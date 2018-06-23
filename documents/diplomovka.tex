@@ -1,0 +1,326 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[a4paper, left=3.5cm, right=2cm, top=2.5cm, bottom=2.5cm,footskip=.25in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{lmodern}
+\usepackage{indentfirst}
+\usepackage{enumerate}
+\usepackage{array}
+\usepackage{float}
+\usepackage{ragged2e}
+\usepackage{lipsum}
+\usepackage{biblatex}
+\usepackage[pdftex]{graphicx}
+\graphicspath{{.png}{images/}}
+\renewcommand{\baselinestretch}{1.8}
+
+\usepackage{pdfpages}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black}
+
+\usepackage{soul}
+\newcommand{\ol}[1]{{\setul{-1.2em}{}\ul{#1}}}
+\newcommand{\textoverline}[1]{{\setul{-5em}{}$\overline{\mbox{#1}}$}}
+
+\newtheorem{definition}{Definition}[subsection]
+\newtheorem{example}{Example}[subsection]
+
+\begin{document}
+
+\begin{titlepage}
+	\centering
+	\par\vspace{1cm}
+	{\scshape\bf FACULTY OF MATHEMATICS, PHYSICS AND INFORMATICS \par}
+	{\scshape\bf OF THE COMENIUS UNIVERSITY IN BRATISLAVA \par}
+	\par\vspace{10cm}
+	{\scshape\bf OPTIMIZATION OF AN ABDUCTIVE REASONER FOR DESCRIPTION LOGICS \par}
+	\par\vspace{0.5cm}
+	{\textsc Master thesis \par}
+	\par\vspace{10.5cm}
+	{\scshape\bf 2019 \hfill Katarína Fabianová \par}
+\end{titlepage}
+
+\pagebreak
+\thispagestyle{empty}
+\centering
+\par\vspace{1cm}
+{\scshape\bf FACULTY OF MATHEMATICS, PHYSICS AND INFORMATICS \par}
+{\scshape\bf OF THE COMENIUS UNIVERSITY IN BRATISLAVA \par}
+\par\vspace{8cm}
+{\scshape\bf OPTIMIZATION OF AN ABDUCTIVE REASONER FOR DESCRIPTION LOGICS \par}
+\par\vspace{0.5cm}
+{\textsc Master thesis \par}
+\par\vspace{4cm}
+\begin{table*}[ht]
+	\newcolumntype{x}[1]{>{\hspace{0pt}}p{#1}}
+	\begin{tabular}{@{}x{5cm}x{10cm}@{}}
+		Study program: & Applied informatics \\
+		Field of study: & 2511 Applied informatics \\
+		School department: & Department of Applied Informatics \\
+		Adviser\textit{}: & RNDr. Martin Homola, PhD. \\
+		Consultant: & Mgr. Júlia Pukancová \\
+	\end{tabular}
+\end{table*}
+\par\vspace{5cm}
+{\scshape\bf Bratislava 2019 \hfill Katarína Fabianová \par}
+
+\pagebreak
+
+\justify
+
+%\pagebreak
+%\thispagestyle{empty}
+%\par\vspace*{15cm}
+%{\large\bf Dedication \par}
+%\par\vspace{0.8cm}
+%\large Čestne prehlasujem, že prácu som vypracovala samostatne
+%pod vedením školiteľa a uviedla som všetky použité
+%zdroje informácií a použitú literatúru. \par
+%\par\vspace{3cm}
+%\large {Bratislava \hfill \textoverline{Katarína Fabianová}} \par
+
+\pagebreak
+\thispagestyle{empty}
+\par\vspace*{15cm}
+{\large\bf Acknowledgements \newline \par}
+
+\pagebreak
+\thispagestyle{empty}
+{\large\bf Abstract \newline \par} 
+
+\textbf{Key words:}
+
+\pagebreak
+\thispagestyle{empty}
+{\large\bf Abstrakt \newline \par} 
+
+\textbf{Kľúčové slová:}
+
+\pagebreak
+\thispagestyle{empty}
+\tableofcontents
+\thispagestyle{empty}
+
+\pagebreak
+\thispagestyle{empty}
+\listoffigures
+
+\pagebreak
+\section*{Introduction}
+\addcontentsline{toc}{section}{\protect\numberline{}Introduction}
+
+
+\pagebreak
+\section{Description logic}
+Description logics (DLs) are a family of knowledge representation. Each description logic has different expression. Every expression is expressed with a unique set of constructors. We are going to work with DL $\mathcal{EL}$ and DL $\mathcal{EL}${+}{+}. Later in this chapter we will introduce DL vocabulary and Ontology. DL vocabulary describes syntax and ontology describes semantics[1][2].
+
+\subsection{DL vocabulary}
+DL is dealing with individuals, concepts and roles. Individual is a concrete instance of a concept. It is used in $ABox$ which will be defined later. Individuals are written with lower letters. Concept is written with first letter capital and the rest are lower letters. Concept can be atomic or complex. Atomic concept is not constructed with any constructor. On the contrary complex concept is constructed of other concepts. Complex concept is recursively defined as follows:
+\[ C,D ::= A | \neg C | C \sqcap D | C \sqcup D | \exists R.C | \forall R.C  \]
+
+In description logic we have also two concepts which are always in ontology. $\top$ (top) stays for everything. Each concept belongs under $\top$ which means that each concept is on left side of subsumption if on right side is only $\top$. Second concept is $\bot$ (bottom) and it stays for nothing which means that each concept is on the right side of subsumption if on left side is only $\bot$. Formally these two concepts can be written as:
+\[ \top \equiv A \sqcup \neg A \]
+\[ \bot \equiv A \sqcap \neg A \]
+
+Role is a binary predicate in a form of restriction following some property and concept. Under restriction is meant: value restriction, existential restriction or number restriction. Property is written with first lower letter. Role can be written as follows: \[ \forall hasParent.Person \]
+\[\exists owns.House \]	
+
+Description logic consists of three mutually disjoint sets. These sets represent whole domain that is used by DL.
+\[ \textbf{Set of individuals:} N_{I} = \{a,b,c...\} \]
+\[ \textbf{Set of concepts:} N_{C} = \{A,B,C...\} \]
+\[ \textbf{Set of roles:} N_{R} = \{R_{1},R_{2},R_{3},...\} \]
+
+Description logic uses constructors such as $\neg$, $\sqcup$, $\sqcap$, $\exists$ and $\forall$. Constructor $\neg$ means negation, for instance $\neg Fruit$. Constructor $\sqcup$ means or, for instance $Mother \sqcup Father$. Constructor $\sqcap$ means and, for instance $Apple \sqcap Pear$. Constructors $\exists$ is existential restriction and $\forall$ is called value restrictions. Among them exists also number restrictions but the classes we use do not implement them.
+
+Description logic uses this two important symbols: $\sqsubseteq$, $\equiv$. First symbol is subsumption $\sqsubseteq$. As an example we can consider expression $Mother \sqsubseteq Parent$. $Mother$ is always a $Parent$ but $Parent$ does not always have to be $Mother$. Second symbol is equivalence $\equiv$ which defines that both sides are equals. For example we can have expression $Parent \equiv Mother \sqcup Father$. $Parent$ is always $Mother$ or $Father$. $Mother$ or $Father$ is also always $Parent$.
+
+We will use following description logics: DL $\mathcal{EL}$ and DL $\mathcal{EL{+}{+}}$. DL $\mathcal{EL}$  uses \textit{TBox}, but no \textit{ABox}. It does not use value restriction, only existential restriction. It also does not use disjunction but just conjunction. It uses also only atomic concepts or concepts of form $\top$. Roles are being used in form of existential restriction followed by property and concept. DL $\mathcal{EL{+}{+}}$ is very similar to DL $\mathcal{EL}$ which means that uses everything what uses DL $\mathcal{EL}$ but includes also individuals so we can work with \textit{ABox}.
+
+To have a better understanding of how description logics works we will introduce a few examples. In all examples we will be rewriting following sentences into description logic.
+
+
+\[ \text{Everybody who is sick, is not happy.} \]
+\[ Sick \sqsubseteq \neg Happy \]
+
+\[ \text{Cat and dogs are animals.} \]
+\[ Cat \sqcup Dog \sqsubseteq Animal \]
+
+\[ \text{Every person owns a house.} \]
+\[ Person \sqsubseteq \exists owns.House \]
+
+\subsection{Ontology}
+Ontology describes relationships between entities in a specific area. Difference between area and ontology is that ontology describes relationships between entities in a formal language. In this part we are using reference [3].
+
+Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$, so we can write $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$. TBox represents all axioms that model ontology. Axiom has a form of predicate followed by operator and another predicate, for example $Apple \sqsubseteq Fruit$, $Person \sqsubseteq \exists own.House$. ABox on the other side does not model ontology but creates a database. It contains set of individuals. It has following form: individual : predicate. For example: $john : Person$, $greenApple : Apple$.
+
+\begin{definition}[Interpretation]
+	Interpretation of description logic is a pair $\mathcal{I} = (\Delta^{\mathcal{I}}, \cdot ^{\mathcal{I}})$ which contains a domain $\Delta^{\mathcal{I}}$ and an interpretation function $\cdot ^{\mathcal{I}}$.	
+\end{definition}
+
+\begin{definition}[Domain]
+	Domain can not be empty. So it must be true that $\Delta^{\mathcal{I}} \not = \emptyset$.
+\end{definition}
+
+\begin{definition}[Interpretation function]
+	Interpretation function is following:
+	\[ a^{\mathcal{I}} \in \Delta^{\mathcal{I}} \text{ } \forall a \in N_{I} \]
+	\[ A^{\mathcal{I}} \subseteq \Delta^{\mathcal{I}} \text{ } \forall A \in N_{C} \]
+	\[ R^{\mathcal{I}} \subseteq \Delta^{\mathcal{I}} \times \Delta^{\mathcal{I}} \text{ } \forall a \in N_{R} \]
+	Interpretation of complex concepts is recursively defined:
+	\[ \neg C^{\mathcal{I}} = \Delta^{\mathcal{I}} \backslash C^{\mathcal{I}} \]
+	\[ C \sqcap D^{\mathcal{I}} = C^{\mathcal{I}} \cap D^{\mathcal{I}} \]
+	\[ C \sqcup D^{\mathcal{I}} = C^{\mathcal{I}} \cup D^{\mathcal{I}} \]
+	\[ \exists R.C^{\mathcal{I}} = \{ x \in \Delta^{\mathcal{I}} | \exists y \in \Delta^{\mathcal{I}} : \langle x,y \rangle \in R^{\mathcal{I}} \land y \in C^{\mathcal{I}} \} \]
+	\[ \forall R.C^{\mathcal{I}} = \{ x \in \Delta^{\mathcal{I}} | \forall y \in \Delta^{\mathcal{I}} : \langle x,y \rangle \in R^{\mathcal{I}} \rightarrow y \in C^{\mathcal{I}} \} \]
+	Interpretation is a model of knowledge base if $\mathcal{I}$ satisfies every axiom in \textit{TBox} and in \textit{ABox} of given knowledge base.
+\end{definition}
+ 
+\section{Abduction}
+Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known is probably deduction and for humans is most natural. All three ways are dealing with following parts: theory, data and effect. In description logic we can translate theory as knowledge base, data as explanations and  effect as observation.
+
+Deduction knows knowledge base and explanations, observation is missing and the goal is to deduce the missing observation. Induction knows observation and explanation but does not know knowledge base. Abduction knows knowledge base and observation but explanation is a subject of searching.
+
+\subsection{ABox abduction}
+In description logic abduction is used when we are not familiar with explanation $\mathcal{E}$ but we know knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations.
+
+\begin{definition}{\textbf{(Abduction)}} 
+	Given knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$, an abductive explanation is such explanation $\mathcal{E}$ that satisfies $\mathcal{KB} \cup \mathcal{O} \models \mathcal{E}$.
+\end{definition}
+
+\begin{definition}{\textbf{(Correct explanation)}}
+	\[ \mathcal{E} \text{ is consistent if } \mathcal{E} \cup \mathcal{KB} \not \models \mathcal{\bot}; \] 
+	\[ \mathcal{E} \text{ is relevant if } \mathcal{E} \not \models \mathcal{O}; \]
+	\[ \mathcal{E} \text{ is explanatory if } \mathcal{KB} \not \models \mathcal{O} \]
+\end{definition}
+
+For better understanding of what ABox abduction is let's introduce a few examples. First example is easy, searched explanation is obvious but it will demonstrate the problem. Second example is not so obvious that's why we have to use an algorithm to compute the solution. For computing the solution we use \textbf{Minimal Hitting Set algorithm}. 
+
+\begin{example}	
+	\[ 
+	\mathcal{KB} = \left\{
+	\begin{tabular}{l c}
+	$Sick \sqsubseteq \neg Happy$
+	\end{tabular}
+	\right \}
+	\]
+	
+	\[ 
+	\mathcal{O} = \left\{
+	\begin{tabular}{l c}
+	$mary : \neg Happy$
+	\end{tabular}
+	\right \}
+	\]								
+\end{example}
+
+In example 2.1.1 we are searching for explanations. In this easy assignment is obvious that what we are looking for is that Mary must be sick. If Mary is sick she can not be happy as we have in our observation. Formally written solution to this abduction problem is following:
+\[ 
+\mathcal{E} = \left\{
+\begin{tabular}{l c}
+$mary : Sick$
+\end{tabular}
+\right \}
+\]
+
+\begin{example}
+	\[ 
+	\mathcal{KB} = \left\{
+	\begin{tabular}{l c}
+%	$Sick \sqsubseteq \neg Happy$
+	\end{tabular}
+	\right \}
+	\]
+	
+	\[ 
+	\mathcal{O} = \left\{
+	\begin{tabular}{l c}
+%	$mary : \neg Happy$
+	\end{tabular}
+	\right \}
+	\]								
+	
+\end{example}
+
+
+\section{Minimal Hitting Set algorithm}
+In this chapter we will find out about algorithm: Minimal hitting set [4]. This algorithm is originally invented by Reiter. He invented the basic of algorithm, then another optimizations were added to his original algorithm.
+
+\subsection{Definitions}
+
+\begin{definition}[Hitting set]
+	Hitting set for a collection of sets $C$ is a set $H \subseteq U_{S \in C}$ such that $H \cap S$ is not empty set for each $S \in C$.
+\end{definition}
+
+\begin{definition}[HS-tree]
+	Let $C$ be a collection of sets. An HS-tree $T$ for $C$ is a smallest edge-labeled and node-labeled tree with following properties:
+
+	\begin{itemize}
+		\item The root is labeled by $\checkmark$ if $C$ is empty. Otherwise the root is labeled by an arbitrary set of $C$.
+		
+		\item For each node $n$ of $T$, let $H(n)$ be the set of edge labels on the path in $T$ from the root to node $n$. The label for $n$ is any set $\sigma \in C$ such that $sigma \cap H(n) = \emptyset$, if such a set $\sigma$ exists. Otherwise, the label for $n$ is $\checkmark$. If $n$ is labeled by the set $\sigma$, then for each $o \in \sigma$, $n$ has a successor $n_{0}$ joined to $n$ by an edge of labeled by $o$.
+	\end{itemize}
+	
+\end{definition}
+
+\begin{definition}[Generate pruned HS-tree]{\indent}
+	\begin{itemize}
+		\item Generate the pruned HS-tree breadth-first, generating all nodes at any fixed level in the tree before descending to generate the nodes at the next level.
+		
+		\item Reusing node labels: If node $n$ has already been labeled by a set $S \in C$ and if $n'$ is a new node such that $H(n') \cap S = \emptyset$, then label $n'$ by $S$.
+		
+		\item Tree prunning:
+		
+		\begin{itemize}
+			\item If node $n$ is labeled by $\checkmark$ and node $n'$ is such that $H(n) \subseteq H(n')$, then close the node $n'$. A label is not computed for $n'$ nor are any successor nodes generated.
+			
+			\item If node $n$ has been generated and node $n'$ is such that $H(n') = H(n)$, then close node $n'$.
+			
+			\item If nodes $n$ and $n'$ have been labeled by sets $S$ and $S'$ of $C$, respectively and if $S'$ is a proper subset of $S$, then for each $\alpha \in S - S'$ mark as redundant the edge from node $n$ labeled by $\alpha$. A redundant edge, together with the subtree beneath it, may be removed from the HS-tree while preserving the property that the resulting pruned HS-tree will yield all minimal hitting sets for $C$.
+			
+		\end{itemize}	
+		
+	\end{itemize}
+
+\end{definition}
+
+\section{Elk}
+
+\subsection{Reasoning}
+
+\subsection{Elk reasoner}
+
+\section{Implementation}
+
+\pagebreak
+\section*{Conclusion}
+\addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
+
+
+\pagebreak
+\section*{References}
+\addcontentsline{toc}{section}{\protect\numberline{}References}
+
+\begin{enumerate}[{[1]}]
+
+\item Yevgeny Kazakov, Markus Krötzsch, František Simančík. ELK Reasoner: Architecture and Evaluation
+
+\item Yevgeny Kazakov, Markus Krötzsch, František Simančík. Practical Reasoning with Nominals in the EL Family of Description Logics
+
+\item Júlia Pukancová, Martin Homola. Tableau-Based ABox Abduction for the $\mathcal{ALCHO}$ Description Logic
+
+\item Franz Baader, Ian Horrocks, Ulrike Sattler. Handbook of Knowledge Representation: Chapter 3
+
+\item Russell Greiner, Barbara A. Smith, Ralph W. Wilkerson. A Correction to the Algorithm in Reiter's Theory of Diagnosis
+
+\item Franz Wotawa. A variant of Reiter’s hitting-set algorithm
+
+\end{enumerate}
+
+\pagebreak
+\section*{Appendices}
+\addcontentsline{toc}{section}{\protect\numberline{}Appendices}
+
+\end{document}
