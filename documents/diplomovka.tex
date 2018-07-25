@@ -27,6 +27,7 @@
 \newtheorem{definition}{Definition}[subsection]
 \newtheorem{example}{Example}[subsection]
 
+
 \usepackage[round]{natbib}
 
 \begin{document}
@@ -179,7 +180,67 @@ Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an
 \end{definition}
 
 \subsection{DL Tableau algorithm}
+%Vysvetlit reasoning, ako suvisi s algoritmom, co je cielom algoritmu, opisat ako priblizne funguje, povedat preco je spravny, pripadne dokaz
+%Reasoning in description logic is very important. POVEDAT, CO JE CONSISTENCY, SATISFIABILITY. correct algorithm if -> sound complete, always terminates
 
+
+\begin{definition}[NNF]
+A concept C is in NNF (negation normal form) only then if each negation constructor ($\neg$) is always before atomic concept symbols inside concept C.
+\end{definition}
+
+\begin{example}[NNF]
+Let's say that we have following axiom:
+\[ \neg \forall owns.House \sqsubseteq Owner \]
+We have to modify this axiom to be in NNF.
+\[ nnf(\neg \forall owns.House \sqsubseteq Owner) = \exists \neg owns.House \sqsubseteq Owner \]
+\end{example}
+
+\begin{definition}[Completion tree]
+A completion tree (CTree) is a triple T = (V, E, $\mathcal{L}$) where (V, E)
+is a tree and $\mathcal{L}$ is a labeling function which means that:
+$\mathcal{L}(x)$ is a set of concepts $\forall x \in V$ and
+$\mathcal{L}(\langle x, y \rangle )$ is a set of roles $\forall \langle x, y \rangle \in E$.	
+\end{definition}
+
+\begin{definition}[Successor, R-successor]
+Given a CTree T = (V,E, $\mathcal{L}$) and $x,y \in V$ we say that: y is a successor of x if and only if $\langle x,y \rangle \in E$ and y is a R-successor of x if and only if $\langle x,y \rangle \in E$ and $R \in \mathcal{L}(\langle x,y \rangle)$.
+\end{definition}
+
+\begin{definition}[Clash]
+Clash is found in a CTree T = $(V,E, \mathcal{L})$ if and only if for some $x \in V$ and for some concept C both $C \in \mathcal{L}(x)$ and $\neg C \in \mathcal{L}(x)$.
+	
+\end{definition}
+
+\begin{definition}[CTree]
+CTree is clash-free if and only if it is such a tree that in each branch has no clash.
+\end{definition}
+
+\begin{definition}[Rules]
+~\begin{itemize}
+	\item $\sqcap-rule:$ if $C_{1} \sqcap C_{2} \in \mathcal{L}(x)$ and $x \in V$ and $\{ C_{1}, C_{2} \} \not \subseteq \mathcal{L}(x)$ and x is not blocked then $\mathcal{L}(x) = \mathcal{L}(x) \cup \{ C_{1}, C_{2} \}$
+	
+	\item $\sqcup-rule:$ if $C_{1} \sqcup C_{2} \in \mathcal{L}(x)$ and $x \in V$ and $ \{ C_{1}, C_{2} \} \cap \mathcal{L}(x) = \emptyset$ and x is not blocked then either $\mathcal{L}(x) = \mathcal{L}(x) \cup \{ C_{1} \}$ or $\mathcal{L}(x) = \mathcal{L}(x) \cup \{ C_{2} \}$
+	
+	\item $\forall-rule:$ if $\forall R.C \in \mathcal{L}(x)$ and $x,y \in V$ and y is R-successor of x and $C \not \in \mathcal{L}(y)$ and x is not blocked then $\mathcal{L}(y) = \mathcal{L}(y) \cup \{ C \}$
+	
+	\item $\exists-rule:$ if $\exists R.C \in \mathcal{L}(x)$ and $x \in V$ with no R-successor y and $C \in \mathcal{L}(y)$ and x is not blocked then $\mathcal{V} = \mathcal{V} \cup \{ z \}, \mathcal{L}(z) = \{ C\}$ and $\mathcal{L}( \langle x, z \rangle ) = \{ R \}$
+	
+	\item $\mathcal{T}-rule:$ if $C_{1} \sqsubseteq C_{2} \in \mathcal{T}$ and $x \in V$ and nnf$(\neg C_{1} \sqcup C_{2}) \not \in \mathcal{L}(x)$ and x is not blocked then $\mathcal{L}(x) = \mathcal{L}(x) \cup \{ nnf(\neg C_{1} \sqcup C_{2}) \}$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Blocking]
+Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor y such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or y is blocked.
+
+\end{definition}
+
+%Concept satisfiability - priebeh algoritmu
+ 
+%\begin{example}
+%	example with knowledge base a postupnym priebehom vytvarania stromu	
+%\end{example}
+
+%Algorithm that proves satisfiability is called \textbf{DL Tableau algorithm}. Its intension is to create a tree where 
 
 \section{Abduction}
 Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known is probably deduction and for humans is most natural. All three ways are dealing with following parts: theory, data and effect. In description logic we can translate theory as knowledge base, data as explanations and  effect as observation.
