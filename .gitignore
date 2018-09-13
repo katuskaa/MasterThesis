@@ -240,3 +240,12 @@ TSWLatexianTemp*
 
 # generated if using elsarticle.cls
 *.spl
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Maven
+log/
+target/
