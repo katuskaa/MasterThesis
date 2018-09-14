@@ -1,8 +1,9 @@
-import base.Parser;
+import abduction.TreeBuilder;
+import common.Loader;
+import common.Parser;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import reasoner.ReasonerManager;
 
 public class Main {
 
@@ -10,7 +11,9 @@ public class Main {
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
         new Parser(args);
-        ReasonerManager reasonerManager = new ReasonerManager();
-        reasonerManager.initializeReasoner();
+        Loader loader = new Loader();
+        loader.initialize();
+        TreeBuilder treeBuilder = new TreeBuilder(loader.getKnowledgeBase(), loader.getNegObservation());
+        treeBuilder.build();
     }
 }

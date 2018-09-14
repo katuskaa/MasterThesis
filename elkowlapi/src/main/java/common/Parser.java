@@ -1,4 +1,4 @@
-package base;
+package common;
 
 public class Parser {
 
@@ -15,7 +15,7 @@ public class Parser {
                 switch (args[i]) {
                     case "-o":
                     case "--observation": {
-                        setConfigurationObservation(args[++i]);
+                        Configuration.OBSERVATION = args[++i];
                         break;
                     }
                     case "-f":
@@ -37,11 +37,6 @@ public class Parser {
 
     private boolean isArgValid(int index) {
         return (index < args.length);
-    }
-
-    private void setConfigurationObservation(String arg) {
-        //TODO change to observation type
-        Configuration.OBSERVATION = arg;
     }
 
     private void printHelpMessage() {
