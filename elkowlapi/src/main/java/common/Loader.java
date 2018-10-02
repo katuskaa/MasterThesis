@@ -1,5 +1,7 @@
 package common;
 
+import application.Application;
+import application.ExitCode;
 import models.KnowledgeBase;
 import models.Observation;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
@@ -15,6 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Loader {
+
+    private Logger logger = Logger.getLogger(Loader.class.getName());
 
     private OWLOntologyManager ontologyManager;
     private OWLOntology ontology;
@@ -35,9 +39,11 @@ public class Loader {
             OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
             reasoner = reasonerFactory.createReasoner(ontology);
+            logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_LOADED);
+            checkConsistency();
         } catch (OWLOntologyCreationException exception) {
-            Logger.getGlobal().log(Level.WARNING, LogMessage.ERROR_CREATING_ONTOLOGY);
-            System.exit(0);
+            logger.log(Level.WARNING, LogMessage.ERROR_CREATING_ONTOLOGY, exception);
+            Application.finish(ExitCode.ERROR);
         }
     }
 
@@ -56,6 +62,15 @@ public class Loader {
         negObservation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
     }
 
+    private void checkConsistency() {
+        if (reasoner.isConsistent()) {
+            logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_CONSISTENCY);
+        } else {
+            logger.log(Level.WARNING, LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
+            Application.finish(ExitCode.ERROR);
+        }
+    }
+
     public void disposeReasoner() {
         reasoner.dispose();
     }
@@ -71,5 +86,6 @@ public class Loader {
     public Observation getNegObservation() {
         return negObservation;
     }
+
 
 }

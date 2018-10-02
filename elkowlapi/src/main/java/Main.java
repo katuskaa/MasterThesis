@@ -1,4 +1,3 @@
-import abduction.TreeBuilder;
 import common.Loader;
 import common.Parser;
 import org.apache.log4j.BasicConfigurator;
@@ -10,10 +9,12 @@ public class Main {
     public static void main(String[] args) {
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
+
         new Parser(args);
         Loader loader = new Loader();
         loader.initialize();
-        TreeBuilder treeBuilder = new TreeBuilder(loader.getKnowledgeBase(), loader.getNegObservation());
-        treeBuilder.build();
+
+//        TreeBuilder treeBuilder = new TreeBuilder(loader.getKnowledgeBase(), loader.getNegObservation());
+//        treeBuilder.build();
     }
 }
