@@ -1,3 +1,4 @@
+import algorithms.mergeXPlain.MergeXPlain;
 import common.Loader;
 import common.Parser;
 import org.apache.log4j.BasicConfigurator;
@@ -14,7 +15,6 @@ public class Main {
         Loader loader = new Loader();
         loader.initialize();
 
-//        TreeBuilder treeBuilder = new TreeBuilder(loader.getKnowledgeBase(), loader.getNegObservation());
-//        treeBuilder.build();
+        MergeXPlain mergeXPlain = new MergeXPlain(loader);
     }
 }

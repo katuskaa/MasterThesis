@@ -1,4 +1,4 @@
-package hittingSetTree;
+package algorithms.hittingSetTree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 

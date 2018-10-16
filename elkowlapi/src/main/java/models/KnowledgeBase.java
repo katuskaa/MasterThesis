@@ -19,4 +19,5 @@ public class KnowledgeBase {
     public void setOwlAxioms(Set<OWLAxiom> owlAxioms) {
         this.owlAxioms = owlAxioms;
     }
+
 }

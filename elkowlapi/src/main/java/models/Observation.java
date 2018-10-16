@@ -1,5 +1,6 @@
 package models;
 
+import common.Printer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 public class Observation {
@@ -17,4 +18,10 @@ public class Observation {
     public void setOwlAxiom(OWLAxiom owlAxiom) {
         this.owlAxiom = owlAxiom;
     }
+
+    @Override
+    public String toString() {
+        return Printer.print(owlAxiom);
+    }
+
 }

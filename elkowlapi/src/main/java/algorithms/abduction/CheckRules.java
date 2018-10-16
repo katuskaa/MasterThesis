@@ -1,4 +1,4 @@
-package abduction;
+package algorithms.abduction;
 
 import models.Explanation;
 import models.KnowledgeBase;

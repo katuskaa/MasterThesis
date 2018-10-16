@@ -21,6 +21,7 @@ public class Loader {
     private Logger logger = Logger.getLogger(Loader.class.getName());
 
     private OWLOntologyManager ontologyManager;
+    private OWLReasonerFactory reasonerFactory;
     private OWLOntology ontology;
     private OWLReasoner reasoner;
     private KnowledgeBase knowledgeBase;
@@ -36,15 +37,31 @@ public class Loader {
     private void loadReasoner() {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
-            OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
+            reasonerFactory = new ElkReasonerFactory();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
-            reasoner = reasonerFactory.createReasoner(ontology);
-            logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_LOADED);
-            checkConsistency();
+            initializeReasoner();
+
+            if (isOntologyConsistent()) {
+                logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_CONSISTENCY);
+            } else {
+                logger.log(Level.WARNING, LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
+                Application.finish(ExitCode.ERROR);
+            }
         } catch (OWLOntologyCreationException exception) {
             logger.log(Level.WARNING, LogMessage.ERROR_CREATING_ONTOLOGY, exception);
             Application.finish(ExitCode.ERROR);
         }
+    }
+
+    public void initializeReasoner() {
+        reasoner = reasonerFactory.createReasoner(ontology);
+        logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_LOADED);
+    }
+
+    public void updateOntology(OWLOntology ontology) {
+        this.ontology = ontology;
+        reasoner.dispose();
+        reasoner = reasonerFactory.createReasoner(ontology);
     }
 
     private void loadKnowledgeBase() {
@@ -60,19 +77,12 @@ public class Loader {
         OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
         observation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
         negObservation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+        Message.log("Observation", observation.toString());
+        Message.log("Neg observation", negObservation.toString());
     }
 
-    private void checkConsistency() {
-        if (reasoner.isConsistent()) {
-            logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_CONSISTENCY);
-        } else {
-            logger.log(Level.WARNING, LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
-            Application.finish(ExitCode.ERROR);
-        }
-    }
-
-    public void disposeReasoner() {
-        reasoner.dispose();
+    public boolean isOntologyConsistent() {
+        return reasoner.isConsistent();
     }
 
     public KnowledgeBase getKnowledgeBase() {
@@ -87,5 +97,19 @@ public class Loader {
         return negObservation;
     }
 
+    public OWLOntologyManager getOntologyManager() {
+        return ontologyManager;
+    }
 
+    public OWLReasonerFactory getReasonerFactory() {
+        return reasonerFactory;
+    }
+
+    public OWLOntology getOntology() {
+        return ontology;
+    }
+
+    public OWLReasoner getReasoner() {
+        return reasoner;
+    }
 }

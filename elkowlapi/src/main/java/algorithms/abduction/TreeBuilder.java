@@ -1,7 +1,7 @@
-package abduction;
+package algorithms.abduction;
 
-import hittingSetTree.Node;
-import hittingSetTree.Tree;
+import algorithms.hittingSetTree.Node;
+import algorithms.hittingSetTree.Tree;
 import models.KnowledgeBase;
 import models.Observation;
 import org.semanticweb.owlapi.model.OWLAxiom;

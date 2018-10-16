@@ -1,4 +1,4 @@
-package hittingSetTree;
+package algorithms.hittingSetTree;
 
 import models.Explanation;
 
