@@ -106,15 +106,7 @@ public class Loader {
         return ontologyManager;
     }
 
-    public OWLReasonerFactory getReasonerFactory() {
-        return reasonerFactory;
-    }
-
     public OWLOntology getOntology() {
         return ontology;
-    }
-
-    public OWLReasoner getReasoner() {
-        return reasoner;
     }
 }
