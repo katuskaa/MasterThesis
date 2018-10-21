@@ -4,12 +4,12 @@ import application.Application;
 import application.ExitCode;
 import models.KnowledgeBase;
 import models.Observation;
-import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import uk.ac.manchester.cs.jfact.JFactFactory;
 
 import java.io.File;
 import java.util.Set;
@@ -37,7 +37,7 @@ public class Loader {
     private void loadReasoner() {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
-            reasonerFactory = new ElkReasonerFactory();
+            reasonerFactory = new JFactFactory();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
             initializeReasoner();
 
@@ -53,7 +53,7 @@ public class Loader {
         }
     }
 
-    public void initializeReasoner() {
+    private void initializeReasoner() {
         reasoner = reasonerFactory.createReasoner(ontology);
         logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_LOADED);
     }
@@ -73,12 +73,17 @@ public class Loader {
         String ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
         OWLDataFactory dataFactory = ontologyManager.getOWLDataFactory();
         String[] expressions = Configuration.OBSERVATION.split(":");
+
         OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(expressions[0])));
         OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
+
         observation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
         negObservation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+
         Message.log("Observation", observation.toString());
         Message.log("Neg observation", negObservation.toString());
+
+        Configuration.INDIVIDUAL = expressions[0];
     }
 
     public boolean isOntologyConsistent() {

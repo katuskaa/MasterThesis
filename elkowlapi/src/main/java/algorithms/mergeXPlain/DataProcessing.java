@@ -1,6 +1,9 @@
 package algorithms.mergeXPlain;
 
+import common.Configuration;
 import common.Loader;
+import common.Printer;
+import models.Literals;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.HashSet;
@@ -15,7 +18,7 @@ class DataProcessing {
         this.loader = loader;
     }
 
-    Set<OWLAxiom> getLiterals() {
+    Literals getLiterals() {
         owlClasses = new HashSet<>();
         Set<OWLAxiom> axioms = loader.getKnowledgeBase().getOwlAxioms();
 
@@ -38,8 +41,7 @@ class DataProcessing {
             }
         }
 
-        Set<OWLAxiom> literals = createLiterals();
-        return literals;
+        return createLiterals();
     }
 
     private void addClassesFromClassExpressions(Set<OWLClassExpression> classExpressions) {
@@ -50,15 +52,21 @@ class DataProcessing {
         }
     }
 
-    private Set<OWLAxiom> createLiterals() {
-        Set<OWLAxiom> literals = new HashSet<>();
+    private Literals createLiterals() {
+        Literals literals = new Literals();
 
         for (OWLClass owlClass : owlClasses) {
             String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
             OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
-            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat("individual")));
-            literals.add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-            literals.add(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
+
+            OWLAxiom owlAxiom = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
+            OWLAxiom observation = loader.getObservation().getOwlAxiom();
+
+            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
+                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
+            }
+            literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
 
         return literals;

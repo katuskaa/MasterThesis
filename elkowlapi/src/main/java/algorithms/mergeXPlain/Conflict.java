@@ -1,24 +1,29 @@
 package algorithms.mergeXPlain;
 
 import models.Explanation;
-import org.semanticweb.owlapi.model.OWLAxiom;
+import models.Literals;
 
 import java.util.HashSet;
 import java.util.Set;
 
 class Conflict {
 
-    private Set<OWLAxiom> literals;
+    private Literals literals;
     private Set<Explanation> explanations;
 
-    Conflict(Set<OWLAxiom> literals, Set<Explanation> explanations) {
+    Conflict() {
+        this.literals = new Literals();
+        this.explanations = new HashSet<>();
+    }
+
+    Conflict(Literals literals, Set<Explanation> explanations) {
         this.literals = literals;
         this.explanations = explanations;
     }
 
-    Set<OWLAxiom> getLiterals() {
+    Literals getLiterals() {
         if (literals == null) {
-            literals = new HashSet<>();
+            literals = new Literals(new HashSet<>());
         }
         return literals;
     }

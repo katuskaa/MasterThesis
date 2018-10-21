@@ -3,13 +3,18 @@ package models;
 import common.Printer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import java.util.HashSet;
 import java.util.Set;
 
-public class Explanation {
+public class Literals {
 
     private Set<OWLAxiom> owlAxioms;
 
-    public Explanation(Set<OWLAxiom> owlAxioms) {
+    public Literals() {
+        this.owlAxioms = new HashSet<>();
+    }
+
+    public Literals(Set<OWLAxiom> owlAxioms) {
         this.owlAxioms = owlAxioms;
     }
 

@@ -2,6 +2,7 @@ package algorithms.mergeXPlain;
 
 import common.Loader;
 import models.Explanation;
+import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -10,170 +11,137 @@ import java.util.Set;
 
 /**
  * Base = knowledgeBase + negObservation
- * Literals = set of all literals / concepts
+ * Literals = set of all literals / concepts with named individual except observation
  */
 public class MergeXPlain {
 
     private Loader loader;
     private OWLOntology base;
-    private Set<OWLAxiom> literals;
+    private Literals literals;
+    private MergeXPlainHelper mergeXPlainHelper;
 
     public MergeXPlain(Loader loader) {
         this.loader = loader;
         initialize();
-        start();
+
+        Conflict conflict = getConflict();
+        Set<Explanation> explanations = conflict.getExplanations();
+        System.out.println(explanations.size());
+        System.out.println(explanations);
+        System.out.println(conflict.getLiterals());
     }
 
     private void initialize() {
+        mergeXPlainHelper = new MergeXPlainHelper();
         base = loader.getOntology();
+
         loader.getOntologyManager().addAxiom(base, loader.getNegObservation().getOwlAxiom());
         loader.updateOntology(base);
+
         DataProcessing dataProcessing = new DataProcessing(loader);
         literals = dataProcessing.getLiterals();
     }
 
-    private Set<Explanation> start() {
-        if (!isBaseConsistent(base)) {
-            return null;
+    private Conflict getConflict() {
+        if (mergeXPlainHelper.isBaseNotConsistent(loader, base)) {
+            return new Conflict();
         }
 
-        if (isBaseWithLiteralsConsistent(base, literals)) {
-            return null;
+        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(loader, base, literals)) {
+            return new Conflict();
         }
 
-        Conflict conflict = findConflicts(base, literals);
-
-        return conflict.getExplanations();
+        return findConflicts(base, literals);
     }
 
-    private boolean isBaseConsistent(OWLOntology ontology) {
-        loader.updateOntology(ontology);
-        return loader.isOntologyConsistent();
-    }
-
-    private boolean isBaseWithLiteralsConsistent(OWLOntology ontology, Set<OWLAxiom> literals) {
-        loader.getOntologyManager().addAxioms(ontology, literals);
-        loader.updateOntology(ontology);
-        boolean isConsistent = loader.isOntologyConsistent();
-        loader.getOntologyManager().removeAxioms(ontology, literals);
-        loader.updateOntology(ontology);
-        return isConsistent;
-    }
-
-    private Conflict findConflicts(OWLOntology ontology, Set<OWLAxiom> literals) {
-        if (isBaseWithLiteralsConsistent(ontology, literals)) {
+    private Conflict findConflicts(OWLOntology base, Literals literals) {
+        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(loader, base, literals)) {
             return new Conflict(literals, new HashSet<>());
         }
 
-        if (literals.size() == 1) {
-            Explanation explanation = new Explanation(literals.iterator().next());
+        if (literals.getOwlAxioms().size() == 1) {
             Set<Explanation> explanations = new HashSet<>();
-            explanations.add(explanation);
-            return new Conflict(new HashSet<>(), explanations);
+            explanations.add(new Explanation(literals.getOwlAxioms()));
+            return new Conflict(new Literals(), explanations);
         }
 
-        int half = literals.size() / 2;
-        int count = 0;
-        Set<OWLAxiom> literalsFirstHalf = new HashSet<>();
-        Set<OWLAxiom> literalsSecondHalf = new HashSet<>();
+        Literals[] sets = mergeXPlainHelper.divideIntoSets(literals);
+        Literals literals1 = sets[0];
+        Literals literals2 = sets[1];
 
-        for (OWLAxiom literal : literals) {
-            if (count < half) {
-                literalsFirstHalf.add(literal);
-            } else {
-                literalsSecondHalf.add(literal);
-            }
-            count++;
-        }
-
-        Conflict conflictFirstHalf = findConflicts(ontology, literalsFirstHalf);
-        Conflict conflictSecondHalf = findConflicts(ontology, literalsSecondHalf);
+        Conflict conflictC1 = findConflicts(base, literals1);
+        Conflict conflictC2 = findConflicts(base, literals2);
 
         Set<Explanation> explanations = new HashSet<>();
-        explanations.addAll(conflictFirstHalf.getExplanations());
-        explanations.addAll(conflictSecondHalf.getExplanations());
+        explanations.addAll(conflictC1.getExplanations());
+        explanations.addAll(conflictC2.getExplanations());
 
-        Set<OWLAxiom> conflictLiterals = new HashSet<>();
-        conflictLiterals.addAll(conflictFirstHalf.getLiterals());
-        conflictLiterals.addAll(conflictSecondHalf.getLiterals());
+        Literals conflictLiterals = new Literals();
+        conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
+        conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
 
-        while (!isBaseWithLiteralsConsistent(ontology, conflictLiterals)) {
+        while (!mergeXPlainHelper.isBaseWithLiteralsConsistent(loader, base, conflictLiterals)) {
 
-            loader.getOntologyManager().addAxioms(ontology, conflictSecondHalf.getLiterals());
-            loader.updateOntology(ontology);
-            Set<OWLAxiom> X = getConflict(ontology, conflictSecondHalf.getLiterals(), conflictFirstHalf.getLiterals());
-            loader.getOntologyManager().removeAxioms(ontology, conflictSecondHalf.getLiterals());
-            loader.updateOntology(ontology);
+            mergeXPlainHelper.addAxiomsToBase(loader, base, conflictC2.getLiterals().getOwlAxioms());
+            Explanation X = getConflict(base, conflictC2.getLiterals().getOwlAxioms(), conflictC1.getLiterals());
+            mergeXPlainHelper.removeAxiomsFromBase(loader, base, conflictC2.getLiterals().getOwlAxioms());
 
-            loader.getOntologyManager().addAxioms(ontology, X);
-            loader.updateOntology(ontology);
-            Set<OWLAxiom> CS = getConflict(ontology, X, conflictSecondHalf.getLiterals());
-            CS.addAll(X);
-            loader.getOntologyManager().removeAxioms(ontology, X);
-            loader.updateOntology(ontology);
+            mergeXPlainHelper.addAxiomsToBase(loader, base, X.getOwlAxioms());
+            Explanation CS = getConflict(base, X.getOwlAxioms(), conflictC2.getLiterals());
+            mergeXPlainHelper.removeAxiomsFromBase(loader, base, X.getOwlAxioms());
 
-            conflictFirstHalf.getLiterals().removeAll(X);
+            //TODO po zakomentovani sa ani nezacykli, ale teraz sa neda ucit, co je spravne vysvetlenie
+            // CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
-            for (OWLAxiom owlAxiom : CS) {
-                explanations.add(new Explanation(owlAxiom));
+            conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
+
+            conflictLiterals = new Literals();
+            conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
+            conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
+
+            if (mergeXPlainHelper.containExplanationsExplanation(explanations, CS)) {
+                break;
             }
+
+            explanations.add(CS);
+
+            System.out.println("while cycle");
+            System.out.println(explanations);
+            System.out.println(conflictLiterals);
+            System.out.println();
         }
 
-        Set<OWLAxiom> resultLiterals = new HashSet<>();
-        resultLiterals.addAll(conflictFirstHalf.getLiterals());
-        resultLiterals.addAll(conflictSecondHalf.getLiterals());
-
-        return new Conflict(resultLiterals, explanations);
+        return new Conflict(conflictLiterals, explanations);
     }
 
-    // B = B + C2'
-    // D = C2'
-    // C = C1'
-    private Set<OWLAxiom> getConflict(OWLOntology ontology, Set<OWLAxiom> literalsSecond, Set<OWLAxiom> literalsFirst) {
 
-        if (!literalsSecond.isEmpty() && !loader.isOntologyConsistent()) {
-            return new HashSet<>();
+    private Explanation getConflict(OWLOntology base, Set<OWLAxiom> axioms, Literals literals) {
+
+        if (!axioms.isEmpty() && mergeXPlainHelper.isBaseNotConsistent(loader, base)) {
+            return new Explanation(new HashSet<>());
         }
 
-        if (literalsFirst.isEmpty()) {
-            return new HashSet<>();
+        if (literals.getOwlAxioms().size() == 1) {
+            return new Explanation(literals.getOwlAxioms());
         }
 
-        if (literalsFirst.size() == 1) {
-            return literalsFirst;
-        }
+        Literals[] sets = mergeXPlainHelper.divideIntoSets(literals);
+        Literals literals1 = sets[0];
+        Literals literals2 = sets[1];
 
-        int half = (literalsFirst.size() + 1) / 2;
-        int count = 0;
-        Set<OWLAxiom> literalsFirstHalf = new HashSet<>();
-        Set<OWLAxiom> literalsSecondHalf = new HashSet<>();
+        mergeXPlainHelper.addAxiomsToBase(loader, base, literals1.getOwlAxioms());
+        Explanation D2 = getConflict(base, literals1.getOwlAxioms(), literals2);
+        mergeXPlainHelper.removeAxiomsFromBase(loader, base, literals1.getOwlAxioms());
 
-        for (OWLAxiom literal : literalsFirst) {
-            if (count < half) {
-                literalsFirstHalf.add(literal);
-            } else {
-                literalsSecondHalf.add(literal);
-            }
-            count++;
-        }
-
-        loader.getOntologyManager().addAxioms(ontology, literalsFirstHalf);
-        loader.updateOntology(ontology);
-        Set<OWLAxiom> conflictSecond = getConflict(ontology, literalsFirstHalf, literalsSecondHalf);
-        loader.getOntologyManager().removeAxioms(ontology, literalsFirstHalf);
-        loader.updateOntology(ontology);
-
-        loader.getOntologyManager().addAxioms(ontology, conflictSecond);
-        loader.updateOntology(ontology);
-        Set<OWLAxiom> conflictFirst = getConflict(ontology, conflictSecond, literalsFirstHalf);
-        loader.getOntologyManager().removeAxioms(ontology, conflictSecond);
-        loader.updateOntology(ontology);
+        mergeXPlainHelper.addAxiomsToBase(loader, base, D2.getOwlAxioms());
+        Explanation D1 = getConflict(base, D2.getOwlAxioms(), literals1);
+        mergeXPlainHelper.removeAxiomsFromBase(loader, base, D2.getOwlAxioms());
 
         Set<OWLAxiom> conflicts = new HashSet<>();
-        conflicts.addAll(conflictFirst);
-        conflicts.addAll(conflictSecond);
+        conflicts.addAll(D1.getOwlAxioms());
+        conflicts.addAll(D2.getOwlAxioms());
 
-        return conflicts;
+        return new Explanation(conflicts);
     }
 
 
