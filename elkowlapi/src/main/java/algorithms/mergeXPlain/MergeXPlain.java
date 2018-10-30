@@ -90,25 +90,14 @@ public class MergeXPlain {
             Explanation CS = getConflict(base, X.getOwlAxioms(), conflictC2.getLiterals());
             mergeXPlainHelper.removeAxiomsFromBase(loader, base, X.getOwlAxioms());
 
-            //TODO po zakomentovani sa ani nezacykli, ale teraz sa neda ucit, co je spravne vysvetlenie
-            // CS.getOwlAxioms().addAll(X.getOwlAxioms());
+            //TODO po zakomentovani sa neda urcit, co je spravne vysvetlenie
+            CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
+            conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
             conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
-
-            conflictLiterals = new Literals();
             conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
-            conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
-
-            if (mergeXPlainHelper.containExplanationsExplanation(explanations, CS)) {
-                break;
-            }
 
             explanations.add(CS);
-
-            System.out.println("while cycle");
-            System.out.println(explanations);
-            System.out.println(conflictLiterals);
-            System.out.println();
         }
 
         return new Conflict(conflictLiterals, explanations);

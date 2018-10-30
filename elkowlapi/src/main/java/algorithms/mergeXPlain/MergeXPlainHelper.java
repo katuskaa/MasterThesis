@@ -15,7 +15,6 @@ class MergeXPlainHelper {
         return !loader.isOntologyConsistent();
     }
 
-    // TODO elk vracia consistent aj ked nie je, v porovnani s jfact maju ine vysledky
     boolean isBaseWithLiteralsConsistent(Loader loader, OWLOntology ontology, Literals literals) {
         addAxiomsToBase(loader, ontology, literals.getOwlAxioms());
         boolean isConsistent = loader.isOntologyConsistent();
@@ -46,6 +45,8 @@ class MergeXPlainHelper {
             } else {
                 dividedLiterals[1].getOwlAxioms().add(owlAxiom);
             }
+
+//            dividedLiterals[count%2].getOwlAxioms().add(owlAxiom);
             count++;
         }
 
