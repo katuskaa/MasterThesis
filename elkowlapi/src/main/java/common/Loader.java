@@ -4,12 +4,12 @@ import application.Application;
 import application.ExitCode;
 import models.KnowledgeBase;
 import models.Observation;
+import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import uk.ac.manchester.cs.jfact.JFactFactory;
 
 import java.io.File;
 import java.util.Set;
@@ -37,7 +37,10 @@ public class Loader {
     private void loadReasoner() {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
-            reasonerFactory = new JFactFactory();
+            reasonerFactory = new ReasonerFactory();
+//            reasonerFactory = new JFactFactory();
+//            reasonerFactory = OpenlletReasonerFactory.getInstance();
+//            reasonerFactory = new ElkReasonerFactory();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
             initializeReasoner();
 
