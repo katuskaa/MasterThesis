@@ -2,7 +2,6 @@ package algorithms.mergeXPlain;
 
 import common.Configuration;
 import common.Loader;
-import common.Printer;
 import models.Literals;
 import org.semanticweb.owlapi.model.*;
 
@@ -60,12 +59,14 @@ class DataProcessing {
             OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
             OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
 
-            OWLAxiom owlAxiom = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
-            OWLAxiom observation = loader.getObservation().getOwlAxiom();
+//            OWLAxiom owlAxiom = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
+//            OWLAxiom observation = loader.getObservation().getOwlAxiom();
+//
+//            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
+//                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
+//            }
 
-            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
-                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-            }
+            literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
             literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
 

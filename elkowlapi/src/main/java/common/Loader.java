@@ -62,7 +62,6 @@ public class Loader {
     }
 
     public void updateOntology(OWLOntology ontology) {
-        this.ontology = ontology;
         reasoner.dispose();
         reasoner = reasonerFactory.createReasoner(ontology);
     }
