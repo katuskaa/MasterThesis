@@ -3,6 +3,7 @@ package models;
 import common.Printer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Explanation {
@@ -13,12 +14,12 @@ public class Explanation {
         this.owlAxioms = owlAxioms;
     }
 
-    public Set<OWLAxiom> getOwlAxioms() {
-        return owlAxioms;
+    public Explanation() {
+        this.owlAxioms = new HashSet<>();
     }
 
-    public void setOwlAxioms(Set<OWLAxiom> owlAxiom) {
-        this.owlAxioms = owlAxioms;
+    public Set<OWLAxiom> getOwlAxioms() {
+        return owlAxioms;
     }
 
     @Override

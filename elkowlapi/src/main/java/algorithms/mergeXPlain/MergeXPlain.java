@@ -24,7 +24,7 @@ public class MergeXPlain {
         this.loader = loader;
         initialize();
 
-        Conflict conflict = getConflict();
+        Conflict conflict = getExplanations();
         Set<Explanation> explanations = conflict.getExplanations();
         System.out.println(explanations.size());
         System.out.println(explanations);
@@ -35,14 +35,14 @@ public class MergeXPlain {
         mergeXPlainHelper = new MergeXPlainHelper();
         base = loader.getOntology();
 
-        loader.getOntologyManager().addAxiom(base, loader.getNegObservation().getOwlAxiom());
+        loader.getOntologyManager().addAxiom(base, loader.getObservation().getOwlAxiom());
         loader.updateOntology(base);
 
         DataProcessing dataProcessing = new DataProcessing(loader);
         literals = dataProcessing.getLiterals();
     }
 
-    private Conflict getConflict() {
+    private Conflict getExplanations() {
         if (mergeXPlainHelper.isBaseNotConsistent(loader, base)) {
             return new Conflict();
         }
@@ -90,7 +90,6 @@ public class MergeXPlain {
             Explanation CS = getConflict(base, X.getOwlAxioms(), conflictC2.getLiterals());
             mergeXPlainHelper.removeAxiomsFromBase(loader, base, X.getOwlAxioms());
 
-            //TODO po zakomentovani sa neda urcit, co je spravne vysvetlenie
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
             conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
@@ -105,9 +104,8 @@ public class MergeXPlain {
 
 
     private Explanation getConflict(OWLOntology base, Set<OWLAxiom> axioms, Literals literals) {
-
         if (!axioms.isEmpty() && mergeXPlainHelper.isBaseNotConsistent(loader, base)) {
-            return new Explanation(new HashSet<>());
+            return new Explanation();
         }
 
         if (literals.getOwlAxioms().size() == 1) {

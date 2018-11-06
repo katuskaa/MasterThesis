@@ -1,7 +1,6 @@
 package algorithms.mergeXPlain;
 
 import common.Loader;
-import models.Explanation;
 import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -40,26 +39,17 @@ class MergeXPlainHelper {
         dividedLiterals[1] = new Literals();
 
         for (OWLAxiom owlAxiom : literals.getOwlAxioms()) {
-            if (count < half) {
-                dividedLiterals[0].getOwlAxioms().add(owlAxiom);
-            } else {
-                dividedLiterals[1].getOwlAxioms().add(owlAxiom);
-            }
+//            if (count < half) {
+//                dividedLiterals[0].getOwlAxioms().add(owlAxiom);
+//            } else {
+//                dividedLiterals[1].getOwlAxioms().add(owlAxiom);
+//            }
 
-//            dividedLiterals[count%2].getOwlAxioms().add(owlAxiom);
+            dividedLiterals[count % 2].getOwlAxioms().add(owlAxiom);
             count++;
         }
 
         return dividedLiterals;
-    }
-
-    boolean containExplanationsExplanation(Set<Explanation> explanations, Explanation explanation) {
-        for (Explanation exp : explanations) {
-            if (explanation.getOwlAxioms().equals(exp.getOwlAxioms())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }
