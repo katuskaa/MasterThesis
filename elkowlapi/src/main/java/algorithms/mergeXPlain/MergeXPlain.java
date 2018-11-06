@@ -8,12 +8,16 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base = knowledgeBase + negObservation
  * Literals = set of all literals / concepts with named individual except observation
  */
 public class MergeXPlain {
+
+    private Logger logger = Logger.getLogger(MergeXPlain.class.getName());
 
     private Loader loader;
     private OWLOntology base;
@@ -26,16 +30,17 @@ public class MergeXPlain {
 
         Conflict conflict = getExplanations();
         Set<Explanation> explanations = conflict.getExplanations();
-        System.out.println(explanations.size());
-        System.out.println(explanations);
-        System.out.println(conflict.getLiterals());
+
+        logger.log(Level.INFO, "Count of explanations is ".concat(String.valueOf(explanations.size())).concat("\n"));
+        logger.log(Level.INFO, "Explanations:\n".concat(explanations.toString()).concat("\n"));
+        logger.log(Level.INFO, "Literals:\n".concat(conflict.getLiterals().toString()).concat("\n"));
     }
 
     private void initialize() {
         mergeXPlainHelper = new MergeXPlainHelper();
         base = loader.getOntology();
 
-        loader.getOntologyManager().addAxiom(base, loader.getObservation().getOwlAxiom());
+        loader.getOntologyManager().addAxiom(base, loader.getNegObservation().getOwlAxiom());
         loader.updateOntology(base);
 
         DataProcessing dataProcessing = new DataProcessing(loader);
