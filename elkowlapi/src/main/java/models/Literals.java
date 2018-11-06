@@ -22,8 +22,8 @@ public class Literals {
         return owlAxioms;
     }
 
-    public void setOwlAxioms(Set<OWLAxiom> owlAxiom) {
-        this.owlAxioms = owlAxioms;
+    public void addLiterals(Literals literals) {
+        this.owlAxioms.addAll(literals.getOwlAxioms());
     }
 
     @Override

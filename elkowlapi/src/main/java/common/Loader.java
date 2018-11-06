@@ -4,7 +4,7 @@ import application.Application;
 import application.ExitCode;
 import models.KnowledgeBase;
 import models.Observation;
-import org.semanticweb.HermiT.ReasonerFactory;
+import openllet.owlapi.OpenlletReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.Imports;
@@ -37,9 +37,9 @@ public class Loader {
     private void loadReasoner() {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
-            reasonerFactory = new ReasonerFactory();
+//            reasonerFactory = new ReasonerFactory();
 //            reasonerFactory = new JFactFactory();
-//            reasonerFactory = OpenlletReasonerFactory.getInstance();
+            reasonerFactory = OpenlletReasonerFactory.getInstance();
 //            reasonerFactory = new ElkReasonerFactory();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
             initializeReasoner();
@@ -76,14 +76,28 @@ public class Loader {
         OWLDataFactory dataFactory = ontologyManager.getOWLDataFactory();
         String[] expressions = Configuration.OBSERVATION.split(":");
 
-        OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(expressions[0])));
-        OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
+        if (expressions[0].contains(",")) {
+            //objectProperty
+            String[] individuals = expressions[0].split(",");
 
-        observation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-        negObservation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+            OWLNamedIndividual subject = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(individuals[0])));
+            OWLNamedIndividual object = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(individuals[1])));
+            OWLObjectProperty objectProperty = dataFactory.getOWLObjectProperty(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
 
-        Message.log("Observation", observation.toString());
-        Message.log("Neg observation", negObservation.toString());
+            observation = new Observation(dataFactory.getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
+            negObservation = new Observation(dataFactory.getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
+        } else {
+
+            //classAssertion
+            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(expressions[0])));
+            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
+
+            observation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
+            negObservation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+        }
+
+        logger.log(Level.INFO, "Observation = ".concat(observation.toString()));
+        logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
 
         Configuration.INDIVIDUAL = expressions[0];
     }
