@@ -20,7 +20,7 @@ public class TreeBuilder {
     }
 
     public void build() {
-        Set<OWLAxiom> data = new LinkedHashSet<>(knowledgeBase.getOwlAxioms());
+        Set<OWLAxiom> data = new LinkedHashSet<>(knowledgeBase.getTBoxAxioms());
         data.add(negObservation.getOwlAxiom());
         Tree tree = new Tree(data);
         for (OWLAxiom owlAxiom : data) {

@@ -52,7 +52,7 @@ class DataProcessing {
             OWLAxiom observation = loader.getObservation().getOwlAxiom();
 
 //            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
-//                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
+//                literals.getTBoxAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
 //            }
 //
             literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
@@ -94,7 +94,7 @@ class DataProcessing {
 
 //    Literals getLiterals() {
 //        owlClasses = new HashSet<>();
-//        Set<OWLAxiom> axioms = loader.getKnowledgeBase().getOwlAxioms();
+//        Set<OWLAxiom> axioms = loader.getKnowledgeBase().getTBoxAxioms();
 //
 //        for (OWLAxiom axiom : axioms) {
 //

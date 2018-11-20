@@ -1,6 +1,6 @@
 import algorithms.mergeXPlain.MergeXPlain;
+import common.ArgumentParser;
 import common.Loader;
-import common.Parser;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -11,10 +11,13 @@ public class Main {
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
 
-        new Parser(args);
+        ArgumentParser argumentParser = new ArgumentParser();
+        argumentParser.parse(args);
+
         Loader loader = new Loader();
         loader.initialize();
 
         MergeXPlain mergeXPlain = new MergeXPlain(loader);
+
     }
 }

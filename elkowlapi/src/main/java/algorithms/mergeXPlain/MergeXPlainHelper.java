@@ -11,6 +11,7 @@ class MergeXPlainHelper {
 
     boolean isBaseNotConsistent(Loader loader, OWLOntology ontology) {
         loader.updateOntology(ontology);
+
         return !loader.isOntologyConsistent();
     }
 
@@ -18,6 +19,7 @@ class MergeXPlainHelper {
         addAxiomsToBase(loader, ontology, literals.getOwlAxioms());
         boolean isConsistent = loader.isOntologyConsistent();
         removeAxiomsFromBase(loader, ontology, literals.getOwlAxioms());
+
         return isConsistent;
     }
 
@@ -40,9 +42,9 @@ class MergeXPlainHelper {
 
         for (OWLAxiom owlAxiom : literals.getOwlAxioms()) {
 //            if (count < half) {
-//                dividedLiterals[0].getOwlAxioms().add(owlAxiom);
+//                dividedLiterals[0].getTBoxAxioms().add(owlAxiom);
 //            } else {
-//                dividedLiterals[1].getOwlAxioms().add(owlAxiom);
+//                dividedLiterals[1].getTBoxAxioms().add(owlAxiom);
 //            }
 
             dividedLiterals[count % 2].getOwlAxioms().add(owlAxiom);

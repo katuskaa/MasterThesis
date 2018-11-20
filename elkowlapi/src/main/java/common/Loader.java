@@ -6,7 +6,10 @@ import models.KnowledgeBase;
 import models.Observation;
 import openllet.owlapi.OpenlletReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -24,6 +27,7 @@ public class Loader {
     private OWLReasonerFactory reasonerFactory;
     private OWLOntology ontology;
     private OWLReasoner reasoner;
+
     private KnowledgeBase knowledgeBase;
     private Observation observation;
     private Observation negObservation;
@@ -37,10 +41,12 @@ public class Loader {
     private void loadReasoner() {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
+
 //            reasonerFactory = new ReasonerFactory();
 //            reasonerFactory = new JFactFactory();
             reasonerFactory = OpenlletReasonerFactory.getInstance();
 //            reasonerFactory = new ElkReasonerFactory();
+
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
             initializeReasoner();
 
@@ -50,6 +56,7 @@ public class Loader {
                 logger.log(Level.WARNING, LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
                 Application.finish(ExitCode.ERROR);
             }
+
         } catch (OWLOntologyCreationException exception) {
             logger.log(Level.WARNING, LogMessage.ERROR_CREATING_ONTOLOGY, exception);
             Application.finish(ExitCode.ERROR);
@@ -68,38 +75,17 @@ public class Loader {
 
     private void loadKnowledgeBase() {
         Set<OWLAxiom> TBoxAxioms = ontology.getTBoxAxioms(Imports.EXCLUDED);
-        knowledgeBase = new KnowledgeBase(TBoxAxioms);
+        Set<OWLAxiom> ABoxAxioms = ontology.getABoxAxioms(Imports.EXCLUDED);
+
+        knowledgeBase = new KnowledgeBase(TBoxAxioms, ABoxAxioms);
     }
 
     private void loadObservation() {
-        String ontologyIRI = ontology.getOntologyID().getOntologyIRI().toString();
-        OWLDataFactory dataFactory = ontologyManager.getOWLDataFactory();
-        String[] expressions = Configuration.OBSERVATION.split(":");
-
-        if (expressions[0].contains(",")) {
-            //objectProperty
-            String[] individuals = expressions[0].split(",");
-
-            OWLNamedIndividual subject = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(individuals[0])));
-            OWLNamedIndividual object = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(individuals[1])));
-            OWLObjectProperty objectProperty = dataFactory.getOWLObjectProperty(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
-
-            observation = new Observation(dataFactory.getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
-            negObservation = new Observation(dataFactory.getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
-        } else {
-
-            //classAssertion
-            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(expressions[0])));
-            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
-
-            observation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-            negObservation = new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
-        }
+        ObservationParser observationParser = new ObservationParser(this);
+        observationParser.parse();
 
         logger.log(Level.INFO, "Observation = ".concat(observation.toString()));
         logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
-
-        Configuration.INDIVIDUAL = expressions[0];
     }
 
     public boolean isOntologyConsistent() {
@@ -125,4 +111,13 @@ public class Loader {
     public OWLOntology getOntology() {
         return ontology;
     }
+
+    void setObservation(Observation observation) {
+        this.observation = observation;
+    }
+
+    void setNegObservation(Observation negObservation) {
+        this.negObservation = negObservation;
+    }
+
 }
