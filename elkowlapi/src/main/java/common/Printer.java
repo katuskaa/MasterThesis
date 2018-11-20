@@ -1,6 +1,6 @@
 package common;
 
-import com.sun.deploy.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.ArrayList;
