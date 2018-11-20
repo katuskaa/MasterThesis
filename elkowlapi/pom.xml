@@ -8,7 +8,6 @@
     <artifactId>elk</artifactId>
     <version>0.0.1</version>
 
-
     <dependencies>
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
@@ -18,7 +17,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.version}</version>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -41,11 +40,11 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.5</version>
         </dependency>
-        <dependency>
-            <groupId>org.semanticweb.elk</groupId>
-            <artifactId>elk-owlapi-standalone</artifactId>
-            <version>[0.4.3,)</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.semanticweb.elk</groupId>-->
+        <!--<artifactId>elk-owlapi-standalone</artifactId>-->
+        <!--<version>0.4.3</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>jfact</artifactId>
