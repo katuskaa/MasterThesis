@@ -2,6 +2,7 @@ package models;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class KnowledgeBase {
@@ -20,6 +21,13 @@ public class KnowledgeBase {
 
     public Set<OWLAxiom> getABoxAxioms() {
         return ABoxAxioms;
+    }
+
+    public Set<OWLAxiom> getAxioms() {
+        Set<OWLAxiom> axioms = new HashSet<>(TBoxAxioms);
+        axioms.addAll(ABoxAxioms);
+
+        return axioms;
     }
 
 }

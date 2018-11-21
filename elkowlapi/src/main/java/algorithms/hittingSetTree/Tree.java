@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class Tree {
+
     private Node root;
 
     public Tree(Set<OWLAxiom> data) {
         this.root = new ModelNode();
+
         ((ModelNode) this.root).data = data;
         this.root.children = new ArrayList<>();
     }

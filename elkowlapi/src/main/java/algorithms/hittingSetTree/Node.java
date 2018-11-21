@@ -6,5 +6,5 @@ import java.util.ArrayList;
 
 public class Node {
     public ArrayList<Node> children;
-    public OWLAxiom edge;
+    public OWLAxiom label;
 }

@@ -88,6 +88,26 @@ public class Loader {
         logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
     }
 
+    public void addAxiomToOntology(OWLAxiom axiom) {
+        ontologyManager.addAxiom(ontology, axiom);
+        updateOntology(ontology);
+    }
+
+    public void addAxiomsToOntology(Set<OWLAxiom> axioms) {
+        ontologyManager.addAxioms(ontology, axioms);
+        updateOntology(ontology);
+    }
+
+    public void removeAxiomFromOntology(OWLAxiom axiom) {
+        ontologyManager.removeAxiom(ontology, axiom);
+        updateOntology(ontology);
+    }
+
+    public void removeAxiomsFromOntology(Set<OWLAxiom> axioms) {
+        ontologyManager.removeAxioms(ontology, axioms);
+        updateOntology(ontology);
+    }
+
     public boolean isOntologyConsistent() {
         return reasoner.isConsistent();
     }
