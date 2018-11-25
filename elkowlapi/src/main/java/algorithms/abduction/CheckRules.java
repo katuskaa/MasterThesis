@@ -1,27 +1,32 @@
 package algorithms.abduction;
 
-import common.Loader;
 import models.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import reasoner.ILoader;
+import reasoner.IReasonerManager;
 
 import java.util.Set;
 
-public class CheckRules {
+public class CheckRules implements ICheckRules {
 
-    private Loader loader;
+    private ILoader loader;
+    private IReasonerManager reasonerManager;
 
-    public CheckRules(Loader loader) {
+    public CheckRules(ILoader loader, IReasonerManager reasonerManager) {
         this.loader = loader;
+        this.reasonerManager = reasonerManager;
     }
 
+    @Override
     public boolean isConsistent(Explanation explanation) {
-        loader.addAxiomsToOntology(explanation.getOwlAxioms());
-        boolean isConsistent = loader.isOntologyConsistent();
-        loader.removeAxiomsFromOntology(explanation.getOwlAxioms());
+        reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
+        boolean isConsistent = reasonerManager.isOntologyConsistent();
+        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
 
         return isConsistent;
     }
 
+    @Override
     public boolean isRelevant(Explanation explanation) {
         Set<OWLAxiom> explanations = explanation.getOwlAxioms();
         OWLAxiom observation = loader.getObservation().getOwlAxiom();
@@ -35,14 +40,15 @@ public class CheckRules {
         return true;
     }
 
+    @Override
     public boolean isExplanation(Explanation explanation) {
-        loader.addAxiomsToOntology(explanation.getOwlAxioms());
-        loader.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
+        reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
+        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
 
-        boolean isConsistent = loader.isOntologyConsistent();
+        boolean isConsistent = reasonerManager.isOntologyConsistent();
 
-        loader.removeAxiomsFromOntology(explanation.getOwlAxioms());
-        loader.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
+        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
+        reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
 
         return isConsistent;
     }

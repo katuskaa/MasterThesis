@@ -1,10 +1,15 @@
-package common;
+package reasoner;
 
 import application.Application;
 import application.ExitCode;
+import common.Configuration;
+import common.LogMessage;
+import common.ObservationParser;
 import models.KnowledgeBase;
 import models.Observation;
 import openllet.owlapi.OpenlletReasonerFactory;
+import org.semanticweb.HermiT.ReasonerFactory;
+import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -13,15 +18,16 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import uk.ac.manchester.cs.jfact.JFactFactory;
 
 import java.io.File;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Loader {
+public class Loader implements ILoader {
 
-    private Logger logger = Logger.getLogger(Loader.class.getName());
+    private Logger logger = Logger.getLogger(Loader.class.getSimpleName());
 
     private OWLOntologyManager ontologyManager;
     private OWLReasonerFactory reasonerFactory;
@@ -32,25 +38,22 @@ public class Loader {
     private Observation observation;
     private Observation negObservation;
 
-    public void initialize() {
-        loadReasoner();
+    @Override
+    public void initialize(ReasonerType reasonerType) {
+        loadReasoner(reasonerType);
         loadKnowledgeBase();
         loadObservation();
     }
 
-    private void loadReasoner() {
+    private void loadReasoner(ReasonerType reasonerType) {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
-
-//            reasonerFactory = new ReasonerFactory();
-//            reasonerFactory = new JFactFactory();
-            reasonerFactory = OpenlletReasonerFactory.getInstance();
-//            reasonerFactory = new ElkReasonerFactory();
-
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
+
+            changeReasoner(reasonerType);
             initializeReasoner();
 
-            if (isOntologyConsistent()) {
+            if (reasoner.isConsistent()) {
                 logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_CONSISTENCY);
             } else {
                 logger.log(Level.WARNING, LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
@@ -63,14 +66,32 @@ public class Loader {
         }
     }
 
+    @Override
+    public void changeReasoner(ReasonerType reasonerType) {
+        switch (reasonerType) {
+            case ELK:
+                setOWLReasonerFactory(new ElkReasonerFactory());
+                break;
+
+            case PELLET:
+                setOWLReasonerFactory(OpenlletReasonerFactory.getInstance());
+                break;
+
+            case HERMIT:
+                setOWLReasonerFactory(new ReasonerFactory());
+                break;
+
+            case JFACT:
+                setOWLReasonerFactory(new JFactFactory());
+                break;
+        }
+
+        initializeReasoner();
+    }
+
     private void initializeReasoner() {
         reasoner = reasonerFactory.createReasoner(ontology);
         logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_LOADED);
-    }
-
-    public void updateOntology(OWLOntology ontology) {
-        reasoner.dispose();
-        reasoner = reasonerFactory.createReasoner(ontology);
     }
 
     private void loadKnowledgeBase() {
@@ -88,56 +109,59 @@ public class Loader {
         logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
     }
 
-    public void addAxiomToOntology(OWLAxiom axiom) {
-        ontologyManager.addAxiom(ontology, axiom);
-        updateOntology(ontology);
-    }
-
-    public void addAxiomsToOntology(Set<OWLAxiom> axioms) {
-        ontologyManager.addAxioms(ontology, axioms);
-        updateOntology(ontology);
-    }
-
-    public void removeAxiomFromOntology(OWLAxiom axiom) {
-        ontologyManager.removeAxiom(ontology, axiom);
-        updateOntology(ontology);
-    }
-
-    public void removeAxiomsFromOntology(Set<OWLAxiom> axioms) {
-        ontologyManager.removeAxioms(ontology, axioms);
-        updateOntology(ontology);
-    }
-
-    public boolean isOntologyConsistent() {
-        return reasoner.isConsistent();
-    }
-
+    @Override
     public KnowledgeBase getKnowledgeBase() {
         return knowledgeBase;
     }
 
+    @Override
     public Observation getObservation() {
         return observation;
     }
 
+    @Override
+    public void setObservation(Observation observation) {
+        this.observation = observation;
+    }
+
+    @Override
     public Observation getNegObservation() {
         return negObservation;
     }
 
+    @Override
+    public void setNegObservation(Observation negObservation) {
+        this.negObservation = negObservation;
+    }
+
+    @Override
     public OWLOntologyManager getOntologyManager() {
         return ontologyManager;
     }
 
+    @Override
     public OWLOntology getOntology() {
         return ontology;
     }
 
-    void setObservation(Observation observation) {
-        this.observation = observation;
+    @Override
+    public OWLReasoner getReasoner() {
+        return reasoner;
     }
 
-    void setNegObservation(Observation negObservation) {
-        this.negObservation = negObservation;
+    @Override
+    public void setOWLReasoner(OWLReasoner reasoner) {
+        this.reasoner = reasoner;
+    }
+
+    @Override
+    public OWLReasonerFactory getReasonerFactory() {
+        return reasonerFactory;
+    }
+
+    @Override
+    public void setOWLReasonerFactory(OWLReasonerFactory reasonerFactory) {
+        this.reasonerFactory = reasonerFactory;
     }
 
 }

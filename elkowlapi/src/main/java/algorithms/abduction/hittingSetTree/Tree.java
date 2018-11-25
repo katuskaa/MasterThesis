@@ -1,4 +1,4 @@
-package algorithms.hittingSetTree;
+package algorithms.abduction.hittingSetTree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 

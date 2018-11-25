@@ -2,17 +2,18 @@ package common;
 
 import models.Observation;
 import org.semanticweb.owlapi.model.*;
+import reasoner.Loader;
 
 
-class ObservationParser {
+public class ObservationParser {
 
     private Loader loader;
 
-    ObservationParser(Loader loader) {
+    public ObservationParser(Loader loader) {
         this.loader = loader;
     }
 
-    void parse() {
+    public void parse() {
         String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
         OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 

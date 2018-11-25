@@ -1,9 +1,10 @@
-import algorithms.mergeXPlain.MergeXPlain;
+import algorithms.ISolver;
+import algorithms.mergeXPlain.MergeXPlainSolver;
 import common.ArgumentParser;
-import common.Loader;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import reasoner.*;
 
 public class Main {
 
@@ -14,10 +15,12 @@ public class Main {
         ArgumentParser argumentParser = new ArgumentParser();
         argumentParser.parse(args);
 
-        Loader loader = new Loader();
-        loader.initialize();
+        ILoader loader = new Loader();
+        loader.initialize(ReasonerType.HERMIT);
 
-        MergeXPlain mergeXPlain = new MergeXPlain(loader);
+        IReasonerManager reasonerManager = new ReasonerManager(loader);
 
+        ISolver mergeXPlainSolver = new MergeXPlainSolver();
+        mergeXPlainSolver.solve(loader, reasonerManager);
     }
 }

@@ -25,9 +25,11 @@ public class Explanation {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
+
         for (OWLAxiom owlAxiom : owlAxioms) {
             result.append(Printer.print(owlAxiom)).append(";");
         }
+
         return result.toString();
     }
 }

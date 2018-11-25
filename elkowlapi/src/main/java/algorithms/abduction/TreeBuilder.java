@@ -1,8 +1,8 @@
 package algorithms.abduction;
 
-import algorithms.hittingSetTree.ModelNode;
-import algorithms.hittingSetTree.Node;
-import common.Loader;
+import algorithms.abduction.hittingSetTree.ModelNode;
+import algorithms.abduction.hittingSetTree.Node;
+import reasoner.Loader;
 
 
 public class TreeBuilder {
@@ -15,6 +15,7 @@ public class TreeBuilder {
 
     public void build() {
         Node root = new ModelNode();
+
 
     }
 
