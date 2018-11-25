@@ -1,10 +1,15 @@
 import algorithms.ISolver;
+import algorithms.abduction.AbductionHSSolver;
 import algorithms.mergeXPlain.MergeXPlainSolver;
 import common.ArgumentParser;
+import common.Configuration;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import reasoner.*;
+import reasoner.ILoader;
+import reasoner.IReasonerManager;
+import reasoner.Loader;
+import reasoner.ReasonerManager;
 
 public class Main {
 
@@ -16,11 +21,14 @@ public class Main {
         argumentParser.parse(args);
 
         ILoader loader = new Loader();
-        loader.initialize(ReasonerType.HERMIT);
+        loader.initialize(Configuration.REASONER);
 
         IReasonerManager reasonerManager = new ReasonerManager(loader);
 
         ISolver mergeXPlainSolver = new MergeXPlainSolver();
         mergeXPlainSolver.solve(loader, reasonerManager);
+
+        ISolver abductionHSSolver = new AbductionHSSolver();
+        abductionHSSolver.solve(loader, reasonerManager);
     }
 }
