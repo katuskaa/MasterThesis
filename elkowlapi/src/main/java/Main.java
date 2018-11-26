@@ -1,6 +1,5 @@
 import algorithms.ISolver;
 import algorithms.abduction.AbductionHSSolver;
-import algorithms.mergeXPlain.MergeXPlainSolver;
 import common.ArgumentParser;
 import common.Configuration;
 import org.apache.log4j.BasicConfigurator;
@@ -25,8 +24,8 @@ public class Main {
 
         IReasonerManager reasonerManager = new ReasonerManager(loader);
 
-        ISolver mergeXPlainSolver = new MergeXPlainSolver();
-        mergeXPlainSolver.solve(loader, reasonerManager);
+//        ISolver mergeXPlainSolver = new MergeXPlainSolver();
+//        mergeXPlainSolver.solve(loader, reasonerManager);
 
         ISolver abductionHSSolver = new AbductionHSSolver();
         abductionHSSolver.solve(loader, reasonerManager);

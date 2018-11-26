@@ -21,6 +21,7 @@ public class Printer {
     private static String getNamedIndividual(OWLAxiom owlAxiom) {
         List<String> owlNamedIndividuals = new ArrayList<>();
         Set<OWLNamedIndividual> individualsInSignature = owlAxiom.getIndividualsInSignature();
+
         for (OWLNamedIndividual owlNamedIndividual : individualsInSignature) {
             owlNamedIndividuals.add(owlNamedIndividual.getIRI().getFragment());
         }

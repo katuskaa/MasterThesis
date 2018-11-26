@@ -2,10 +2,9 @@ package algorithms.abduction.hittingSetTree;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.util.ArrayList;
+import java.util.Set;
 
 public abstract class Node {
 
-    public ArrayList<Node> children;
-    public OWLAxiom label;
+    public Set<OWLAxiom> label;
 }

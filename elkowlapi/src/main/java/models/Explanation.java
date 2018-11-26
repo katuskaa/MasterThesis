@@ -22,6 +22,14 @@ public class Explanation {
         return owlAxioms;
     }
 
+    public void addAxioms(Set<OWLAxiom> axioms) {
+        this.owlAxioms.addAll(axioms);
+    }
+
+    public void addAxiom(OWLAxiom axiom) {
+        this.owlAxioms.add(axiom);
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();

@@ -50,7 +50,7 @@ public class CheckRules implements ICheckRules {
         reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
         reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
 
-        return isConsistent;
+        return !isConsistent;
     }
 
 }
