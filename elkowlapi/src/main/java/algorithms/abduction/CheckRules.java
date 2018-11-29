@@ -42,13 +42,23 @@ public class CheckRules implements ICheckRules {
 
     @Override
     public boolean isExplanation(Explanation explanation) {
-        reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
         reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
+        reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
+
+        System.out.println("\nisExplanation");
+        loader.getOntology().axioms().forEach(axiom -> {
+            System.out.println(axiom);
+        });
 
         boolean isConsistent = reasonerManager.isOntologyConsistent();
 
         reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
         reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
+
+        System.out.println("\nisExplanation delete");
+        loader.getOntology().axioms().forEach(axiom -> {
+            System.out.println(axiom);
+        });
 
         return !isConsistent;
     }

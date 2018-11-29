@@ -86,12 +86,13 @@ public class Loader implements ILoader {
                 break;
         }
 
-        initializeReasoner();
-    }
-
-    private void initializeReasoner() {
         reasoner = reasonerFactory.createReasoner(ontology);
         logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_LOADED);
+    }
+
+    @Override
+    public void initializeReasoner() {
+        reasoner.flush();
     }
 
     private void loadKnowledgeBase() {

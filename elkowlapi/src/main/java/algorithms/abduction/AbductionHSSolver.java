@@ -8,6 +8,7 @@ import algorithms.abduction.hittingSetTree.Node;
 import models.Explanation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
@@ -18,18 +19,40 @@ public class AbductionHSSolver implements ISolver {
 
     private ILoader loader;
     private IReasonerManager reasonerManager;
+    private List<Explanation> explanations;
+    private Set<OWLAxiom> assertionsAxioms;
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
 
+        initialize();
         startSolving();
     }
 
+    @Override
+    public List<Explanation> getExplanations() {
+        return explanations;
+    }
+
+    private void initialize() {
+        assertionsAxioms = new HashSet<>();
+
+        loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
+            List<OWLAxiom> assertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom);
+
+            if (assertionAxiom != null && assertionAxiom.size() == 2) {
+                assertionsAxioms.add(assertionAxiom.get(0));
+            }
+        });
+
+
+    }
+
     // TODO este doplnit optimalizacie
-    private List<Explanation> startSolving() {
-        List<Explanation> explanations = new LinkedList<>();
+    private void startSolving() {
+        explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
 
         ModelNode root = getNegModel(null);
@@ -80,12 +103,8 @@ public class AbductionHSSolver implements ISolver {
                 explanations.add(((CheckNode) node).explanation);
             }
         }
-
-        return explanations;
     }
 
-
-    //TODO vymysliet neg of owlaxiom a spravit class assertiony, neskor aj object property
     private ModelNode getNegModel(Explanation explanation) {
         ModelNode modelNode = new ModelNode();
         Set<OWLAxiom> model = new HashSet<>();
@@ -94,38 +113,29 @@ public class AbductionHSSolver implements ISolver {
 
         if (explanation != null) {
             for (OWLAxiom owlAxiom : explanation.getOwlAxioms()) {
-                OWLAxiom complementOfAxiom = getComplementOfOWLAxiom(owlAxiom);
+                OWLAxiom complementOfAxiom = AxiomManager.getComplementOfOWLAxiom(loader, owlAxiom);
 
                 model.add(complementOfAxiom);
             }
         }
 
-        loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
-            OWLAxiom complementOfAxiom = getComplementOfOWLAxiom(axiom);
+        for (OWLAxiom axiom : assertionsAxioms) {
+            OWLAxiom complementOfAxiom = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
 
             if (!model.contains(axiom) && !model.contains(complementOfAxiom)) {
                 model.add(axiom);
-                addClassAssertionAxiom(axiom);
             }
-        });
+        }
 
         modelNode.data = model;
 
         return modelNode;
     }
 
-    private OWLAxiom getComplementOfOWLAxiom(OWLAxiom axiom) {
-
-        return null;
-    }
-
-    private void addClassAssertionAxiom(OWLAxiom axiom) {
-
-    }
-
-    private void addObjectPropertyAssertionAxiom(OWLAxiom axiom) {
-
-    }
-
+//    private OWLClassExpression convertOWLAxiomToOWLClassExpression(OWLAxiom owlAxiom) {
+//        Utils utils = new Utils(loader.getOntologyManager().getOWLDataFactory());
+//
+//        return utils.convert(owlAxiom);
+//    }
 
 }

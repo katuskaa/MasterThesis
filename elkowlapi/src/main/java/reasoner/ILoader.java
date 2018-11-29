@@ -13,6 +13,8 @@ public interface ILoader {
 
     void changeReasoner(ReasonerType reasonerType);
 
+    void initializeReasoner();
+
     KnowledgeBase getKnowledgeBase();
 
     Observation getObservation();

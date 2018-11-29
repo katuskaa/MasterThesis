@@ -9,9 +9,8 @@ import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Base = knowledgeBase + negObservation
@@ -19,14 +18,14 @@ import java.util.logging.Logger;
  */
 public class MergeXPlainSolver implements ISolver {
 
-    private Logger logger = Logger.getLogger(MergeXPlainSolver.class.getSimpleName());
-
     private ILoader loader;
     private IReasonerManager reasonerManager;
 
     private OWLOntology base;
     private Literals literals;
     private MergeXPlainHelper mergeXPlainHelper;
+
+    private Set<Explanation> explanations;
 
 
     @Override
@@ -38,33 +37,34 @@ public class MergeXPlainSolver implements ISolver {
         startSolving();
     }
 
+    @Override
+    public Set<Explanation> getExplanations() {
+        return explanations;
+    }
+
     private void initialize() {
         mergeXPlainHelper = new MergeXPlainHelper();
         base = loader.getOntology();
 
         loader.getOntologyManager().addAxiom(base, loader.getNegObservation().getOwlAxiom());
-        reasonerManager.updateOntology(base);
+        loader.initializeReasoner();
 
         IDataProcessing dataProcessing = new DataProcessing(loader);
         literals = dataProcessing.getLiterals();
     }
 
     private void startSolving() {
-        Conflict conflict = getExplanations();
-        Set<Explanation> explanations = conflict.getExplanations();
-
-        logger.log(Level.INFO, "Count of explanations is ".concat(String.valueOf(explanations.size())).concat("\n"));
-        logger.log(Level.INFO, "Explanations:\n".concat(explanations.toString()).concat("\n"));
-        logger.log(Level.INFO, "Literals:\n".concat(conflict.getLiterals().toString()).concat("\n"));
+        Conflict conflict = getMergeConflict();
+        explanations = conflict.getExplanations();
     }
 
 
-    private Conflict getExplanations() {
-        if (mergeXPlainHelper.isBaseNotConsistent(reasonerManager, base)) {
+    private Conflict getMergeConflict() {
+        if (mergeXPlainHelper.isBaseNotConsistent(reasonerManager)) {
             return new Conflict();
         }
 
-        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(loader, reasonerManager, base, literals)) {
+        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, literals)) {
             return new Conflict();
         }
 
@@ -72,7 +72,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private Conflict findConflicts(OWLOntology base, Literals literals) {
-        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(loader, reasonerManager, base, literals)) {
+        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, literals)) {
             return new Conflict(literals, new HashSet<>());
         }
 
@@ -82,12 +82,10 @@ public class MergeXPlainSolver implements ISolver {
             return new Conflict(new Literals(), explanations);
         }
 
-        Literals[] sets = mergeXPlainHelper.divideIntoSets(literals);
-        Literals literals1 = sets[0];
-        Literals literals2 = sets[1];
+        List<Literals> sets = mergeXPlainHelper.divideIntoSets(literals);
 
-        Conflict conflictC1 = findConflicts(base, literals1);
-        Conflict conflictC2 = findConflicts(base, literals2);
+        Conflict conflictC1 = findConflicts(base, sets.get(0));
+        Conflict conflictC2 = findConflicts(base, sets.get(1));
 
         Set<Explanation> explanations = new HashSet<>();
         explanations.addAll(conflictC1.getExplanations());
@@ -97,15 +95,15 @@ public class MergeXPlainSolver implements ISolver {
         conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
         conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
 
-        while (!mergeXPlainHelper.isBaseWithLiteralsConsistent(loader, reasonerManager, base, conflictLiterals)) {
+        while (!mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, conflictLiterals)) {
 
-            mergeXPlainHelper.addAxiomsToBase(loader, reasonerManager, base, conflictC2.getLiterals().getOwlAxioms());
-            Explanation X = getConflict(base, conflictC2.getLiterals().getOwlAxioms(), conflictC1.getLiterals());
-            mergeXPlainHelper.removeAxiomsFromBase(loader, reasonerManager, base, conflictC2.getLiterals().getOwlAxioms());
+            reasonerManager.addAxiomsToOntology(conflictC2.getLiterals().getOwlAxioms());
+            Explanation X = getConflict(conflictC2.getLiterals().getOwlAxioms(), conflictC1.getLiterals());
+            reasonerManager.removeAxiomsFromOntology(conflictC2.getLiterals().getOwlAxioms());
 
-            mergeXPlainHelper.addAxiomsToBase(loader, reasonerManager, base, X.getOwlAxioms());
-            Explanation CS = getConflict(base, X.getOwlAxioms(), conflictC2.getLiterals());
-            mergeXPlainHelper.removeAxiomsFromBase(loader, reasonerManager, base, X.getOwlAxioms());
+            reasonerManager.addAxiomsToOntology(X.getOwlAxioms());
+            Explanation CS = getConflict(X.getOwlAxioms(), conflictC2.getLiterals());
+            reasonerManager.removeAxiomsFromOntology(X.getOwlAxioms());
 
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
@@ -120,8 +118,8 @@ public class MergeXPlainSolver implements ISolver {
     }
 
 
-    private Explanation getConflict(OWLOntology base, Set<OWLAxiom> axioms, Literals literals) {
-        if (!axioms.isEmpty() && mergeXPlainHelper.isBaseNotConsistent(reasonerManager, base)) {
+    private Explanation getConflict(Set<OWLAxiom> axioms, Literals literals) {
+        if (!axioms.isEmpty() && mergeXPlainHelper.isBaseNotConsistent(reasonerManager)) {
             return new Explanation();
         }
 
@@ -129,17 +127,15 @@ public class MergeXPlainSolver implements ISolver {
             return new Explanation(literals.getOwlAxioms());
         }
 
-        Literals[] sets = mergeXPlainHelper.divideIntoSets(literals);
-        Literals literals1 = sets[0];
-        Literals literals2 = sets[1];
+        List<Literals> sets = mergeXPlainHelper.divideIntoSets(literals);
 
-        mergeXPlainHelper.addAxiomsToBase(loader, reasonerManager, base, literals1.getOwlAxioms());
-        Explanation D2 = getConflict(base, literals1.getOwlAxioms(), literals2);
-        mergeXPlainHelper.removeAxiomsFromBase(loader, reasonerManager, base, literals1.getOwlAxioms());
+        reasonerManager.addAxiomsToOntology(sets.get(0).getOwlAxioms());
+        Explanation D2 = getConflict(sets.get(0).getOwlAxioms(), sets.get(1));
+        reasonerManager.removeAxiomsFromOntology(sets.get(0).getOwlAxioms());
 
-        mergeXPlainHelper.addAxiomsToBase(loader, reasonerManager, base, D2.getOwlAxioms());
-        Explanation D1 = getConflict(base, D2.getOwlAxioms(), literals1);
-        mergeXPlainHelper.removeAxiomsFromBase(loader, reasonerManager, base, D2.getOwlAxioms());
+        reasonerManager.addAxiomsToOntology(D2.getOwlAxioms());
+        Explanation D1 = getConflict(D2.getOwlAxioms(), sets.get(0));
+        reasonerManager.removeAxiomsFromOntology(D2.getOwlAxioms());
 
         Set<OWLAxiom> conflicts = new HashSet<>();
         conflicts.addAll(D1.getOwlAxioms());
