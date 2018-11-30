@@ -54,7 +54,13 @@ public class AxiomManager {
             OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
             OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(name)));
 
-            complement = dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual);
+            OWLClassExpression owlClassExpression = ((OWLClassAssertionAxiom) owlAxiom).getClassExpression();
+
+            if (OWLObjectComplementOf.class.isAssignableFrom(owlClassExpression.getClass())) {
+                complement = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
+            } else {
+                complement = dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual);
+            }
         } else {
             System.out.println("names wrong count!");
         }

@@ -57,6 +57,8 @@ public class Loader implements ILoader {
                 logger.log(Level.INFO, LogMessage.INFO_ONTOLOGY_CONSISTENCY);
             } else {
                 logger.log(Level.WARNING, LogMessage.ERROR_ONTOLOGY_CONSISTENCY);
+                reasoner.dispose();
+
                 Application.finish(ExitCode.ERROR);
             }
 

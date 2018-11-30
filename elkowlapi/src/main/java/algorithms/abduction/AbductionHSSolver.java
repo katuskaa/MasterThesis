@@ -2,12 +2,13 @@ package algorithms.abduction;
 
 import algorithms.ISolver;
 import algorithms.abduction.hittingSetTree.CheckNode;
-import algorithms.abduction.hittingSetTree.CrossNode;
 import algorithms.abduction.hittingSetTree.ModelNode;
 import algorithms.abduction.hittingSetTree.Node;
 import models.Explanation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
@@ -20,7 +21,8 @@ public class AbductionHSSolver implements ISolver {
     private ILoader loader;
     private IReasonerManager reasonerManager;
     private List<Explanation> explanations;
-    private Set<OWLAxiom> assertionsAxioms;
+    private List<OWLAxiom> assertionsAxioms;
+    private List<OWLAxiom> negAssertionsAxioms;
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
@@ -37,17 +39,17 @@ public class AbductionHSSolver implements ISolver {
     }
 
     private void initialize() {
-        assertionsAxioms = new HashSet<>();
+        assertionsAxioms = new ArrayList<>();
+        negAssertionsAxioms = new ArrayList<>();
 
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
             List<OWLAxiom> assertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom);
 
             if (assertionAxiom != null && assertionAxiom.size() == 2) {
                 assertionsAxioms.add(assertionAxiom.get(0));
+                negAssertionsAxioms.add(assertionAxiom.get(1));
             }
         });
-
-
     }
 
     // TODO este doplnit optimalizacie
@@ -55,7 +57,7 @@ public class AbductionHSSolver implements ISolver {
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
 
-        ModelNode root = getNegModel(null);
+        ModelNode root = getModel(null);
         root.label = new HashSet<>();
 
         Queue<Node> queue = new LinkedList<>();
@@ -75,27 +77,24 @@ public class AbductionHSSolver implements ISolver {
 
                     boolean isConsistent = checkRules.isConsistent(explanation);
                     boolean isRelevant = checkRules.isRelevant(explanation);
-                    boolean isExplanation = checkRules.isExplanation(explanation);
 
-                    if (!isConsistent || !isRelevant) {
-                        CrossNode crossNode = new CrossNode();
+                    if (isConsistent && isRelevant) {
+                        boolean isInconsistent = checkRules.isInconsistent(explanation);
 
-                        crossNode.label = explanation.getOwlAxioms();
-                        queue.add(crossNode);
+                        if (isInconsistent) {
+                            CheckNode checkNode = new CheckNode();
 
-                    } else if (isExplanation) {
-                        CheckNode checkNode = new CheckNode();
+                            checkNode.explanation = explanation;
+                            checkNode.label = explanation.getOwlAxioms();
 
-                        checkNode.explanation = explanation;
-                        checkNode.label = explanation.getOwlAxioms();
+                            queue.add(checkNode);
 
-                        queue.add(checkNode);
+                        } else {
+                            ModelNode modelNode = getModel(explanation);
 
-                    } else {
-                        ModelNode modelNode = getNegModel(explanation);
-
-                        modelNode.label = explanation.getOwlAxioms();
-                        queue.add(modelNode);
+                            modelNode.label = explanation.getOwlAxioms();
+                            queue.add(modelNode);
+                        }
                     }
                 }
 
@@ -105,37 +104,57 @@ public class AbductionHSSolver implements ISolver {
         }
     }
 
-    private ModelNode getNegModel(Explanation explanation) {
+    private ModelNode getModel(Explanation explanation) {
         ModelNode modelNode = new ModelNode();
         Set<OWLAxiom> model = new HashSet<>();
 
-        model.add(loader.getObservation().getOwlAxiom());
+        model.add(loader.getNegObservation().getOwlAxiom());
+        // reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
 
         if (explanation != null) {
-            for (OWLAxiom owlAxiom : explanation.getOwlAxioms()) {
-                OWLAxiom complementOfAxiom = AxiomManager.getComplementOfOWLAxiom(loader, owlAxiom);
-
-                model.add(complementOfAxiom);
-            }
+            model.addAll(explanation.getOwlAxioms());
         }
 
-        for (OWLAxiom axiom : assertionsAxioms) {
-            OWLAxiom complementOfAxiom = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+        for (int i = 0; i < assertionsAxioms.size(); i++) {
+            OWLAxiom axiom = assertionsAxioms.get(i);
+            OWLAxiom complementOfAxiom = negAssertionsAxioms.get(i);
 
             if (!model.contains(axiom) && !model.contains(complementOfAxiom)) {
-                model.add(axiom);
+
+                boolean isSatisfiable;
+
+                reasonerManager.addAxiomToOntology(complementOfAxiom);
+
+                try {
+                    isSatisfiable = loader.getReasoner().isSatisfiable(((OWLClassAssertionAxiom) complementOfAxiom).getClassExpression());
+                } catch (InconsistentOntologyException exception) {
+                    isSatisfiable = false;
+                }
+
+                reasonerManager.removeAxiomFromOntology(complementOfAxiom);
+
+                if (!isSatisfiable) {
+                    model.add(axiom);
+                } else {
+                    model.add(complementOfAxiom);
+                }
             }
         }
 
-        modelNode.data = model;
+        // reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
+
+
+        Set<OWLAxiom> negModel = new HashSet<>();
+
+        for (OWLAxiom axiom : model) {
+            OWLAxiom complement = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
+
+            negModel.add(complement);
+        }
+
+        modelNode.data = negModel;
 
         return modelNode;
     }
-
-//    private OWLClassExpression convertOWLAxiomToOWLClassExpression(OWLAxiom owlAxiom) {
-//        Utils utils = new Utils(loader.getOntologyManager().getOWLDataFactory());
-//
-//        return utils.convert(owlAxiom);
-//    }
 
 }

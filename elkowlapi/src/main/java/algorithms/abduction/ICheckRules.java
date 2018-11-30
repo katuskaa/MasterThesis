@@ -8,5 +8,5 @@ public interface ICheckRules {
 
     boolean isRelevant(Explanation explanation);
 
-    boolean isExplanation(Explanation explanation);
+    boolean isInconsistent(Explanation explanation);
 }

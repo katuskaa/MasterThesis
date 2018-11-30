@@ -16,4 +16,6 @@ public interface IReasonerManager {
 
     boolean isOntologyConsistent();
 
+    boolean isSatisfiable(OWLAxiom axiom);
+
 }

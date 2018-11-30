@@ -17,6 +17,7 @@ import java.util.Collection;
 public class Main {
 
     public static void main(String[] args) {
+        //LogManager.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
 
