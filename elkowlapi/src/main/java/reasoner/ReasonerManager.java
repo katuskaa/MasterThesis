@@ -1,9 +1,6 @@
 package reasoner;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 
 import java.util.Set;
 
@@ -44,20 +41,6 @@ public class ReasonerManager implements IReasonerManager {
     public boolean isOntologyConsistent() {
         loader.initializeReasoner();
         return loader.getReasoner().isConsistent();
-    }
-
-    @Override
-    public boolean isSatisfiable(OWLAxiom axiom) {
-        OWLClassExpression classExpression = ((OWLClassAssertionAxiom) axiom).getClassExpression();
-        boolean isSatisfiable;
-
-        try {
-            isSatisfiable = loader.getReasoner().isSatisfiable(classExpression);
-        } catch (InconsistentOntologyException exception) {
-            isSatisfiable = false;
-        }
-
-        return isSatisfiable;
     }
 
 }

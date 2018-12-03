@@ -17,7 +17,6 @@ import java.util.Collection;
 public class Main {
 
     public static void main(String[] args) {
-        //LogManager.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
 
@@ -34,7 +33,7 @@ public class Main {
             solver.solve(loader, reasonerManager);
             Collection<Explanation> explanations = solver.getExplanations();
 
-            System.out.println("\nResultExplanation are:\n");
+            System.out.println("\nExplanations are:");
 
             for (Explanation explanation : explanations) {
                 System.out.println(explanation);

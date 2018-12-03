@@ -2,8 +2,6 @@ package algorithms.abduction;
 
 import models.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
@@ -14,7 +12,7 @@ public class CheckRules implements ICheckRules {
     private ILoader loader;
     private IReasonerManager reasonerManager;
 
-    public CheckRules(ILoader loader, IReasonerManager reasonerManager) {
+    CheckRules(ILoader loader, IReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
     }
@@ -22,32 +20,12 @@ public class CheckRules implements ICheckRules {
     @Override
     public boolean isConsistent(Explanation explanation) {
         reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
-//        boolean isConsistent = reasonerManager.isOntologyConsistent();
-        boolean isSatisfiable = false;
 
-        // System.out.println(explanation);
-
-        for (OWLAxiom axiom : explanation.getOwlAxioms()) {
-            // System.out.println(((OWLClassAssertionAxiom) axiom).getClassExpression());
-
-            try {
-                isSatisfiable = loader.getReasoner().isSatisfiable(((OWLClassAssertionAxiom) axiom).getClassExpression());
-            } catch (InconsistentOntologyException exception) {
-                isSatisfiable = false;
-            }
-
-            if (!isSatisfiable) {
-                break;
-            }
-        }
-
-//        System.out.println("isConsistent = " + isConsistent);
-//        System.out.println("isSatisfiable = " + isSatisfiable);
-//        System.out.println();
+        boolean isConsistent = reasonerManager.isOntologyConsistent();
 
         reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
 
-        return isSatisfiable;
+        return isConsistent;
     }
 
     @Override
@@ -70,32 +48,11 @@ public class CheckRules implements ICheckRules {
         reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
 
         boolean isConsistent = reasonerManager.isOntologyConsistent();
-        boolean isSatisfiable = false;
 
-        System.out.println(explanation);
-
-        for (OWLAxiom axiom : explanation.getOwlAxioms()) {
-            System.out.println(((OWLClassAssertionAxiom) axiom).getClassExpression());
-
-            try {
-                isSatisfiable = loader.getReasoner().isSatisfiable(((OWLClassAssertionAxiom) axiom).getClassExpression());
-            } catch (InconsistentOntologyException exception) {
-                isSatisfiable = false;
-            }
-
-            if (!isSatisfiable) {
-                break;
-            }
-        }
-
-        System.out.println("isConsistent = " + isConsistent);
-        System.out.println("isSatisfiable = " + isSatisfiable);
-        System.out.println();
-
-        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
         reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
+        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
 
-        return !isSatisfiable;
+        return !isConsistent;
     }
 
 }

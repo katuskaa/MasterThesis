@@ -12,7 +12,7 @@ public class AxiomManager {
     public static List<OWLAxiom> createClassAssertionAxiom(ILoader loader, OWLAxiom owlAxiom) {
         List<OWLAxiom> owlAxioms = new LinkedList<>();
 
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
         OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 
         if (OWLDeclarationAxiom.class.isAssignableFrom(owlAxiom.getClass())) {
@@ -39,7 +39,7 @@ public class AxiomManager {
     }
 
     public static OWLAxiom getComplementOfOWLAxiom(ILoader loader, OWLAxiom owlAxiom) {
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
         OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 
         Set<OWLClass> names = owlAxiom.getClassesInSignature();

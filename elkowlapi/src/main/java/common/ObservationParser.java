@@ -14,7 +14,7 @@ public class ObservationParser {
     }
 
     public void parse() {
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
         OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 
         String[] expressions = Configuration.OBSERVATION.split(":");
@@ -31,6 +31,8 @@ public class ObservationParser {
     private void parseClassAssertion(String ontologyIRI, OWLDataFactory dataFactory, String[] expressions) {
         OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(expressions[0])));
         OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
+
+        loader.getOntologyManager().addAxiom(loader.getOntology(), dataFactory.getOWLDeclarationAxiom(namedIndividual));
 
         loader.setObservation(new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual)));
         loader.setNegObservation(new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual)));

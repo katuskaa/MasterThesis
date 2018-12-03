@@ -45,7 +45,7 @@ class DataProcessing implements IDataProcessing {
         Literals literals = new Literals();
 
         for (OWLClass owlClass : owlClasses) {
-            String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+            String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
             OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
             OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
 
@@ -66,7 +66,7 @@ class DataProcessing implements IDataProcessing {
     private Literals createLiteralsFromObjectProperties() {
         Literals literals = new Literals();
 
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
         OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 
         loader.getOntology().axioms().forEach(axiom -> {
