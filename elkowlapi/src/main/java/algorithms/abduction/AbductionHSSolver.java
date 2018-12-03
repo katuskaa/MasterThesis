@@ -1,9 +1,6 @@
 package algorithms.abduction;
 
 import algorithms.ISolver;
-import algorithms.abduction.hittingSetTree.CheckNode;
-import algorithms.abduction.hittingSetTree.ModelNode;
-import algorithms.abduction.hittingSetTree.Node;
 import models.Explanation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -80,12 +77,7 @@ public class AbductionHSSolver implements ISolver {
                         boolean isInconsistent = checkRules.isInconsistent(explanation);
 
                         if (isInconsistent) {
-                            CheckNode checkNode = new CheckNode();
-
-                            checkNode.explanation = explanation;
-                            checkNode.label = explanation.getOwlAxioms();
-
-                            queue.add(checkNode);
+                            explanations.add(explanation);
 
                         } else {
                             ModelNode modelNode = getNegModel(explanation);
@@ -95,9 +87,6 @@ public class AbductionHSSolver implements ISolver {
                         }
                     }
                 }
-
-            } else if (CheckNode.class.isAssignableFrom(node.getClass())) {
-                explanations.add(((CheckNode) node).explanation);
             }
         }
     }
@@ -106,7 +95,7 @@ public class AbductionHSSolver implements ISolver {
         ModelNode modelNode = new ModelNode();
         Set<OWLAxiom> model = new HashSet<>();
 
-        // model.add(loader.getNegObservation().getOwlAxiom());
+        model.add(loader.getNegObservation().getOwlAxiom());
         reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
 
         if (explanation != null) {
@@ -142,7 +131,7 @@ public class AbductionHSSolver implements ISolver {
         }
 
         reasonerManager.removeAxiomsFromOntology(model);
-        reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
+        model.remove(loader.getNegObservation().getOwlAxiom());
 
         Set<OWLAxiom> negModel = new HashSet<>();
 
