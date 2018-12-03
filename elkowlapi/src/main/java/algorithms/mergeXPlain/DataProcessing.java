@@ -1,27 +1,28 @@
 package algorithms.mergeXPlain;
 
 import common.Configuration;
-import common.Loader;
+import common.Printer;
 import models.Literals;
 import org.semanticweb.owlapi.model.*;
+import reasoner.ILoader;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class DataProcessing {
+class DataProcessing implements IDataProcessing {
 
-    private Loader loader;
+    private ILoader loader;
     private Set<OWLClass> owlClasses;
-    private Set<OWLObjectProperty> owlObjectProperties;
 
-    DataProcessing(Loader loader) {
+    DataProcessing(ILoader loader) {
         this.loader = loader;
         this.owlClasses = new HashSet<>();
     }
 
-    Literals getLiterals() {
+    @Override
+    public Literals getLiterals() {
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(owlAxiom -> {
 
             Set<OWLClass> classes = owlAxiom.getClassesInSignature();
@@ -35,7 +36,7 @@ class DataProcessing {
         Literals literals = new Literals();
 
         literals.addLiterals(createLiteralsFromClasses());
-        literals.addLiterals(createLiteralsFromObjectProperties());
+        // literals.addLiterals(createLiteralsFromObjectProperties());
 
         return literals;
     }
@@ -44,17 +45,17 @@ class DataProcessing {
         Literals literals = new Literals();
 
         for (OWLClass owlClass : owlClasses) {
-            String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+            String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
             OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
             OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
 
             OWLAxiom owlAxiom = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
             OWLAxiom observation = loader.getObservation().getOwlAxiom();
 
-//            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
-//                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-//            }
-//
+            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
+                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
+            }
+
             literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
             literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
@@ -65,7 +66,7 @@ class DataProcessing {
     private Literals createLiteralsFromObjectProperties() {
         Literals literals = new Literals();
 
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().toString();
+        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
         OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 
         loader.getOntology().axioms().forEach(axiom -> {
@@ -83,48 +84,11 @@ class DataProcessing {
 
                     literals.getOwlAxioms().add(dataFactory.getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
                     literals.getOwlAxioms().add(dataFactory.getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
-
                 }
             }
-
         });
 
         return literals;
     }
 
-//    Literals getLiterals() {
-//        owlClasses = new HashSet<>();
-//        Set<OWLAxiom> axioms = loader.getKnowledgeBase().getOwlAxioms();
-//
-//        for (OWLAxiom axiom : axioms) {
-//
-//            if (axiom instanceof OWLSubClassOfAxiom) {
-//                OWLSubClassOfAxiom subClassOfAxiom = (OWLSubClassOfAxiom) axiom;
-//                if (subClassOfAxiom.getSubClass() instanceof OWLClass) {
-//                    owlClasses.add(subClassOfAxiom.getSubClass().asOWLClass());
-//                }
-//                if (subClassOfAxiom.getSuperClass() instanceof OWLClass) {
-//                    owlClasses.add(subClassOfAxiom.getSuperClass().asOWLClass());
-//                }
-//            } else if (axiom instanceof OWLDisjointClassesAxiom) {
-//                Set<OWLClassExpression> classExpressions = ((OWLDisjointClassesAxiom) axiom).getClassExpressions();
-//                addClassesFromClassExpressions(classExpressions);
-//            } else if (axiom instanceof OWLEquivalentClassesAxiom) {
-//                Set<OWLClassExpression> classExpressions = ((OWLEquivalentClassesAxiom) axiom).getClassExpressions();
-//                addClassesFromClassExpressions(classExpressions);
-//            }
-//        }
-//
-//        return createLiterals();
-//    }
-//
-//    private void addClassesFromClassExpressions(Set<OWLClassExpression> classExpressions) {
-//        for (OWLClassExpression classExpression : classExpressions) {
-//            if (classExpression.isClassExpressionLiteral()) {
-//                owlClasses.add(classExpression.asOWLClass());
-//            } else if (classExpression instanceof OWLObjectSomeValuesFrom) {
-//            }
-//        }
-//    }
-//
 }

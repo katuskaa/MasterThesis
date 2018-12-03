@@ -1,9 +1,12 @@
 package models;
 
 import common.Printer;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Explanation {
@@ -22,12 +25,22 @@ public class Explanation {
         return owlAxioms;
     }
 
+    public void addAxioms(Set<OWLAxiom> axioms) {
+        this.owlAxioms.addAll(axioms);
+    }
+
+    public void addAxiom(OWLAxiom axiom) {
+        this.owlAxioms.add(axiom);
+    }
+
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
+        List<String> result = new ArrayList<>();
+
         for (OWLAxiom owlAxiom : owlAxioms) {
-            result.append(Printer.print(owlAxiom)).append(";");
+            result.add(Printer.print(owlAxiom));
         }
-        return result.toString();
+
+        return "{ " + StringUtils.join(result, ",") + " }";
     }
 }
