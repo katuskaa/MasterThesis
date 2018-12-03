@@ -116,11 +116,7 @@ public class AbductionHSSolver implements ISolver {
                 boolean isComplementConsistent = reasonerManager.isOntologyConsistent();
                 reasonerManager.removeAxiomFromOntology(complementOfAxiom);
 
-
-                if (!isConsistent && isComplementConsistent) {
-                    model.add(complementOfAxiom);
-                    reasonerManager.addAxiomToOntology(complementOfAxiom);
-                } else if (!isComplementConsistent && isConsistent) {
+                if (!isComplementConsistent && isConsistent) {
                     model.add(axiom);
                     reasonerManager.addAxiomToOntology(axiom);
                 } else {
