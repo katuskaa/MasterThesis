@@ -3,18 +3,17 @@ package reasoner;
 import application.Application;
 import application.ExitCode;
 import common.Configuration;
+import common.IObservationParser;
 import common.LogMessage;
 import common.ObservationParser;
+import models.Individuals;
 import models.KnowledgeBase;
 import models.Observation;
 import openllet.owlapi.OpenlletReasonerFactory;
 import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -37,6 +36,8 @@ public class Loader implements ILoader {
     private KnowledgeBase knowledgeBase;
     private Observation observation;
     private Observation negObservation;
+    private String ontologyIRI;
+    private Individuals namedIndividuals;
 
     @Override
     public void initialize(ReasonerType reasonerType) {
@@ -105,8 +106,14 @@ public class Loader implements ILoader {
     }
 
     private void loadObservation() {
-        ObservationParser observationParser = new ObservationParser(this);
+        observation = new Observation();
+        negObservation = new Observation();
+        namedIndividuals = new Individuals();
+
+        IObservationParser observationParser = new ObservationParser(this);
         observationParser.parse();
+
+        logger.log(Level.INFO, "individuals = ".concat(namedIndividuals.toString()));
 
         logger.log(Level.INFO, "Observation = ".concat(observation.toString()));
         logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
@@ -123,8 +130,8 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void setObservation(Observation observation) {
-        this.observation = observation;
+    public void addObservation(OWLAxiom observation) {
+        this.observation.addOwlAxiom(observation);
     }
 
     @Override
@@ -133,8 +140,8 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void setNegObservation(Observation negObservation) {
-        this.negObservation = negObservation;
+    public void addNegObservation(OWLAxiom negObservation) {
+        this.negObservation.addOwlAxiom(negObservation);
     }
 
     @Override
@@ -153,18 +160,32 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void setOWLReasoner(OWLReasoner reasoner) {
-        this.reasoner = reasoner;
-    }
-
-    @Override
-    public OWLReasonerFactory getReasonerFactory() {
-        return reasonerFactory;
-    }
-
-    @Override
     public void setOWLReasonerFactory(OWLReasonerFactory reasonerFactory) {
         this.reasonerFactory = reasonerFactory;
+    }
+
+    @Override
+    public String getOntologyIRI() {
+        if (ontologyIRI == null) {
+            ontologyIRI = ontology.getOntologyID().getOntologyIRI().get().toString();
+        }
+
+        return ontologyIRI;
+    }
+
+    @Override
+    public OWLDataFactory getDataFactory() {
+        return ontologyManager.getOWLDataFactory();
+    }
+
+    @Override
+    public Individuals getIndividuals() {
+        return namedIndividuals;
+    }
+
+    @Override
+    public void addNamedIndividual(OWLNamedIndividual namedIndividual) {
+        namedIndividuals.addNamedIndividual(namedIndividual);
     }
 
 }

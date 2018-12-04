@@ -10,7 +10,7 @@ public interface ICheckRules {
 
     boolean isRelevant(Explanation explanation);
 
-    boolean isInconsistent(Explanation explanation);
+    boolean isExplanation(Explanation explanation);
 
     boolean isMinimal(List<Explanation> explanationList, Explanation explanation);
 }

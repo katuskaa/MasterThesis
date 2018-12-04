@@ -9,39 +9,37 @@ import java.util.Set;
 
 public class AxiomManager {
 
-    public static List<OWLAxiom> createClassAssertionAxiom(ILoader loader, OWLAxiom owlAxiom) {
+    public static List<OWLAxiom> createClassAssertionAxiom(ILoader loader, OWLAxiom axiom) {
         List<OWLAxiom> owlAxioms = new LinkedList<>();
 
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
-        OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
+        if (OWLDeclarationAxiom.class.isAssignableFrom(axiom.getClass())) {
+            String name = ((OWLDeclarationAxiom) axiom).getEntity().getIRI().getFragment();
 
-        if (OWLDeclarationAxiom.class.isAssignableFrom(owlAxiom.getClass())) {
-            String name = ((OWLDeclarationAxiom) owlAxiom).getEntity().getIRI().getFragment();
-
-            if (name.equals(Configuration.INDIVIDUAL)) {
-                return owlAxioms;
+            for (OWLNamedIndividual namedIndividual : loader.getIndividuals().getNamedIndividuals()) {
+                if (name.equals(namedIndividual.getIRI().getFragment())) {
+                    return owlAxioms;
+                }
             }
 
-            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
-            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(name)));
+            OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(name)));
 
-            owlAxioms.add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-            owlAxioms.add(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
-        } else {
-            System.out.println("Wrong axiom format, expected OWLDeclarationAxiom!");
+            for (OWLNamedIndividual namedIndividual : loader.getIndividuals().getNamedIndividuals()) {
+                owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+                owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+            }
         }
 
         return owlAxioms;
     }
 
-    public static void createObjectPropertyAssertionAxiom(OWLAxiom axiom) {
-        //TODO finish
+    public static List<OWLAxiom> createObjectPropertyAssertionAxiom(ILoader loader, OWLAxiom axiom) {
+        List<OWLAxiom> owlAxioms = new LinkedList<>();
+
+        return owlAxioms;
     }
 
+    //TODO add object property negation
     public static OWLAxiom getComplementOfOWLAxiom(ILoader loader, OWLAxiom owlAxiom) {
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
-        OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
-
         Set<OWLClass> names = owlAxiom.getClassesInSignature();
         String name = "";
         OWLAxiom complement = null;
@@ -51,15 +49,15 @@ public class AxiomManager {
                 name = owlClass.getIRI().getFragment();
             }
 
-            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
-            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(name)));
+            OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(Configuration.INDIVIDUAL)));
+            OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(name)));
 
             OWLClassExpression owlClassExpression = ((OWLClassAssertionAxiom) owlAxiom).getClassExpression();
 
             if (OWLObjectComplementOf.class.isAssignableFrom(owlClassExpression.getClass())) {
-                complement = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
+                complement = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual);
             } else {
-                complement = dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual);
+                complement = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual);
             }
         } else {
             System.out.println("names wrong count!");

@@ -42,7 +42,7 @@ public class Main {
     }
 
     private static ISolver createSolver() {
-        switch (Configuration.METHOD) {
+        switch (Configuration.STRATEGY) {
             case ABDUCTIONHS:
                 return new AbductionHSSolver();
 

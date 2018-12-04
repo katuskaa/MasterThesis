@@ -1,27 +1,38 @@
 package models;
 
+import common.Configuration;
 import common.Printer;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class Observation {
 
-    private OWLAxiom owlAxiom;
+    private List<OWLAxiom> axioms;
 
-    public Observation(OWLAxiom owlAxiom) {
-        this.owlAxiom = owlAxiom;
+    public Observation() {
+        this.axioms = new LinkedList<>();
     }
 
-    public OWLAxiom getOwlAxiom() {
-        return owlAxiom;
+    public List<OWLAxiom> getOwlAxioms() {
+        return axioms;
     }
 
-    public void setOwlAxiom(OWLAxiom owlAxiom) {
-        this.owlAxiom = owlAxiom;
+    public void addOwlAxiom(OWLAxiom axiom) {
+        axioms.add(axiom);
     }
 
     @Override
     public String toString() {
-        return Printer.print(owlAxiom);
+        List<String> observation = new LinkedList<>();
+
+        for (OWLAxiom axiom : axioms) {
+            observation.add(Printer.print(axiom));
+        }
+
+        return StringUtils.join(observation, Configuration.DELIMITER_OBSERVATION);
     }
 
 }

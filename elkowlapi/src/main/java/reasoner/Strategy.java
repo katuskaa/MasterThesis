@@ -1,6 +1,6 @@
 package reasoner;
 
-public enum Method {
+public enum Strategy {
     MERGEXPLAIN,
     ABDUCTIONHS
 }

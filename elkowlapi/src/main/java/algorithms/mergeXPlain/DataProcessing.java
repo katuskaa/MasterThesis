@@ -45,19 +45,17 @@ class DataProcessing implements IDataProcessing {
         Literals literals = new Literals();
 
         for (OWLClass owlClass : owlClasses) {
-            String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
-            OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
-            OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(Configuration.INDIVIDUAL)));
+            OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(Configuration.INDIVIDUAL)));
 
-            OWLAxiom owlAxiom = dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual);
-            OWLAxiom observation = loader.getObservation().getOwlAxiom();
+            OWLAxiom owlAxiom = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual);
+            OWLAxiom observation = loader.getObservation().getOwlAxioms().get(0);
 
             if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
-                literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
+                literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
             }
 
-            literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual));
-            literals.getOwlAxioms().add(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+            literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+            literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
 
         return literals;
@@ -65,9 +63,6 @@ class DataProcessing implements IDataProcessing {
 
     private Literals createLiteralsFromObjectProperties() {
         Literals literals = new Literals();
-
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
-        OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
 
         loader.getOntology().axioms().forEach(axiom -> {
             Set<OWLClass> classes = axiom.getClassesInSignature();
@@ -78,12 +73,12 @@ class DataProcessing implements IDataProcessing {
 
                     List<OWLClass> classList = new ArrayList<>(classes);
 
-                    OWLNamedIndividual subject = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(classList.get(0).getIRI().getFragment())));
-                    OWLNamedIndividual object = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(classList.get(1).getIRI().getFragment())));
-                    OWLObjectProperty objectProperty = dataFactory.getOWLObjectProperty(IRI.create(ontologyIRI.concat("#").concat(owlObjectProperty.getNamedProperty().getIRI().getFragment())));
+                    OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(classList.get(0).getIRI().getFragment())));
+                    OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(classList.get(1).getIRI().getFragment())));
+                    OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(owlObjectProperty.getNamedProperty().getIRI().getFragment())));
 
-                    literals.getOwlAxioms().add(dataFactory.getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
-                    literals.getOwlAxioms().add(dataFactory.getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
+                    literals.getOwlAxioms().add(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
+                    literals.getOwlAxioms().add(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
                 }
             }
         });

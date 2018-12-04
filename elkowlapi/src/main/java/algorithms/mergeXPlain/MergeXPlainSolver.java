@@ -43,7 +43,7 @@ public class MergeXPlainSolver implements ISolver {
     private void initialize() {
         mergeXPlainHelper = new MergeXPlainHelper();
 
-        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
+        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxioms().get(0));
         loader.initializeReasoner();
 
         IDataProcessing dataProcessing = new DataProcessing(loader);

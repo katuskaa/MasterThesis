@@ -8,7 +8,10 @@ import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 
 public class AbductionHSSolver implements ISolver {
@@ -37,6 +40,7 @@ public class AbductionHSSolver implements ISolver {
         assertionsAxioms = new ArrayList<>();
         negAssertionsAxioms = new ArrayList<>();
 
+        //TODO add object property
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
             List<OWLAxiom> assertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom);
 
@@ -47,7 +51,7 @@ public class AbductionHSSolver implements ISolver {
         });
     }
 
-    // TODO este doplnit optimalizacie
+    // TODO add optimisations
     private void startSolving() {
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
@@ -74,9 +78,9 @@ public class AbductionHSSolver implements ISolver {
                     boolean isRelevant = checkRules.isRelevant(explanation);
 
                     if (isConsistent && isRelevant) {
-                        boolean isInconsistent = checkRules.isInconsistent(explanation);
+                        boolean isExplanation = checkRules.isExplanation(explanation);
 
-                        if (isInconsistent) {
+                        if (isExplanation) {
                             boolean isMinimal = checkRules.isMinimal(explanations, explanation);
 
                             if (isMinimal) {
@@ -95,17 +99,15 @@ public class AbductionHSSolver implements ISolver {
         }
     }
 
+    //TODO consider object property
     private ModelNode getNegModel(Explanation explanation) {
-        ModelNode modelNode = new ModelNode();
-        Set<OWLAxiom> model = new HashSet<>();
-
-        model.add(loader.getNegObservation().getOwlAxiom());
-        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
+        List<OWLAxiom> model = new LinkedList<>(loader.getNegObservation().getOwlAxioms());
 
         if (explanation != null) {
             model.addAll(explanation.getOwlAxioms());
-            reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
         }
+
+        reasonerManager.addAxiomsToOntology(model);
 
         for (int i = 0; i < assertionsAxioms.size(); i++) {
             OWLAxiom axiom = assertionsAxioms.get(i);
@@ -131,13 +133,16 @@ public class AbductionHSSolver implements ISolver {
         }
 
         reasonerManager.removeAxiomsFromOntology(model);
-        model.remove(loader.getNegObservation().getOwlAxiom());
 
-        Set<OWLAxiom> negModel = new HashSet<>();
+        return getComplementOfModel(model);
+    }
+
+    private ModelNode getComplementOfModel(List<OWLAxiom> model) {
+        ModelNode modelNode = new ModelNode();
+        List<OWLAxiom> negModel = new LinkedList<>();
 
         for (OWLAxiom axiom : model) {
             OWLAxiom complement = AxiomManager.getComplementOfOWLAxiom(loader, axiom);
-
             negModel.add(complement);
         }
 
