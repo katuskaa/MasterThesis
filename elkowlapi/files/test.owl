@@ -19,24 +19,18 @@
 
     <!-- http://www.semanticweb.org/katka/ontologies/2018/9/katka#C -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/9/katka#C">
-        <owl:disjointWith rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/9/katka#D"/>
-        <owl:disjointWith rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/9/katka#F"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/9/katka#C"/>
 
 
     <!-- http://www.semanticweb.org/katka/ontologies/2018/9/katka#D -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/9/katka#D">
-        <owl:disjointWith rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/9/katka#E"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/9/katka#D"/>
 
 
     <!-- http://www.semanticweb.org/katka/ontologies/2018/9/katka#E -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/9/katka#E">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/9/katka#C"/>
-        <owl:disjointWith rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/9/katka#F"/>
     </owl:Class>
 
 
