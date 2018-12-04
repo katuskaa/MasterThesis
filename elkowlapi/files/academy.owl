@@ -26,15 +26,12 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/10/academy#AssocProfessor">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/10/academy#Professor"/>
-        <owl:disjointWith rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/10/academy#Scientist"/>
     </owl:Class>
 
 
     <!-- http://www.semanticweb.org/katka/ontologies/2018/10/academy#Professor -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/10/academy#Professor">
-        <owl:disjointWith rdf:resource="http://www.semanticweb.org/katka/ontologies/2018/10/academy#Scientist"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2018/10/academy#Professor"/>
 
 
     <!-- http://www.semanticweb.org/katka/ontologies/2018/10/academy#Scientist -->
