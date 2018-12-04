@@ -4,19 +4,20 @@ import models.Explanation;
 import models.Literals;
 
 import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 class Conflict {
 
     private Literals literals;
-    private Set<Explanation> explanations;
+    private List<Explanation> explanations;
 
     Conflict() {
         this.literals = new Literals();
-        this.explanations = new HashSet<>();
+        this.explanations = new LinkedList<>();
     }
 
-    Conflict(Literals literals, Set<Explanation> explanations) {
+    Conflict(Literals literals, List<Explanation> explanations) {
         this.literals = literals;
         this.explanations = explanations;
     }
@@ -28,9 +29,9 @@ class Conflict {
         return literals;
     }
 
-    Set<Explanation> getExplanations() {
+    List<Explanation> getExplanations() {
         if (explanations == null) {
-            explanations = new HashSet<>();
+            explanations = new LinkedList<>();
         }
         return explanations;
     }

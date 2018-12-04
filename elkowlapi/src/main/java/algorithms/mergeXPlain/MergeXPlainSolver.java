@@ -8,9 +8,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Base = knowledgeBase + negObservation
@@ -25,7 +23,7 @@ public class MergeXPlainSolver implements ISolver {
     private Literals literals;
     private MergeXPlainHelper mergeXPlainHelper;
 
-    private Set<Explanation> explanations;
+    private List<Explanation> explanations;
 
 
     @Override
@@ -38,7 +36,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     @Override
-    public Set<Explanation> getExplanations() {
+    public List<Explanation> getExplanations() {
         return explanations;
     }
 
@@ -72,11 +70,11 @@ public class MergeXPlainSolver implements ISolver {
 
     private Conflict findConflicts(OWLOntology base, Literals literals) {
         if (mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, literals)) {
-            return new Conflict(literals, new HashSet<>());
+            return new Conflict(literals, new LinkedList<>());
         }
 
         if (literals.getOwlAxioms().size() == 1) {
-            Set<Explanation> explanations = new HashSet<>();
+            List<Explanation> explanations = new LinkedList<>();
             explanations.add(new Explanation(literals.getOwlAxioms()));
             return new Conflict(new Literals(), explanations);
         }
@@ -86,7 +84,7 @@ public class MergeXPlainSolver implements ISolver {
         Conflict conflictC1 = findConflicts(base, sets.get(0));
         Conflict conflictC2 = findConflicts(base, sets.get(1));
 
-        Set<Explanation> explanations = new HashSet<>();
+        List<Explanation> explanations = new LinkedList<>();
         explanations.addAll(conflictC1.getExplanations());
         explanations.addAll(conflictC2.getExplanations());
 
@@ -117,7 +115,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
 
-    private Explanation getConflict(Set<OWLAxiom> axioms, Literals literals) {
+    private Explanation getConflict(Collection<OWLAxiom> axioms, Literals literals) {
         if (!axioms.isEmpty() && mergeXPlainHelper.isBaseNotConsistent(reasonerManager)) {
             return new Explanation();
         }

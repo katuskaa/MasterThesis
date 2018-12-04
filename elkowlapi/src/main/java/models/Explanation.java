@@ -5,27 +5,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class Explanation {
 
-    private Set<OWLAxiom> owlAxioms;
+    private Collection<OWLAxiom> owlAxioms;
 
-    public Explanation(Set<OWLAxiom> owlAxioms) {
+    public Explanation(Collection<OWLAxiom> owlAxioms) {
         this.owlAxioms = owlAxioms;
     }
 
     public Explanation() {
-        this.owlAxioms = new HashSet<>();
+        this.owlAxioms = new LinkedList<>();
     }
 
-    public Set<OWLAxiom> getOwlAxioms() {
+    public Collection<OWLAxiom> getOwlAxioms() {
         return owlAxioms;
     }
 
-    public void addAxioms(Set<OWLAxiom> axioms) {
+    public void addAxioms(Collection<OWLAxiom> axioms) {
         this.owlAxioms.addAll(axioms);
     }
 

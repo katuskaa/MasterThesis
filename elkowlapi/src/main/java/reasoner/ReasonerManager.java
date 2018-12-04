@@ -2,8 +2,7 @@ package reasoner;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.util.Set;
-
+import java.util.Collection;
 
 public class ReasonerManager implements IReasonerManager {
 
@@ -20,7 +19,7 @@ public class ReasonerManager implements IReasonerManager {
     }
 
     @Override
-    public void addAxiomsToOntology(Set<OWLAxiom> axioms) {
+    public void addAxiomsToOntology(Collection<OWLAxiom> axioms) {
         loader.getOntologyManager().addAxioms(loader.getOntology(), axioms);
         loader.initializeReasoner();
     }
@@ -32,7 +31,7 @@ public class ReasonerManager implements IReasonerManager {
     }
 
     @Override
-    public void removeAxiomsFromOntology(Set<OWLAxiom> axioms) {
+    public void removeAxiomsFromOntology(Collection<OWLAxiom> axioms) {
         loader.getOntologyManager().removeAxioms(loader.getOntology(), axioms);
         loader.initializeReasoner();
     }
