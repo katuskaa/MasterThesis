@@ -2,9 +2,9 @@ package algorithms.abduction;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.util.Set;
+import java.util.Collection;
 
 abstract class Node {
 
-    Set<OWLAxiom> label;
+    Collection<OWLAxiom> label;
 }

@@ -53,7 +53,7 @@ public class AbductionHSSolver implements ISolver {
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
 
         ModelNode root = getNegModel(null);
-        root.label = new HashSet<>();
+        root.label = new LinkedList<>();
 
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
@@ -77,7 +77,11 @@ public class AbductionHSSolver implements ISolver {
                         boolean isInconsistent = checkRules.isInconsistent(explanation);
 
                         if (isInconsistent) {
-                            explanations.add(explanation);
+                            boolean isMinimal = checkRules.isMinimal(explanations, explanation);
+
+                            if (isMinimal) {
+                                explanations.add(explanation);
+                            }
 
                         } else {
                             ModelNode modelNode = getNegModel(explanation);

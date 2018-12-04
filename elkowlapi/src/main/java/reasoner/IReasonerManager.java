@@ -2,17 +2,17 @@ package reasoner;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.util.Set;
+import java.util.Collection;
 
 public interface IReasonerManager {
 
     void addAxiomToOntology(OWLAxiom axiom);
 
-    void addAxiomsToOntology(Set<OWLAxiom> axioms);
+    void addAxiomsToOntology(Collection<OWLAxiom> axioms);
 
     void removeAxiomFromOntology(OWLAxiom axiom);
 
-    void removeAxiomsFromOntology(Set<OWLAxiom> axioms);
+    void removeAxiomsFromOntology(Collection<OWLAxiom> axioms);
 
     boolean isOntologyConsistent();
 

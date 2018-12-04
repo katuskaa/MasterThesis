@@ -5,7 +5,8 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 public class CheckRules implements ICheckRules {
 
@@ -30,7 +31,7 @@ public class CheckRules implements ICheckRules {
 
     @Override
     public boolean isRelevant(Explanation explanation) {
-        Set<OWLAxiom> explanations = explanation.getOwlAxioms();
+        Collection<OWLAxiom> explanations = explanation.getOwlAxioms();
         OWLAxiom observation = loader.getObservation().getOwlAxiom();
 
         for (OWLAxiom axiom : explanations) {
@@ -53,6 +54,23 @@ public class CheckRules implements ICheckRules {
         reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
 
         return !isConsistent;
+    }
+
+    @Override
+    public boolean isMinimal(List<Explanation> explanationList, Explanation explanation) {
+        if (explanation == null || !(explanation.getOwlAxioms() instanceof List)) {
+            return false;
+        }
+
+        OWLAxiom lastAxiom = ((List<OWLAxiom>) explanation.getOwlAxioms()).get(explanation.getOwlAxioms().size() - 1);
+
+        for (Explanation minimalExplanation : explanationList) {
+            if (minimalExplanation.getOwlAxioms().contains(lastAxiom)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }
