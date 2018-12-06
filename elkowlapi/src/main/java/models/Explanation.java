@@ -1,33 +1,46 @@
 package models;
 
 import common.Printer;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Explanation {
 
-    private Set<OWLAxiom> owlAxioms;
+    private Collection<OWLAxiom> owlAxioms;
 
-    public Explanation(Set<OWLAxiom> owlAxioms) {
+    public Explanation(Collection<OWLAxiom> owlAxioms) {
         this.owlAxioms = owlAxioms;
     }
 
     public Explanation() {
-        this.owlAxioms = new HashSet<>();
+        this.owlAxioms = new LinkedList<>();
     }
 
-    public Set<OWLAxiom> getOwlAxioms() {
+    public Collection<OWLAxiom> getOwlAxioms() {
         return owlAxioms;
+    }
+
+    public void addAxioms(Collection<OWLAxiom> axioms) {
+        this.owlAxioms.addAll(axioms);
+    }
+
+    public void addAxiom(OWLAxiom axiom) {
+        this.owlAxioms.add(axiom);
     }
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
+        List<String> result = new ArrayList<>();
+
         for (OWLAxiom owlAxiom : owlAxioms) {
-            result.append(Printer.print(owlAxiom)).append(";");
+            result.add(Printer.print(owlAxiom));
         }
-        return result.toString();
+
+        return "{ " + StringUtils.join(result, ",") + " }";
     }
 }

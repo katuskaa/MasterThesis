@@ -1,32 +1,76 @@
 package algorithms.abduction;
 
 import models.Explanation;
-import models.KnowledgeBase;
-import models.Observation;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import reasoner.ILoader;
+import reasoner.IReasonerManager;
 
-public class CheckRules {
+import java.util.Collection;
+import java.util.List;
 
-    private KnowledgeBase knowledgeBase;
-    private Observation negObservation;
-    private Explanation explanation;
+public class CheckRules implements ICheckRules {
 
-    public CheckRules(KnowledgeBase knowledgeBase, Observation negObservation, Explanation explanation) {
-        this.knowledgeBase = knowledgeBase;
-        this.negObservation = negObservation;
-        this.explanation = explanation;
+    private ILoader loader;
+    private IReasonerManager reasonerManager;
+
+    CheckRules(ILoader loader, IReasonerManager reasonerManager) {
+        this.loader = loader;
+        this.reasonerManager = reasonerManager;
     }
 
-    public boolean isConsistent() {
-        //spravit negaciu vysvetlenia, ak sa nachadza v knowledge base return false else true
+    @Override
+    public boolean isConsistent(Explanation explanation) {
+        reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
+
+        boolean isConsistent = reasonerManager.isOntologyConsistent();
+
+        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
+
+        return isConsistent;
+    }
+
+    @Override
+    public boolean isRelevant(Explanation explanation) {
+        Collection<OWLAxiom> explanations = explanation.getOwlAxioms();
+
+        for (OWLAxiom observation : loader.getObservation().getOwlAxioms()) {
+            for (OWLAxiom axiom : explanations) {
+                if (axiom.equals(observation)) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
-    public boolean isRelevant() {
-        //ak sa vysvetlenie zhoduje s observation, return false else true
-        return true;
+    @Override
+    public boolean isExplanation(Explanation explanation) {
+        reasonerManager.addAxiomsToOntology(loader.getNegObservation().getOwlAxioms());
+        reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
+
+        boolean isConsistent = reasonerManager.isOntologyConsistent();
+
+        reasonerManager.removeAxiomsFromOntology(loader.getNegObservation().getOwlAxioms());
+        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
+
+        return !isConsistent;
     }
 
-    public boolean isInconsistent() {
+    @Override
+    public boolean isMinimal(List<Explanation> explanationList, Explanation explanation) {
+        if (explanation == null || !(explanation.getOwlAxioms() instanceof List)) {
+            return false;
+        }
+
+        OWLAxiom lastAxiom = ((List<OWLAxiom>) explanation.getOwlAxioms()).get(explanation.getOwlAxioms().size() - 1);
+
+        for (Explanation minimalExplanation : explanationList) {
+            if (minimalExplanation.getOwlAxioms().contains(lastAxiom)) {
+                return false;
+            }
+        }
+
         return true;
     }
 

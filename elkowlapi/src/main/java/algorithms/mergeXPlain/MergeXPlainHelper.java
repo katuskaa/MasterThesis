@@ -1,51 +1,37 @@
 package algorithms.mergeXPlain;
 
-import common.Loader;
 import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
+import reasoner.IReasonerManager;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
 
 class MergeXPlainHelper {
 
-    boolean isBaseNotConsistent(Loader loader, OWLOntology ontology) {
-        loader.updateOntology(ontology);
-        return !loader.isOntologyConsistent();
+    boolean isBaseNotConsistent(IReasonerManager reasonerManager) {
+        return !reasonerManager.isOntologyConsistent();
     }
 
-    boolean isBaseWithLiteralsConsistent(Loader loader, OWLOntology ontology, Literals literals) {
-        addAxiomsToBase(loader, ontology, literals.getOwlAxioms());
-        boolean isConsistent = loader.isOntologyConsistent();
-        removeAxiomsFromBase(loader, ontology, literals.getOwlAxioms());
+    boolean isBaseWithLiteralsConsistent(IReasonerManager reasonerManager, Literals literals) {
+        reasonerManager.addAxiomsToOntology(literals.getOwlAxioms());
+        boolean isConsistent = reasonerManager.isOntologyConsistent();
+        reasonerManager.removeAxiomsFromOntology(literals.getOwlAxioms());
+
         return isConsistent;
     }
 
-    void addAxiomsToBase(Loader loader, OWLOntology base, Set<OWLAxiom> axioms) {
-        loader.getOntologyManager().addAxioms(base, axioms);
-        loader.updateOntology(base);
-    }
+    List<Literals> divideIntoSets(Literals literals) {
+        List<Literals> dividedLiterals = new ArrayList<>();
 
-    void removeAxiomsFromBase(Loader loader, OWLOntology base, Set<OWLAxiom> axioms) {
-        loader.getOntologyManager().removeAxioms(base, axioms);
-        loader.updateOntology(base);
-    }
+        dividedLiterals.add(new Literals());
+        dividedLiterals.add(new Literals());
 
-    Literals[] divideIntoSets(Literals literals) {
         int count = 0;
-        int half = literals.getOwlAxioms().size() / 2;
-        Literals[] dividedLiterals = new Literals[2];
-        dividedLiterals[0] = new Literals();
-        dividedLiterals[1] = new Literals();
 
         for (OWLAxiom owlAxiom : literals.getOwlAxioms()) {
-//            if (count < half) {
-//                dividedLiterals[0].getOwlAxioms().add(owlAxiom);
-//            } else {
-//                dividedLiterals[1].getOwlAxioms().add(owlAxiom);
-//            }
-
-            dividedLiterals[count % 2].getOwlAxioms().add(owlAxiom);
+            dividedLiterals.get(count % 2).getOwlAxioms().add(owlAxiom);
             count++;
         }
 

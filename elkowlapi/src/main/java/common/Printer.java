@@ -12,20 +12,21 @@ public class Printer {
 
     public static String print(OWLAxiom owlAxiom) {
         if (owlAxiom instanceof OWLClassAssertionAxiom) {
-            return Printer.getNamedIndividual(owlAxiom).concat(":").concat(Printer.getClassAssertionAxiom(owlAxiom));
+            return Printer.getNamedIndividual(owlAxiom).concat(Configuration.DELIMITER_ASSERTION).concat(Printer.getClassAssertionAxiom(owlAxiom));
         }
 
-        return Printer.getNamedIndividual(owlAxiom).concat(":").concat(Printer.getObjectPropertyAssertionAxiom(owlAxiom));
+        return Printer.getNamedIndividual(owlAxiom).concat(Configuration.DELIMITER_ASSERTION).concat(Printer.getObjectPropertyAssertionAxiom(owlAxiom));
     }
 
     private static String getNamedIndividual(OWLAxiom owlAxiom) {
         List<String> owlNamedIndividuals = new ArrayList<>();
         Set<OWLNamedIndividual> individualsInSignature = owlAxiom.getIndividualsInSignature();
+
         for (OWLNamedIndividual owlNamedIndividual : individualsInSignature) {
             owlNamedIndividuals.add(owlNamedIndividual.getIRI().getFragment());
         }
 
-        return StringUtils.join(owlNamedIndividuals, ",");
+        return StringUtils.join(owlNamedIndividuals, Configuration.DELIMITER_INDIVIDUAL);
     }
 
     private static String getClassAssertionAxiom(OWLAxiom owlAxiom) {
