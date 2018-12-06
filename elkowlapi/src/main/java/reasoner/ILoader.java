@@ -1,11 +1,12 @@
 package reasoner;
 
+import models.Individuals;
 import models.KnowledgeBase;
 import models.Observation;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+
 
 public interface ILoader {
 
@@ -19,11 +20,11 @@ public interface ILoader {
 
     Observation getObservation();
 
-    void setObservation(Observation observation);
+    void addObservation(OWLAxiom observation);
 
     Observation getNegObservation();
 
-    void setNegObservation(Observation negObservation);
+    void addNegObservation(OWLAxiom negObservation);
 
     OWLOntologyManager getOntologyManager();
 
@@ -31,10 +32,13 @@ public interface ILoader {
 
     OWLReasoner getReasoner();
 
-    void setOWLReasoner(OWLReasoner reasoner);
-
-    OWLReasonerFactory getReasonerFactory();
-
     void setOWLReasonerFactory(OWLReasonerFactory reasonerFactory);
 
+    String getOntologyIRI();
+
+    OWLDataFactory getDataFactory();
+
+    Individuals getIndividuals();
+
+    void addNamedIndividual(OWLNamedIndividual namedIndividual);
 }

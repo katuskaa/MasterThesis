@@ -1,11 +1,13 @@
 package common;
 
-import models.Observation;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import reasoner.Loader;
 
 
-public class ObservationParser {
+public class ObservationParser implements IObservationParser {
 
     private Loader loader;
 
@@ -13,39 +15,57 @@ public class ObservationParser {
         this.loader = loader;
     }
 
+    @Override
     public void parse() {
-        String ontologyIRI = loader.getOntology().getOntologyID().getOntologyIRI().get().toString();
-        OWLDataFactory dataFactory = loader.getOntologyManager().getOWLDataFactory();
+        String[] observations;
 
-        String[] expressions = Configuration.OBSERVATION.split(":");
-
-        if (expressions[0].contains(",")) {
-            parseObjectProperty(ontologyIRI, dataFactory, expressions);
+        if (Configuration.MULTI_OBSERVATION) {
+            observations = Configuration.OBSERVATION.split(Configuration.DELIMITER_OBSERVATION);
         } else {
-            parseClassAssertion(ontologyIRI, dataFactory, expressions);
+            observations = new String[1];
+            observations[0] = Configuration.OBSERVATION;
         }
 
-        Configuration.INDIVIDUAL = expressions[0];
+        for (String observation : observations) {
+            String[] expressions = observation.split(Configuration.DELIMITER_ASSERTION);
+
+            if (expressions[0].contains(Configuration.DELIMITER_OBJECT_PROPERTY)) {
+                parseObjectProperty(expressions);
+            } else {
+                parseClassAssertion(expressions);
+            }
+
+            Configuration.INDIVIDUAL = expressions[0];
+        }
     }
 
-    private void parseClassAssertion(String ontologyIRI, OWLDataFactory dataFactory, String[] expressions) {
-        OWLNamedIndividual namedIndividual = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(expressions[0])));
-        OWLClass owlClass = dataFactory.getOWLClass(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
+    private void parseClassAssertion(String[] expressions) {
+        OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(expressions[0])));
+        OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(expressions[1])));
 
-        loader.getOntologyManager().addAxiom(loader.getOntology(), dataFactory.getOWLDeclarationAxiom(namedIndividual));
+        loader.addNamedIndividual(namedIndividual);
 
-        loader.setObservation(new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass, namedIndividual)));
-        loader.setNegObservation(new Observation(dataFactory.getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual)));
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
+
+        loader.addObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+        loader.addNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
     }
 
-    private void parseObjectProperty(String ontologyIRI, OWLDataFactory dataFactory, String[] expressions) {
-        String[] individuals = expressions[0].split(",");
+    private void parseObjectProperty(String[] expressions) {
+        String[] individuals = expressions[0].split(Configuration.DELIMITER_OBJECT_PROPERTY);
 
-        OWLNamedIndividual subject = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(individuals[0])));
-        OWLNamedIndividual object = dataFactory.getOWLNamedIndividual(IRI.create(ontologyIRI.concat("#").concat(individuals[1])));
-        OWLObjectProperty objectProperty = dataFactory.getOWLObjectProperty(IRI.create(ontologyIRI.concat("#").concat(expressions[1])));
+        OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(individuals[0])));
+        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(individuals[1])));
+        OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(expressions[1])));
 
-        loader.setObservation(new Observation(dataFactory.getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object)));
-        loader.setNegObservation(new Observation(dataFactory.getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object)));
+        loader.addNamedIndividual(subject);
+        loader.addNamedIndividual(object);
+
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(subject));
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));
+
+        loader.addObservation(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
+        loader.addNegObservation(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
     }
+
 }
