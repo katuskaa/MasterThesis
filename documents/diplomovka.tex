@@ -242,12 +242,39 @@ CTree is clash-free if and only if it is such a tree that in each branch has no 
 \end{definition}
 
 \begin{definition}[Blocking]
-Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor y such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or y is blocked.
+Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor $y$ such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or $y$ is blocked.
 
 \end{definition}
 
+We want to use DL Tableau algorithm in order to get a model. If we can retrieve a model we know for sure that ontology is consistent with given facts. So as input we have ontology and facts in a form of ABox assertion. Output can vary, it can be a model or if algorithm finds some clash output is inconsistent ontology. If result is a model we also know that ontology with facts is consistent. 
+
+Let's introduce an example where we are familiar with an ontology that is shaped by TBox and ABox. As facts we can use a set $F$. 
+
 \begin{example}{(\textbf{DL Tableau algorithm})}
- TODO add example na algorithm
+	\[ 
+	\mathcal{T} = \left\{
+	\begin{tabular}{l c}
+	$Professor \sqcup Scientist \sqsubseteq Academician$ \\
+	$AssocProfessor \sqsubseteq Professor$ \\
+	\end{tabular}
+	\right \}
+	\]
+	
+	\[ 
+	\mathcal{A} = \left\{
+	\begin{tabular}{l c}
+	$jack : Academician$
+	\end{tabular}
+	\right \}
+	\]	
+	
+	\[ 
+	\mathcal{F} = \left\{
+	\begin{tabular}{l c}
+	$jack : Academician$
+	\end{tabular}
+	\right \}
+	\]											
 \end{example}
 
 \section{Abduction}
