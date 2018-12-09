@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[a4paper, left=3.5cm, right=2cm, top=2.5cm, bottom=2.5cm,footskip=.25in]{geometry}
+\usepackage[a4paper, left=3.5cm, right=2cm, top=2.5cm, bottom=3cm,footskip=.25in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
@@ -48,11 +48,11 @@
 	\par\vspace{1cm}
 	{\scshape\bf FACULTY OF MATHEMATICS, PHYSICS AND INFORMATICS \par}
 	{\scshape\bf OF THE COMENIUS UNIVERSITY IN BRATISLAVA \par}
-	\par\vspace{10cm}
+	\par\vspace{8cm}
 	{\scshape\bf OPTIMIZATION OF AN ABDUCTIVE REASONER FOR DESCRIPTION LOGICS \par}
 	\par\vspace{0.5cm}
 	{\textsc Master thesis \par}
-	\par\vspace{10.5cm}
+	\par\vspace{10.6cm}
 	{\scshape\bf 2019 \hfill Katarína Fabianová \par}
 \end{titlepage}
 
@@ -66,7 +66,7 @@
 {\scshape\bf OPTIMIZATION OF AN ABDUCTIVE REASONER FOR DESCRIPTION LOGICS \par}
 \par\vspace{0.5cm}
 {\textsc Master thesis \par}
-\par\vspace{4cm}
+\par\vspace{2cm}
 \begin{table*}[ht]
 	\newcolumntype{x}[1]{>{\hspace{0pt}}p{#1}}
 	\begin{tabular}{@{}x{5cm}x{10cm}@{}}
@@ -77,7 +77,7 @@
 		Consultant: & RNDr. Martin Homola, PhD. \\
 	\end{tabular}
 \end{table*}
-\par\vspace{5cm}
+\par\vspace{3.03cm}
 {\scshape\bf Bratislava 2019 \hfill Katarína Fabianová \par}
 
 \pagebreak
@@ -166,7 +166,7 @@ To have a better understanding of how description logics works we will introduce
 \subsection{Ontology}
 Ontology describes relationships between entities in a specific area. Difference between area and ontology is that ontology describes relationships between entities in a formal language. In this part we are citing definitions from \citep{staabHandbookOntology}.
 
-Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$, so we can write $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$. TBox represents all axioms that model ontology. Axiom has a form of predicate followed by operator and another predicate, for example $Apple \sqsubseteq Fruit$, $Person \sqsubseteq \exists own.House$. ABox on the other side does not model ontology but creates a database. It contains set of individuals. It has following form: individual : predicate. For example: $john : Person$, $greenApple : Apple$.
+Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$, so we can write $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$. TBox represents all axioms that model ontology. Axiom has a form of predicate followed by operator and another predicate, for example $Apple \sqsubseteq Fruit$, $Person \sqsubseteq \exists own.House$. ABox on the other side does not model ontology but creates a database. It contains set of individuals. It has following form: individual : predicate. For example: $john : Person$, $jack : Academician$.
 
 \begin{definition}[Interpretation]
 	Interpretation of description logic is a pair $\mathcal{I} = (\Delta^{\mathcal{I}}, \cdot ^{\mathcal{I}})$ which contains a domain $\Delta^{\mathcal{I}}$ and an interpretation function $\cdot ^{\mathcal{I}}$.	
@@ -246,13 +246,13 @@ Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an
 
 \end{definition}
 
-We want to use DL Tableau algorithm in order to get a model. If we can retrieve a model we know for sure that ontology is consistent with given facts. So as input we have ontology and facts in a form of ABox assertion. Output can vary, it can be a model or if algorithm finds some clash output is inconsistent ontology. If result is a model we also know that ontology with facts is consistent. 
+We want to use DL Tableau algorithm in order to check consistency of ontology with given facts. Facts can be observation or other ABox axiom assertions. So as input we have ontology and facts in a form of ABox assertions. This algorithm either finds a clash or finishes without no clash. If algorithm finished without clash we know that ontology with facts is consistent, otherwise we know that ontology is inconsistent with given facts.
 
-Let's introduce an example where we are familiar with an ontology that is shaped by TBox and ABox. As facts we can use a set $F$. 
+Let's introduce an example where we know an ontology $\mathcal{KB}$ and observation $\mathcal{O}$. We want to know if ontology is consistent with observation and if we can find a model that satisfies ontology with observation. In ABox abduction algorithm we are using negation of model that is retrieved by help of this algorithm.
 
 \begin{example}{(\textbf{DL Tableau algorithm})}
 	\[ 
-	\mathcal{T} = \left\{
+	\mathcal{KB} = \left\{
 	\begin{tabular}{l c}
 	$Professor \sqcup Scientist \sqsubseteq Academician$ \\
 	$AssocProfessor \sqsubseteq Professor$ \\
@@ -261,21 +261,34 @@ Let's introduce an example where we are familiar with an ontology that is shaped
 	\]
 	
 	\[ 
-	\mathcal{A} = \left\{
+	\mathcal{O} = \left\{
 	\begin{tabular}{l c}
 	$jack : Academician$
 	\end{tabular}
 	\right \}
 	\]	
-	
-	\[ 
-	\mathcal{F} = \left\{
-	\begin{tabular}{l c}
-	$jack : Academician$
-	\end{tabular}
-	\right \}
-	\]											
 \end{example}
+
+Our question is following: Is observation $\mathcal{O}$ consistent with knowledge base $\mathcal{KB}$? We can rewrite it as follows: Is negation of observation $\neg \mathcal{O}$ inconsistent with knowledge base $\mathcal{KB}$? Negation of observation $\neg \mathcal{O}$ is $\{ jack : \neg Academician \}$.
+
+Let's start with algorithm. At first we create a node $jack$ then we create a label $\mathcal{L}(jack)$ for node $jack$.
+
+\[ \bullet jack \]
+
+$ \mathcal{L}(jack) = \{ \neg Academician, (\neg Professor \sqcup \neg Scientist) \sqcup Academician, ... \} $ \\
+
+
+In the label $\mathcal{L}(jack)$ we start with $\neg Academician$ because according to $\neg \mathcal{O}$ jack is not an Academician. Then we continue with first axiom from knowledge base $Professor \sqcup Scientist \sqsubseteq Academician$. There is a subsumption and in general subsumption in a form of $A \sqsubseteq B$ can be rewrited as $\neg A \sqcup B$. So we will rewrite it accordingly and we get $\neg (Professor \sqcup Scientist) \sqcup Academician$. But this is still not in a form that we can write into label. Now we need to transform it into negation normal form as follows: $(\neg Professor \sqcup \neg Scientist) \sqcup Academician$. As we can see it contains disjunction so we need to follow $\sqcup$ - rule. We have to choose $\neg Professor \sqcup \neg Scientist$ because if we would choose $Academician$ we would immediately be having a clash with $\neg Academician$. \\
+
+$ \mathcal{L}(jack) = \{ \neg Academician, (\neg Professor \sqcup \neg Scientist) \sqcup Academician, \neg Professor \sqcup \neg Scientist, \neg Professor,  \neg AssocProfessor \sqcup Professor, \neg AssocProfessor \} $ \\
+
+Now we have to choose again because there is another disjunction. Let's choose $\neg Professor$. Then we will continue with second axiom $AssocProfessor \sqsubseteq Professor$. In label is already $\neg Professor$ so we can not choose $Professor$ but we can choose $\neg AssocProfessor$. We do not have clash but let's go back and 
+instead of choosing $\neg Professor$ we will choose $\neg Scientist$. \\
+
+$ \mathcal{L}(jack) = \{ \neg Academician, (\neg Professor \sqcup \neg Scientist) \sqcup Academician, \neg Professor \sqcup \neg Scientist, \neg Scientist,  \neg AssocProfessor \sqcup Professor, \neg AssocProfessor \} $ \\
+
+Our situation has not been changed. We still have no clash. This step was not even necessary but we wanted to show it because there could happen a situation where we could have chosen incorrectly from disjunction. In that case we would get clash and we have to return back and choose the other possibility and start over. But for our example it was not necessary. As we can see we did not get clash anywhere so now we can claim that our observation $\mathcal{O}$ is consistent with our knowledge base $\mathcal{KB}$.
+
 
 \section{Abduction}
 Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known is probably deduction and for humans is most natural. All three ways are dealing with following parts: theory, data and effect. In description logic we can translate theory as knowledge base, data as explanations and  effect as observation.
@@ -301,7 +314,7 @@ In description logic abduction is used when we are not familiar with explanation
 
 For better understanding of what ABox abduction is let's introduce a few examples. First example is easy, searched explanation is obvious but it will demonstrate the problem. Second example is not so obvious that's why we have to use an algorithm to compute the solution. For computing the solution we use \textbf{Minimal Hitting Set algorithm}.
 
-\begin{example}{(\textbf{ABox Abduction - Feeling})}
+\begin{example}{(\textbf{ABox Abduction - Emotion})}
 	\[ 
 	\mathcal{KB} = \left\{
 	\begin{tabular}{l c}
@@ -458,6 +471,12 @@ Greiner claims that Reiter's way of creating a tree handles some situations inco
 
 The next optimization by Wotawa disclaim the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of edge label and right means the biggest size of edge label in one breadth level. In our case this optimization is also useless because in our tree in one breadth level the size of edge label is always equal.
 
+\subsection{ABox Abduction with Minimal Hitting Set algorithm}
+%For our algorithm to work we have to combine these two algorithms as designed by \citep{pukancovaAboxAbduction}. 
+
+%TODO add pseudocode
+
+
 \section{Reasoning}
 
 \subsection{Elk reasoner}
@@ -466,18 +485,11 @@ The next optimization by Wotawa disclaim the proposed way by Greiner. He has ret
 
 \section{Implementation}
 
-\subsection{ABox Abduction with Minimal Hitting Set algorithm}
-For our algorithm to work we have to combine these two algorithms as designed by \citep{pukancovaAboxAbduction}. 
-
-TODO add pseudocode
+\subsection{ABox Abduction algorithm}
+%TODO add pseudocode
 
 \subsection{MergeXPlain algorithm}
-
-TODO add pseudocode
-
-\subsection{ABox Abduction algorithm}
-
-TODO add pseudocode
+%TODO add pseudocode
 
 \pagebreak
 \section*{Conclusion}
