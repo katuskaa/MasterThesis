@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[a4paper, left=3.5cm, right=2cm, top=2.5cm, bottom=2.5cm,footskip=.25in]{geometry}
+\usepackage[a4paper, left=3.5cm, right=2cm, top=2.5cm, bottom=3cm,footskip=.25in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
@@ -11,6 +11,7 @@
 \usepackage{float}
 \usepackage{ragged2e}
 \usepackage{lipsum}
+\usepackage{titlesec}
 \usepackage[pdftex]{graphicx}
 \graphicspath{{.png}{images/}}
 \renewcommand{\baselinestretch}{1.8}
@@ -19,6 +20,12 @@
 
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black}
+
+\titlespacing*{\section}
+{0pt}{5.5ex plus 1ex minus .2ex}{4.3ex plus .2ex}
+\titlespacing*{\subsection}
+{0pt}{5.5ex plus 1ex minus .2ex}{4.3ex plus .2ex}
+
 
 \usepackage{soul}
 \newcommand{\ol}[1]{{\setul{-1.2em}{}\ul{#1}}}
@@ -29,6 +36,10 @@
 
 
 \usepackage[round]{natbib}
+\usepackage{tikz-qtree}
+
+\usepackage{pifont}
+\newcommand{\xmark}{\ding{53}}
 
 \begin{document}
 
@@ -37,11 +48,11 @@
 	\par\vspace{1cm}
 	{\scshape\bf FACULTY OF MATHEMATICS, PHYSICS AND INFORMATICS \par}
 	{\scshape\bf OF THE COMENIUS UNIVERSITY IN BRATISLAVA \par}
-	\par\vspace{10cm}
+	\par\vspace{8cm}
 	{\scshape\bf OPTIMIZATION OF AN ABDUCTIVE REASONER FOR DESCRIPTION LOGICS \par}
 	\par\vspace{0.5cm}
 	{\textsc Master thesis \par}
-	\par\vspace{10.5cm}
+	\par\vspace{10.6cm}
 	{\scshape\bf 2019 \hfill Katarína Fabianová \par}
 \end{titlepage}
 
@@ -55,18 +66,18 @@
 {\scshape\bf OPTIMIZATION OF AN ABDUCTIVE REASONER FOR DESCRIPTION LOGICS \par}
 \par\vspace{0.5cm}
 {\textsc Master thesis \par}
-\par\vspace{4cm}
+\par\vspace{2cm}
 \begin{table*}[ht]
 	\newcolumntype{x}[1]{>{\hspace{0pt}}p{#1}}
 	\begin{tabular}{@{}x{5cm}x{10cm}@{}}
 		Study program: & Applied informatics \\
 		Field of study: & 2511 Applied informatics \\
 		School department: & Department of Applied Informatics \\
-		Adviser\textit{}: & RNDr. Martin Homola, PhD. \\
-		Consultant: & Mgr. Júlia Pukancová \\
+		Adviser: & Mgr. Júlia Pukancová, PhD. \\
+		Consultant: & RNDr. Martin Homola, PhD. \\
 	\end{tabular}
 \end{table*}
-\par\vspace{5cm}
+\par\vspace{3.03cm}
 {\scshape\bf Bratislava 2019 \hfill Katarína Fabianová \par}
 
 \pagebreak
@@ -135,7 +146,7 @@ Description logic consists of three mutually disjoint sets. These sets represent
 \[ \textbf{Set of concepts:} N_{C} = \{A,B,C...\} \]
 \[ \textbf{Set of roles:} N_{R} = \{R_{1},R_{2},R_{3},...\} \]
 
-Description logic uses constructors such as $\neg$, $\sqcup$, $\sqcap$, $\exists$ and $\forall$. Constructor $\neg$ means negation, for instance $\neg Fruit$. Constructor $\sqcup$ means or, for instance $Mother \sqcup Father$. Constructor $\sqcap$ means and, for instance $Apple \sqcap Pear$. Constructors $\exists$ is existential restriction and $\forall$ is called value restrictions. Among them exists also number restrictions but the classes we use do not implement them.
+Description logic uses constructors such as $\neg$, $\sqcup$, $\sqcap$, $\exists$ and $\forall$. Constructor $\neg$ means negation, for instance $\neg Fruit$. Constructor $\sqcup$ means or, for instance $Mother \sqcup Father$. Constructor $\sqcap$ means and, for instance $Apple \sqcap Pear$. Constructors $\exists$ is existential restriction and $\forall$ is called value restrictions. Among them exists also number restrictions but $\mathcal{EL}$ and $\mathcal{EL}{+}{+}$ do not implement them.
 
 Description logic uses this two important symbols: $\sqsubseteq$, $\equiv$. First symbol is subsumption $\sqsubseteq$. As an example we can consider expression $Mother \sqsubseteq Parent$. $Mother$ is always a $Parent$ but $Parent$ does not always have to be $Mother$. Second symbol is equivalence $\equiv$ which defines that both sides are equals. For example we can have expression $Parent \equiv Mother \sqcup Father$. $Parent$ is always $Mother$ or $Father$. $Mother$ or $Father$ is also always $Parent$.
 
@@ -155,7 +166,7 @@ To have a better understanding of how description logics works we will introduce
 \subsection{Ontology}
 Ontology describes relationships between entities in a specific area. Difference between area and ontology is that ontology describes relationships between entities in a formal language. In this part we are citing definitions from \citep{staabHandbookOntology}.
 
-Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$, so we can write $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$. TBox represents all axioms that model ontology. Axiom has a form of predicate followed by operator and another predicate, for example $Apple \sqsubseteq Fruit$, $Person \sqsubseteq \exists own.House$. ABox on the other side does not model ontology but creates a database. It contains set of individuals. It has following form: individual : predicate. For example: $john : Person$, $greenApple : Apple$.
+Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$, so we can write $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$. TBox represents all axioms that model ontology. Axiom has a form of predicate followed by operator and another predicate, for example $Apple \sqsubseteq Fruit$, $Person \sqsubseteq \exists own.House$. ABox on the other side does not model ontology but creates a database. It contains set of individuals. It has following form: individual : predicate. For example: $john : Person$, $jack : Academician$.
 
 \begin{definition}[Interpretation]
 	Interpretation of description logic is a pair $\mathcal{I} = (\Delta^{\mathcal{I}}, \cdot ^{\mathcal{I}})$ which contains a domain $\Delta^{\mathcal{I}}$ and an interpretation function $\cdot ^{\mathcal{I}}$.	
@@ -179,10 +190,11 @@ Every ontology has its own knowledge base. Knowledge base ($\mathcal{KB}$) is an
 	Interpretation is a model of knowledge base if $\mathcal{I}$ satisfies every axiom in \textit{TBox} and in \textit{ABox} of given knowledge base.
 \end{definition}
 
-\subsection{DL Tableau algorithm}
-%Vysvetlit reasoning, ako suvisi s algoritmom, co je cielom algoritmu, opisat ako priblizne funguje, povedat preco je spravny, pripadne dokaz
-%Reasoning in description logic is very important. POVEDAT, CO JE CONSISTENCY, SATISFIABILITY. correct algorithm if -> sound complete, always terminates
+Ontology is for our work necessary because our input is always an ontology. We can create ontologies using an ontology modeling editor Protége or if we want we can also create an xml file. We have decided to use the editor where we created our ontologies. In the editor ontology can be saved in more types of xml files. We have used rdf/xml syntax.
 
+
+\subsection{DL Tableau algorithm}
+This algorithm is very important in our work because we are using it in ABox Abduction algorithm. DL Tableau algorithm proves satisfiability for an ABox axiom assertion. It means that we want to know if we are able to retrieve a model from ontology if we add some assertion axioms to ontology. We need to retrieve model from ontology in order to successfully continue in ABox abduction algorithm. Following definitions from \citep{baaderHandbook} are describing rules and terms that are used by this algorithm.
 
 \begin{definition}[NNF]
 A concept C is in NNF (negation normal form) only then if each negation constructor ($\neg$) is always before atomic concept symbols inside concept C.
@@ -230,17 +242,53 @@ CTree is clash-free if and only if it is such a tree that in each branch has no 
 \end{definition}
 
 \begin{definition}[Blocking]
-Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor y such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or y is blocked.
+Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor $y$ such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or $y$ is blocked.
 
 \end{definition}
 
-%Concept satisfiability - priebeh algoritmu
- 
-%\begin{example}
-%	example with knowledge base a postupnym priebehom vytvarania stromu	
-%\end{example}
+We want to use DL Tableau algorithm in order to check consistency of ontology with given facts. Facts can be observation or other ABox axiom assertions. So as input we have ontology and facts in a form of ABox assertions. This algorithm either finds a clash or finishes without no clash. If algorithm finished without clash we know that ontology with facts is consistent, otherwise we know that ontology is inconsistent with given facts.
 
-%Algorithm that proves satisfiability is called \textbf{DL Tableau algorithm}. Its intension is to create a tree where 
+Let's introduce an example where we know an ontology $\mathcal{KB}$ and observation $\mathcal{O}$. We want to know if ontology is consistent with observation and if we can find a model that satisfies ontology with observation. In ABox abduction algorithm we are using negation of model that is retrieved by help of this algorithm.
+
+\begin{example}{(\textbf{DL Tableau algorithm})}
+	\[ 
+	\mathcal{KB} = \left\{
+	\begin{tabular}{l c}
+	$Professor \sqcup Scientist \sqsubseteq Academician$ \\
+	$AssocProfessor \sqsubseteq Professor$ \\
+	\end{tabular}
+	\right \}
+	\]
+	
+	\[ 
+	\mathcal{O} = \left\{
+	\begin{tabular}{l c}
+	$jack : Academician$
+	\end{tabular}
+	\right \}
+	\]	
+\end{example}
+
+Our question is following: Is observation $\mathcal{O}$ consistent with knowledge base $\mathcal{KB}$? We can rewrite it as follows: Is negation of observation $\neg \mathcal{O}$ inconsistent with knowledge base $\mathcal{KB}$? Negation of observation $\neg \mathcal{O}$ is $\{ jack : \neg Academician \}$.
+
+Let's start with algorithm. At first we create a node $jack$ then we create a label $\mathcal{L}(jack)$ for node $jack$.
+
+\[ \bullet jack \]
+
+$ \mathcal{L}(jack) = \{ \neg Academician, (\neg Professor \sqcup \neg Scientist) \sqcup Academician, ... \} $ \\
+
+
+In the label $\mathcal{L}(jack)$ we start with $\neg Academician$ because according to $\neg \mathcal{O}$ jack is not an Academician. Then we continue with first axiom from knowledge base $Professor \sqcup Scientist \sqsubseteq Academician$. There is a subsumption and in general subsumption in a form of $A \sqsubseteq B$ can be rewrited as $\neg A \sqcup B$. So we will rewrite it accordingly and we get $\neg (Professor \sqcup Scientist) \sqcup Academician$. But this is still not in a form that we can write into label. Now we need to transform it into negation normal form as follows: $(\neg Professor \sqcup \neg Scientist) \sqcup Academician$. As we can see it contains disjunction so we need to follow $\sqcup$ - rule. We have to choose $\neg Professor \sqcup \neg Scientist$ because if we would choose $Academician$ we would immediately be having a clash with $\neg Academician$. \\
+
+$ \mathcal{L}(jack) = \{ \neg Academician, (\neg Professor \sqcup \neg Scientist) \sqcup Academician, \neg Professor \sqcup \neg Scientist, \neg Professor,  \neg AssocProfessor \sqcup Professor, \neg AssocProfessor \} $ \\
+
+Now we have to choose again because there is another disjunction. Let's choose $\neg Professor$. Then we will continue with second axiom $AssocProfessor \sqsubseteq Professor$. In label is already $\neg Professor$ so we can not choose $Professor$ but we can choose $\neg AssocProfessor$. We do not have clash but let's go back and 
+instead of choosing $\neg Professor$ we will choose $\neg Scientist$. \\
+
+$ \mathcal{L}(jack) = \{ \neg Academician, (\neg Professor \sqcup \neg Scientist) \sqcup Academician, \neg Professor \sqcup \neg Scientist, \neg Scientist,  \neg AssocProfessor \sqcup Professor, \neg AssocProfessor \} $ \\
+
+Our situation has not been changed. We still have no clash. This step was not even necessary but we wanted to show it because there could happen a situation where we could have chosen incorrectly from disjunction. In that case we would get clash and we have to return back and choose the other possibility and start over. But for our example it was not necessary. As we can see we did not get clash anywhere so now we can claim that our observation $\mathcal{O}$ is consistent with our knowledge base $\mathcal{KB}$.
+
 
 \section{Abduction}
 Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known is probably deduction and for humans is most natural. All three ways are dealing with following parts: theory, data and effect. In description logic we can translate theory as knowledge base, data as explanations and  effect as observation.
@@ -248,7 +296,7 @@ Generally in logic we are familiar with three ways of thinking. Deduction, induc
 Deduction knows knowledge base and explanations, observation is missing and the goal is to deduce the missing observation. Induction knows observation and explanation but does not know knowledge base. Abduction knows knowledge base and observation but explanation is a subject of searching. All definitions are from article by \citep{pukancovaAboxAbduction}.
 
 \subsection{ABox abduction}
-In description logic abduction is used when we are not familiar with explanation $\mathcal{E}$ but we know knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations.
+In description logic abduction is used when we are not familiar with explanation $\mathcal{E}$ but we know knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations. Minimal explanation is such an explanation that does not exist any other explanation that would be a subset of this minimal explanation.
 
 \begin{definition}{\textbf{(Abduction)}} 
 	Given knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$, an abductive explanation is such explanation $\mathcal{E}$ that satisfies $\mathcal{KB} \cup \mathcal{O} \models \mathcal{E}$.
@@ -260,9 +308,13 @@ In description logic abduction is used when we are not familiar with explanation
 	\[ \mathcal{E} \text{ is explanatory if } \mathcal{KB} \not \models \mathcal{O} \]
 \end{definition}
 
-For better understanding of what ABox abduction is let's introduce a few examples. First example is easy, searched explanation is obvious but it will demonstrate the problem. Second example is not so obvious that's why we have to use an algorithm to compute the solution. For computing the solution we use \textbf{Minimal Hitting Set algorithm}. 
+\begin{definition}{\textbf{(Minimal explanation)}}
+	Minimal explanation is such an explanation that does not exist other explanation that would be a subset of the first explanation.
+\end{definition}
 
-\begin{example}	
+For better understanding of what ABox abduction is let's introduce a few examples. First example is easy, searched explanation is obvious but it will demonstrate the problem. Second example is not so obvious that's why we have to use an algorithm to compute the solution. For computing the solution we use \textbf{Minimal Hitting Set algorithm}.
+
+\begin{example}{(\textbf{ABox Abduction - Emotion})}
 	\[ 
 	\mathcal{KB} = \left\{
 	\begin{tabular}{l c}
@@ -280,7 +332,7 @@ For better understanding of what ABox abduction is let's introduce a few example
 	\]								
 \end{example}
 
-In example 2.1.1 we are searching for explanations. In this easy assignment is obvious that what we are looking for is that Mary must be sick. If Mary is sick she can not be happy as we have in our observation. Formally written solution to this abduction problem is following:
+In this example we are searching for explanations. In this easy assignment is obvious that what we are looking for is that Mary must be sick. If Mary is not happy she must be sick. Formally written solution to this abduction problem is following:
 \[ 
 \mathcal{E} = \left\{
 \begin{tabular}{l c}
@@ -289,11 +341,12 @@ $mary : Sick$
 \right \}
 \]
 
-\begin{example}
+\begin{example}{(\textbf{ABox Abduction - Academy})}
 	\[ 
 	\mathcal{KB} = \left\{
 	\begin{tabular}{l c}
-	%	$Sick \sqsubseteq \neg Happy$
+		$Professor \sqcup Scientist \sqsubseteq Academician$ \\
+		$AssocProfessor \sqsubseteq Professor$ \\
 	\end{tabular}
 	\right \}
 	\]
@@ -301,18 +354,27 @@ $mary : Sick$
 	\[ 
 	\mathcal{O} = \left\{
 	\begin{tabular}{l c}
-	%	$mary : \neg Happy$
+		$jack : Academician$
 	\end{tabular}
 	\right \}
 	\]								
 	
 \end{example}
 
+If $jack$ is an Academician he must be Professor or Scientist. If he is an Professor he must be also an AssocProfessor. This is an oversimplified explanation how we can retrieve correct explanations. For better introduction into this algorithm we will explain it step by step. We know the observation so we know that jack is an Academician, that is a fact. In our first axiom in TBox is written that if somebody is an Academician he is also a Professor or Scientist. He can be both but at least one of them but that we are not able to determine. That is why are both correct explanations. The second axiom claims that if somebody is a Professor he must be also an AssocProfessor. In this part we are not explaining the whole algorithm yet because it will be explained in our next chapter Minimal Hitting Set algorithm but we need to have at least an idea of how does it work. So as we already know the correct explanations are following:
 
-\section{Minimal Hitting Set algorithm}
-In this chapter we will find out about algorithm: Minimal hitting set. This algorithm is originally invented by \citep{reiterHS}. He invented the basic of algorithm, but a few years later \citep{greinerReitersCorrection} and \citep{wotawaReitersVariant} added another optimizations to this algorithm.
+\[ 
+\mathcal{E} = \left\{
+\begin{tabular}{l c}
+	$jack : Professor$ \\
+	$jack : Scientist$ \\
+	$jack : AssocProfessor$ \\
+\end{tabular}
+\right \}
+\]
 
-\subsection{Definitions}
+\subsection{Minimal Hitting Set algorithm}
+In this part we will find out about algorithm: Minimal hitting set. This algorithm is invented by \citep{reiterHS}. At first we will declare terms that we will be using.
 
 \begin{definition}[Hitting set]
 	Hitting set for a collection of sets $C$ is a set $H \subseteq U_{S \in C}$ such that $H \cap S$ is not empty set for each $S \in C$.
@@ -350,17 +412,84 @@ In this chapter we will find out about algorithm: Minimal hitting set. This algo
 	
 \end{definition}
 
-\subsection{Reiter's variant}
+Reiter's algorithm is used to compute a minimal hitting set. Input is a set of sets. The goal of Reiter's algorithm is to compute minimal hitting set from this input. It means that the result hitting set will have intersection with each set from input.
+
+Let's show an example with $F$ as input set and $HS$ as result.
+
+\begin{example}{\textbf{(Minimal Hitting Set)}}
+	\[  F = \{ \{a,b\}, \{b,c\}, \{a,c\}, \{b,d\}, \{b\} \} \]
+	\[ HS = \{ \{a,b\}, \{b,c\} \} \]
+\end{example}
+
+As we can observe in this example the first result set has intersection with each set of $F$ and the second result set also has intersection with each set of $F$. So we can determine that these result sets are definitely minimal hitting sets. They are both minimal because there is no other set that is smaller and at the same time has intersection with each set of $F$.
+
+For better and easier understanding of this algorithm we can visualize it and explain.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[level distance=2.5cm,sibling distance=2cm,
+	draw, edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}]
+	\Tree
+	[.\{a,b\}
+		\edge node[auto=right] {a};
+		[.\{b,c\} 
+			\edge node[midway,left] {b};
+			[.{\checkmark} ]
+			\edge node[midway,right] {c};
+			[.\{b,d\} 
+				\edge node[midway,left] {b};
+				[.{\xmark} ]
+				\edge node[midway,right] {d};
+				[.\{b\} 
+					\edge node[midway,right] {b};
+					[.{\xmark} ]
+				]
+			]			
+		]
+		\edge node[auto=left] {b};
+		[.\{a,c\} 
+			\edge node[midway,left] {a};
+			[.{\xmark} ]
+			\edge node[midway,right] {c};
+			[.{\checkmark} ]
+		]	
+	]
+	\end{tikzpicture}
+
+	\caption{Minimal Hitting Set}
+	\label{fig:MinimalHS}	
+\end{figure}
+
+Aim is to create a tree where nodes can have three types of value. Node can be set from $F$, check or cross. Each edge is labeled by one element of some set from $F$. At first we have to create root. Root node is first set $\{a,b\}$ from $F$. It will have exactly two children because the size of node is exactly two.
+
+Now we have to decide what will be child's node. Let's check left child. We have to create a set from edges from root to our node. In this case this set contains only one element $\{a\}$. If $\{a\}$ has intersection with each sets from $F$ we can add check as node. But that is not our case so we add the second set as node. Let's continue with right child of root. Labeled path from this node to root is $\{b\}$. That has also not intersection with each set of $F$ so we add third set as node. We continue breadth-first with $\{b,c\}$ node. Left child has labeled path $\{a,b\}$ which has intersection with each set of $F$ and it fulfills condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we are looking for only minimal hitting sets. If already exists checked node that is a proper subset of this possible hitting set we have to add cross as node because it is not a minimal hitting set, otherwise we add check as node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
 
 \subsection{Optimizations}
+To Reiter's original algorithm were added optimizations by \citep{greinerReitersCorrection} and \citep{wotawaReitersVariant} a few years later. 
 
-\section{Elk}
+Greiner claims that Reiter's way of creating a tree handles some situations incorrect. The base algorithm is correct but prunning may lead to loose of minimal hitting sets. Proposed way of preventing this loose is use directed acyclic graph instead of a tree. We did not use this optimization because in our case wrong handling of situation can not happened.
 
-\subsection{Reasoning}
+The next optimization by Wotawa disclaim the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of edge label and right means the biggest size of edge label in one breadth level. In our case this optimization is also useless because in our tree in one breadth level the size of edge label is always equal.
+
+\subsection{ABox Abduction with Minimal Hitting Set algorithm}
+%For our algorithm to work we have to combine these two algorithms as designed by \citep{pukancovaAboxAbduction}. 
+
+%TODO add pseudocode
+
+
+\section{Reasoning}
 
 \subsection{Elk reasoner}
 
+\subsection{Other reasoners}
+
 \section{Implementation}
+
+\subsection{ABox Abduction algorithm}
+%TODO add pseudocode
+
+\subsection{MergeXPlain algorithm}
+%TODO add pseudocode
 
 \pagebreak
 \section*{Conclusion}

@@ -133,6 +133,7 @@ public class AbductionHSSolver implements ISolver {
         }
 
         reasonerManager.removeAxiomsFromOntology(model);
+        model.removeAll(loader.getNegObservation().getOwlAxioms());
 
         return getComplementOfModel(model);
     }
