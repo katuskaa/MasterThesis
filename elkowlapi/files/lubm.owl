@@ -6,7 +6,7 @@
         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
         xml:base="http://swat.cse.lehigh.edu/onto/univ-bench.owl">
     <owl:Ontology rdf:about="http://swat.cse.lehigh.edu/onto/univ-bench.owl">
-        <rdfs:label>Univ-bench common.Loader</rdfs:label>
+        <rdfs:label>Univ-bench reasoner.Loader</rdfs:label>
         <rdfs:comment>An university loader for benchmark tests</rdfs:comment>
         <owl:versionInfo>univ-bench-loader-owl, ver April 1, 2004</owl:versionInfo>
     </owl:Ontology>
