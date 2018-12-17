@@ -16,10 +16,12 @@
 \usepackage[slovak]{babel}
 \usepackage[fleqn]{mathtools}
 \usepackage{amsmath}
-\usepackage{algorithm2e}
-\usepackage{algorithmic}
 \usepackage{listings}
 \usepackage{color}
+%\usepackage[]{algorithm2e}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
 
 % There are many different themes available for Beamer. A comprehensive
 % list with examples is given here:
@@ -133,42 +135,42 @@
 \end{frame}
 
 
-\begin{frame}{Description logic}
+\begin{frame}{Description logics}
   \begin{itemize}
 	\item {
-		family of knowledge representation languages
+		Family of knowledge representation languages
 	}
 	
 	\item {
-		every description logic has different expressivity
+		Every description logic has different expressivity
 	}
 	
 	\item {
-		each type of expressivity supports different constructors
+		Each type of expressivity supports different constructors
 	}
 	
 	\item {
-		we will use $\mathcal{ALC}$ and $\mathcal{EL{+}{+}}$ DL
+		We will use $\mathcal{ALC}$ and $\mathcal{EL{+}{+}}$ DL
 	}
 
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Description logic (DL)}{Syntax}
+\begin{frame}{Description logics (DL)}{Syntax}
 	\begin{itemize}
 	\item {
 		$\mathcal{ALC}$ DL is shaped by 3 mutually disjoint sets:
-		\[ N_{I} = \{ a,b,c... \} \]
-		\[ N_{C} = \{ A,B,C... \} \]
-		\[N_{R} = \{ R_{1}, R_{2}, R_{3} \} \]
+		\[ N_{I} = \{ a,b,c, ... \} \]
+		\[ N_{C} = \{ A,B,C, ... \} \]
+		\[N_{R} = \{ R_{1}, R_{2}, R_{3}, ... \} \]
 	}
 	
 	\item {
-		individual, concept (atomic or complex)
+		Individual, concept (atomic or complex)
 	}		
 	
 	\item {
-		$\mathcal{ALC}$ DL consists of following constructors:
+		$\mathcal{ALC}$ DL consists of the following constructors:
 		\[ \neg, \sqcup, \sqcap, \forall, \exists \]
 		DL conceptualization: Everybody who is sick, is not happy.
 		\[ Sick \sqsubseteq \neg Happy \text{ (axiom)} \]
@@ -176,15 +178,15 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Description logic}{Semantics}
+\begin{frame}{Description logics}{Semantics}
 	\begin{itemize}
 				
 		\item {
-			ontology describes relationships between entities in a specific area
+			Ontology describes relationships between entities in a specific area
 		}
 		
 		\item {
-			contains knowledge base $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$	
+			Knowledge base $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$	
 		}
 		
 		\item {
@@ -202,8 +204,9 @@
 		\[ 
 		\mathcal{KB} = \left\{
 		\begin{tabular}{l c}
-		$Sick \sqsubseteq \neg Happy$ \\
-		$mary: Sick$ \\
+		$Profesor \sqcup Scientist \sqsubseteq Academician$ \\
+		$AssocProfesor \sqsubseteq Professor$ \\
+		$jack: Academician$ \\
 		\end{tabular}
 		\right \}
 		\]
@@ -226,7 +229,7 @@
 		}
 		
 		\item {
-			Current reasoners: Elk, JFact, Hermit, Pellet
+			Reasoners we work with: ELK, JFact, Hermit, Pellet
 		}
 	\end{itemize}
 \end{frame}
@@ -245,12 +248,13 @@
 		\[ 
 		\mathcal{KB} = \left\{
 		\begin{tabular}{l c}
-		$Sick \sqsubseteq \neg Happy$ \\
+		$Profesor \sqcup Scientist \sqsubseteq Academician$ \\
+		$AssocProfesor \sqsubseteq Professor$ \\
 		\end{tabular}
 		\right \}
 		\]
 		
-		\[ \mathcal{O} = \{ mary: \neg Happy \} \]
+		\[ \mathcal{O} = \{ jack: Academician \} \]
 		
 		\item {
 			We use adjusted minimal HS algorithm to find minimal explanations
@@ -258,30 +262,54 @@
 		
 		\item {
 			Algorithm finds this explanation: 
-			\[ \mathcal{E}_{1} = \{ mary: Sick \} \]
+			\[ \mathcal{E}_{1} = \{ jack: Professor \} \]
+			\[ \mathcal{E}_{2} = \{ jack: Scientist \} \]
+			\[ \mathcal{E}_{3} = \{ jack: AssocProfessor \} \]
 		}
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Reiter's algorithm: Minimal hitting set}
+\begin{frame}{Adjusted Reiter's algorithm: Minimal Hitting Set}
+\begin{algorithm}[H]
+	\caption{Adjusted Minimal Hitting Set algorithm}
+	\begin{algorithmic} 
+		\REQUIRE $Ontology, observation \text{ } \mathcal{O}$
+		\STATE $root \leftarrow negationOfModel$
+		\STATE $queue \leftarrow queue \cup root$
+		\WHILE{$queue.isNotEmpty()$}
+		\STATE $node \leftarrow queue.pop()$
+			\FOR{(Node child : node.children)}
+			\STATE $consistent \leftarrow isConsistent(node); relevant \leftarrow isRelevant(node)$
+			\STATE $explanation \leftarrow isExplanation(node); minimal \leftarrow isMinimal(node)$ 
+			\IF{\texttt{(explanation)}}
+				\STATE $explanations \leftarrow explanations \cup node.label$
+			\ELSE
+				\STATE $queue \leftarrow queue \cup node$
+			\ENDIF
+			
+			\ENDFOR
+		\ENDWHILE		
+	\end{algorithmic}
+\end{algorithm}	
+\end{frame}
+
+
+\begin{frame}{Adjusted Reiter's algorithm: Minimal Hitting Set}
 	\begin{itemize}
-		
 		\item {
-			Reiter's algorithm computes minimal hitting sets
+			Implementation with more reasoners (ELK/JFact/Hermit/Pellet)
 		}
 		
 		\item {
-			Definitions: Hitting set, HS-tree
-		}
-		
-		\item {
-			Algorithm: Generate pruned HS-tree
+			Elk should be quicker thanks to lower expressivity
 		}
 		
 		\item {
 			Optimizations: 
+
 			\begin{itemize}
 				\item Observation can not be an explanation
+
 				\item Explanation that is not minimal does not even have to be considered
 			\end{itemize}
 		}
@@ -289,74 +317,19 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Progress}{Ontology data set}
-	\begin{itemize}
-		\item { Academy
-			\[ 
-			\mathcal{KB} = \left\{
-			\begin{tabular}{c c}
-			$Professor \sqcup Scientist \sqsubseteq Academician$ \\
-			$AssocProfessor \sqsubseteq Professor$ \\
-			\end{tabular}
-			\right \}
-			\]
-			\[ 
-			\mathcal{O} = \left\{
-			\begin{tabular}{c c}
-			$jack : Academician$ \\
-			\end{tabular}
-			\right \}
-			\]		
-			\[ 
-			\mathcal{E} = \left\{
-			\begin{tabular}{c c}
-			$jack : Professor, \text{ } jack : Scientist, \text{ } jack : AssocProfessor$ \\
-			\end{tabular}
-			\right \}
-			\]										
-		}
-
-		\item { Test
-			\[ 
-			\mathcal{KB} = \left\{
-			\begin{tabular}{c c}
-			$E \sqsubseteq C$ \\
-			$F \sqsubseteq D$ \\
-			\end{tabular}
-			\right \}
-			\]
-			\[ 
-			\mathcal{O} = \left\{
-			\begin{tabular}{c c}
-			$a : C$ \\
-			\end{tabular}
-			\right \}
-			\]			
-			\[ 
-			\mathcal{E} = \left\{
-			\begin{tabular}{c c}
-			$a : E$ \\
-			\end{tabular}
-			\right \}
-			\]										
-		}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Progress}{Implementation}
+\begin{frame}{Progress}
 	\begin{itemize}
 		\item Implementation of Reiter's algorithm with optimizations for simple concepts:
 
 		\begin{itemize}
-			\item works for observation given as simple concept yet
-			\item tested on both ontologies with correct results
+			\item Works for observation given as simple concept yet
+			\item Tested on 2 ontologies with correct results
 		\end{itemize}		
 
 		\item Started implementation of MergeXPlain algorithm for simple concepts:
 
 		\begin{itemize}
-			\item designed for observation given as simple concept yet
-			\item not working quite good yet
+			\item Designed for observation given as simple concept yet
 		\end{itemize}
 	\end{itemize}
 \end{frame}
@@ -365,15 +338,15 @@
 	\begin{itemize}		
 		\item Modify implementation of Reiter's algorithm with optimizations:
 		\begin{itemize}
-			\item to accept complex concept as observation
-			\item to accept more complex concepts as observation
-			\item add more optimizations
+			\item To accept complex concept as observation
+			\item To accept more complex concepts as observation
+			\item Add more optimizations
 		\end{itemize}
 		
 		\item Modify implementation of MergeXPlain algorithm:
 		\begin{itemize}
-			\item to process correctly observation given as simple concept
-			\item to accept complex concepts and possibly more complex concepts as observation
+			\item To process correctly observation given as simple concept
+			\item To accept complex concepts and possibly more complex concepts as observation
 		\end{itemize}		
 		\item {
 			Evaluation of results (ELK/JFact/Hermit/Pellet)
