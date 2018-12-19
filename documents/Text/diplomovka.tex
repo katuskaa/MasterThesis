@@ -132,26 +132,24 @@
 Description logics (DLs) are a family of knowledge representation formalism. Each description logic has different expressivity. Every expressivity is expressed with a unique set of constructors. We are going to work with $\mathcal{ALC}$, $\mathcal{EL}$ and $\mathcal{EL}${+}{+} DL. Each description logic has its own syntax and semantics. In this chapter we will introduce syntax and semantics \citep{Rudolph2011} for each DL that we will be working with.
 
 \subsection{$\mathcal{ALC}$ DL}
-$\mathcal{ALC}$ DL is a DL which is more expressive than $\mathcal{EL}$ and $\mathcal{EL}{+}{+}$ DL. $\mathcal{ALC}$ is less expressive than many other DLs. $ALC$ stands for Attributive (Concept) Language with Complements. It means that not only complement of atomic concept is allowed but also a complement of complex concept is allowed.
+$\mathcal{ALC}$ DL is a DL which is more expressive than $\mathcal{EL}$ and $\mathcal{EL}{+}{+}$ DL. $\mathcal{ALC}$ is less expressive than many other DLs. $\mathcal{ALC}$ stands for Attributive (Concept) Language with Complements. It means that not only complement of atomic concept is allowed but also a complement of complex concept is allowed.
 
 \subsubsection{$\mathcal{ALC}$ Syntax}
-$\mathcal{ALC}$ description logic consists of three mutually disjoint sets. These sets represent whole domain that is used by $\mathcal{ALC}$ DL.
+$\mathcal{ALC}$ description logic consists of three mutually disjoint sets. These sets represent whole vocabulary that is used by $\mathcal{ALC}$ DL.
 
 \begin{definition}{\textbf{DL vocabulary}}
-	\[ \textbf{Set of individuals:} N_{I} = \{a,b,c...\} \]
-	\[ \textbf{Set of concepts:} N_{C} = \{A,B,C...\} \]
-	\[ \textbf{Set of roles:} N_{R} = \{R_{1},R_{2},R_{3},...\} \]
+	\[ \textbf{Set of individuals:} \text{ } N_{I} = \{a,b,c...\} \]
+	\[ \textbf{Set of concepts:} \text{ } N_{C} = \{A,B,C...\} \]
+	\[ \textbf{Set of roles:} \text{ } N_{R} = \{R_{1},R_{2},R_{3},...\} \]
 \end{definition}
 
 \begin{example}{\textbf{DL vocabulary}}
-	\[ Individuals = \{ jack, john, jane \} \]
-	\[ Concepts = \{ Person, Mother, Father \} \]
-	\[ Roles = \{ hasChild, likes, owns \} \]
+	\[ N_{I} = \{ jack, john, jane \} \]
+	\[ N_{C} = \{ Person, Mother, Father \} \]
+	\[ N_{R} = \{ hasChild, likes, owns \} \]
 \end{example}
 
-$\mathcal{ALC}$ DL deals with individuals and concepts. An individual is a concrete instance of a concept. Concept is a class that defines some entity. Concept can have two forms, one is concept assertion and the second one is role assertion.
-
-Concept can be atomic or complex. Atomic concept is not constructed with any constructor. On the contrary complex concept is created from constructors and other concepts.
+$\mathcal{ALC}$ DL deals with individuals and concepts. An individual is a concrete instance of a concept. Concept is a class that defines some entity. Concept can be atomic or complex. Atomic concept is not constructed with any constructor. On the contrary complex concept is created from constructors and other concepts.
 
 \begin{definition}{\textbf{Complex concept}}
 	
@@ -167,13 +165,34 @@ Concept can be atomic or complex. Atomic concept is not constructed with any con
 \[ \forall likes.Food \]
 \end{example}
 
-Complex concept uses following constructors: $\neg$, $\sqcup$, $\sqcap$, $\exists$ and $\forall$. Constructor $\neg$ means negation, constructor $\sqcup$ means or and constructor $\sqcap$ means and. Constructors $\exists$ is existential restriction and $\forall$ is called value restriction.
+Complex concept uses following constructors: $\neg$, $\sqcup$, $\sqcap$, $\exists$ and $\forall$. Constructor $\neg$ is negation, constructor $\sqcup$ is or and constructor $\sqcap$ is and. Constructors $\exists$ is existential restriction and $\forall$ is called value restriction.
 
 There are two concepts that are always in ontology. $\top$ (top) stays for everything. Each concept belongs under $\top$ which means that each concept is on left side of subsumption if on right side is only $\top$. Second concept is $\bot$ (bottom) and it stays for nothing which means that each concept is on the right side of subsumption if there is only $\bot$ on the left side. Formally these two concepts can be written as follows:
 \[ \top \equiv A \sqcup \neg A \]
 \[ \bot \equiv A \sqcap \neg A \]
 
-$\mathcal{ALC}$ description logic uses axioms in order to model some situation. There are two types of axioms, first is TBox and the second one is ABox. In TBox is used symbol $\sqsubseteq$. Let's explain this symbol on an example $Mother \sqsubseteq Parent$. $Mother$ is always a $Parent$ but $Parent$ does not always have to be a $Mother$. 
+$\mathcal{ALC}$ description logic uses axioms in order to model some situation. Ontology \citep{staabHandbookOntology} is used to formally describe these axioms. The purpose of ontology is to describe relationships between entities in a formal language. Every ontology has its own knowledge base. Knowledge base is a set of TBox axioms and ABox axioms. Ontology is described by knowledge base.
+
+\begin{definition}{\textbf{Knowledge base}}
+	
+	Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$.
+\end{definition}
+
+\begin{example}{\textbf{Knowledge base}}
+	\[ 
+	\mathcal{KB} = \left\{
+	\begin{tabular}{c c}
+	$Professor \sqcup Scientist \sqsubseteq Academician$ \\
+	$AssocProfessor \sqsubseteq Professor$ \\
+	$jack : Academician$ \\
+	$jane : Scientist$ \\
+	$john : Professor$ \\	
+	\end{tabular}
+	\right \}
+	\]
+\end{example}
+
+There are two types of axioms, the first is TBox and the second one is ABox. In TBox the subsumption symbol ($\sqsubseteq$) is used. Let's explain this symbol on an example $Mother \sqsubseteq Parent$. $Mother$ is always a $Parent$ but $Parent$ does not always have to be a $Mother$. TBox represents axioms that model ontology. Each axiom explains the relationship between entities in this axiom.
 
 \begin{definition}{\textbf{TBox}}
 	
@@ -192,6 +211,8 @@ $\mathcal{ALC}$ description logic uses axioms in order to model some situation. 
 	\right \}
 	\]
 \end{example}
+
+ABox on the other side does not model ontology but creates a database of facts. It contains set of assertion axioms that can be called facts. Fact is a direct assertion of an individual to a concept.
 
 \begin{definition}{\textbf{ABox}}
 	
@@ -224,35 +245,12 @@ To have a better understanding of $\mathcal{ALC}$ DL we can translate sentences 
 \[ Person \sqsubseteq \exists owns.House \]
 
 \subsubsection{$\mathcal{ALC}$ Semantics}
-Ontology \citep{staabHandbookOntology} describes relationships between entities in a specific area. Difference between area and ontology is that ontology describes relationships between entities in a formal language.
-
-Every ontology has its own knowledge base. Knowledge base is a set of TBox axioms and ABox axioms. Ontology is described by knowledge base. TBox represents axioms that model ontology. Each axiom explains the relationship between entities in this axiom. ABox on the other side does not model ontology but creates a database of facts. It contains set of assertion axioms that can be called facts. Fact is a direct assertion of an individual to a concept.
-
-\begin{definition}{\textbf{Knowledge base}}
-	
-Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$.
-\end{definition}
-
-\begin{example}{\textbf{Knowledge base}}
-	\[ 
-	\mathcal{KB} = \left\{
-	\begin{tabular}{c c}
-	$Professor \sqcup Scientist \sqsubseteq Academician$ \\
-	$AssocProfessor \sqsubseteq Professor$ \\
-	$jack : Academician$ \\
-	$jane : Scientist$ \\
-	$john : Professor$ \\	
-	\end{tabular}
-	\right \}
-	\]
-\end{example}
-
-An interpretation is a pair of domain and interpretation function. Domain is a set of values that represents concepts in the interpretation. Result of interpretation function is different for individuals, concepts and roles. If we use interpretation function on individual the result is an element from domain. If we use it on concepts the result is a set of elements from domain. If we use it on roles the result is a pair of elements from domain.
+An interpretation is a pair of a domain and an interpretation function. The domain is a set of values that represents concepts in the interpretation. The result of interpretation function is different for individuals, concepts and roles. If we use the interpretation function on an individual the result is an element from the domain. If we use it on the concepts the result is a set of elements from the domain. If we use it on the roles the result is a set of pairs of elements from the domain.
 
 \begin{definition}{\textbf{Interpretation}}
 
 	An interpretation of a given knowledge base $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$ is a pair $\mathcal{I} = (\Delta^{\mathcal{I}}, \cdot ^{\mathcal{I}})$ which contains a domain $\Delta^{\mathcal{I}}$ and an interpretation function $\cdot ^{\mathcal{I}}$.	
-	Domain can not be empty. So it must be true that $\Delta^{\mathcal{I}} \not = \emptyset$.
+	Domain can not be empty.
 		
 	The interpretation function is following:
 	\[ a^{\mathcal{I}} \in \Delta^{\mathcal{I}} \text{ } \forall a \in N_{I} \]
@@ -287,17 +285,17 @@ An interpretation is a pair of domain and interpretation function. Domain is a s
 	
 \end{example}
 
-The interpretation satisfies an axiom according to its type. We know three types of axioms. First is an axiom from TBox, second is assertion axiom to a concept and the third one is an assertion to a role.
+The interpretation satisfies an axiom according to its type. We know three types of axioms. The first is an axiom from TBox, the second one is an assertion axiom to a concept and the third one is an assertion to a role.
 
 \begin{definition}{\textbf{Satisfaction $\models$}}
 
 	Given an axiom $\phi$, an interpretation $\mathcal{I} = (\Delta^{\mathcal{I}}, \cdot ^{\mathcal{I}})$ satisfies $\phi (\mathcal{I} \models \phi)$ depending on its type:
-	\[ C \sqsubseteq D: \mathcal{I} \models C \sqsubseteq D \text{ iff } C^{\mathcal{I}} \subseteq D^{\mathcal{I}} \]
-	\[ a:C: \mathcal{I} \models a:C \text{ iff } a^{\mathcal{I}} \in C^{\mathcal{I}} \]
-	\[ a,b:R: \mathcal{I} \models a,b:R \text{ iff } \langle a^{\mathcal{I}}, \in b^{\mathcal{I}} \rangle \in R^{\mathcal{I}} \]	
+	\[ \mathcal{I} \models C \sqsubseteq D \text{ iff } C^{\mathcal{I}} \subseteq D^{\mathcal{I}} \]
+	\[ \mathcal{I} \models a:C \text{ iff } a^{\mathcal{I}} \in C^{\mathcal{I}} \]
+	\[ \mathcal{I} \models a,b:R \text{ iff } \langle a^{\mathcal{I}}, \in b^{\mathcal{I}} \rangle \in R^{\mathcal{I}} \]	
 \end{definition}
 
-Finding a model is crucial for consistency checking. If we find at least one model knowledge base $\mathcal{KB}$ is consistent. We can have more models for one knowledge base. In Example 1.1.7 there are two showed models but there can be more models. 
+Finding a model (an interpretation satisfying $\mathcal{KB}$) is crucial for consistency checking. If we find at least one model the knowledge base $\mathcal{KB}$ is consistent. We can have more models for one knowledge base. In Example 1.1.7 there are two showed models but there can be more models. 
 
 \begin{definition}{\textbf{Model}}
 	
@@ -315,21 +313,21 @@ Finding a model is crucial for consistency checking. If we find at least one mod
 	\right \}
 	\]
 
-	\[ \mathcal{M}_{1} = \{  \Delta^{\mathcal{I}} = \{ P,S,A,AP \}, \]	
+	\[ \mathcal{I}_{1} = \{  \Delta^{\mathcal{I}} = \{ P,S,A,AP \}, \]	
 	\[ Professor^{\mathcal{I}} = \{P\}, Scientist^{\mathcal{I}} = \{S\}, Academician^{\mathcal{I}} = \{A\}, AssocProfessor^{\mathcal{I}} = \{AP\} \]
 	\[ jack^{\mathcal{I}} = A \} \]	
 
-	\[ \mathcal{M}_{2} = \{  \Delta^{\mathcal{I}} = \{ A \}, \]	
+	\[ \mathcal{I}_{2} = \{  \Delta^{\mathcal{I}} = \{ A \}, \]	
 	\[ Professor^{\mathcal{I}} = \{A\}, Scientist^{\mathcal{I}} = \{A\}, Academician^{\mathcal{I}} = \{A\}, AssocProfessor^{\mathcal{I}} = \{A\} \]
 	\[ jack^{\mathcal{I}} = A \} \]		
 \end{example}
 
 \begin{definition}{\textbf{Consistency}}
 	
-	A knowledge base $\mathcal{KB}$ is consistent iff $\mathcal{KB}$ has at least one model $\mathcal{M}$.
+	A knowledge base $\mathcal{KB}$ is consistent iff $\mathcal{KB}$ has at least one model $\mathcal{I}$.
 \end{definition}
 
-We are familiar with four decision problems, satisfiability, subsumption $(\sqsubseteq)$, equivalence ($\equiv$) and disjointness. Satisfiability means that concept is satisfiable in regard to $\mathcal{KB}$ if we can find such a model of knowledge base for which holds that interpretation of that concept is not empty. Subsumption between two concepts means that it must hold that interpretation of left-sided concept is a proper subset of interpretation of right-sided concept in each possible model of knowledge base. Equivalence is similar to subsumption but the difference is that the interpretations of both concepts must be equal in each possible model of knowledge base. Disjointness means that intersection of the interpretations of both concepts must be empty set in each possible model of knowledge base.
+We are familiar with more decision problems, satisfiability, subsumption $(\sqsubseteq)$, equivalence ($\equiv$) and disjointness. Satisfiability means that concept is satisfiable in regard to $\mathcal{KB}$ if we can find such a model of a knowledge base for which holds that interpretation of that concept is not empty. Subsumption between two concepts must hold that interpretation of left-sided concept is a proper subset of interpretation of right-sided concept in each possible model of a knowledge base. Equivalence is similar to subsumption but the difference is that the interpretations of both concepts must be equal in each possible model of a knowledge base. Disjointness means that intersection of the interpretations of both concepts must be an empty set in each possible model of a knowledge base.
 
 \begin{definition}{\textbf{Decision problems}}
 
@@ -340,29 +338,31 @@ We are familiar with four decision problems, satisfiability, subsumption $(\sqsu
 
 		\item $C \text{ is subsumed by D w.r.t. } \mathcal{KB} \text{ (denoted } \mathcal{KB} \models C \sqsubseteq D) \text{ iff } C^{\mathcal{I}} \subseteq D^{\mathcal{I}} \text{ in every} \newline \text{model } \mathcal{I} \text{ of } \mathcal{KB};$
 
-		\item $\text{C and D are equivalent w.r.t. } \mathcal{KB} \text{ (denoted } \mathcal{KB} \models C \equiv D) \text{ iff } C^{\mathcal{I}} = D^{\mathcal{I}} \text{ in every} \newline \text{model } \mathcal{I} \text{ off } \mathcal{KB};$
+		\item $\text{C and D are equivalent w.r.t. } \mathcal{KB} \text{ (denoted } \mathcal{KB} \models C \equiv D) \text{ iff } C^{\mathcal{I}} = D^{\mathcal{I}} \text{ in every} \newline \text{model } \mathcal{I} \text{ of } \mathcal{KB};$
 		
-		\item $\text{C and D are disjoint w.r.t. } \mathcal{KB} \text{ iff } C^{\mathcal{I}} \cap D^{\mathcal{I}} = \emptyset \text{ in every model } \mathcal{I} \text{ off } \mathcal{KB}.$		
+		\item $\text{C and D are disjoint w.r.t. } \mathcal{KB} \text{ iff } C^{\mathcal{I}} \cap D^{\mathcal{I}} = \emptyset \text{ in every model } \mathcal{I} \text{ of } \mathcal{KB}.$		
 	\end{itemize}
 \end{definition}
 
 If $\mathcal{KB} = \emptyset$ then we say that decision problems (satisfiability, subsumption, equivalence and disjointness) of concepts are defined in general by definition and we use notation such as we omit $\mathcal{KB} \models$ from the notation.
 
 \subsection{DL Tableau algorithm}
-DL Tableau algorithm proves satisfiability if input is concept C and TBox $\mathcal{T}$. But if input is knowledge base $\mathcal{KB}$ then this algorithm is modified to check consistency of given knowledge base. In both versions of this algorithm holds that each concept must be in NNF (negation normal form). Negation normal form is such a form that each negation is pushed in front of atomic concept inside a complex concept. DL Tableau algorithm creates a CTree (Completion tree). At first it initializes with input concept if it proves concept satisfiability otherwise it creates a named node and continue with input concept and then applies tableau rules for given DL. If the algorithm finds a clash in some node, created CTree is not clash-free and the result is that C is unsatisfiable w.r.t. $\mathcal{T}$. If the algorithm applies each rule until any rule can be applied and it finds no clash then result is that concept C is satisfiable w.r.t. $\mathcal{T}$. Following definitions \citep{baaderHandbook} are describing rules and terms that are used by this algorithm.
+Following definitions \citep{baaderHandbook} describe rules and terms that are used by this algorithm. DL Tableau algorithm proves satisfiability of a concept or checks consistency of a given knowledge base. By proving satisfiability the input for the algorithm is concept C and TBox $\mathcal{T}$. By checking consistency the input for the algorithm is a knowledge base $\mathcal{KB}$. In both versions of this algorithm holds that each concept must be in NNF (negation normal form). Negation normal form is such a form that each negation is pushed in front of atomic concept inside a complex concept. 
 
 \begin{definition}{\textbf{NNF}}
-
+	
 	A concept C is in NNF (negation normal form) iff the complement constructor $\neg$ 
 	only occurs in front of atomic concept symbols inside C.
 \end{definition}
 
 \begin{example}{\textbf{NNF}}
-	\[ \neg (C \sqcap D) \equiv \neg C \sqcup \neg D \]
-	\[ \neg (C \sqcup D) \equiv \neg C \sqcap \neg D \]
-	\[ \neg \exists R.C \equiv \forall R. \neg C \]
-	\[ \neg \forall R.C \equiv \exists R. \neg C \]
+	\[ nnf(\neg (C \sqcap D)) = \neg C \sqcup \neg D \]
+	\[ nnf(\neg (C \sqcup D)) = \neg C \sqcap \neg D \]
+	\[ nnf(\neg \exists R.C) = \forall R. \neg C \]
+	\[ nnf(\neg \forall R.C) = \exists R. \neg C \]
 \end{example}
+
+DL Tableau algorithm creates a CTree (Completion tree). CTree proves whether model exists or not.
 
 \begin{definition}{\textbf{Completion tree}}
 
@@ -371,6 +371,9 @@ DL Tableau algorithm proves satisfiability if input is concept C and TBox $\math
 	$\mathcal{L}(x)$ is a set of concepts $\forall x \in V$ and
 	$\mathcal{L}(\langle x, y \rangle )$ is a set of roles $\forall \langle x, y \rangle \in E$.	
 \end{definition}
+
+At first the algorithm creates node and initializes it with the input concept.
+Then the algorithm applies tableau rules for given DL. If the algorithm applies each rule until any rule can be applied and it finds no clash then result is that concept C is satisfiable w.r.t. $\mathcal{T}$.
 
 \begin{definition}{\textbf{Successor, R-successor}}
 
@@ -395,6 +398,8 @@ DL Tableau algorithm proves satisfiability if input is concept C and TBox $\math
 A CTree T = $(V,E, \mathcal{L})$ is clash-free iff none of the nodes in V contains a clash.
 \end{definition}
 
+There can be a situation that some concept can lead to infinite looping and algorithm would never stop. An example for that is: $Person \sqsubseteq \exists hasParent.Person$. That is why the algorithm uses Blocking rule.
+
 \begin{definition}{\textbf{Blocking}}
 	
 	Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor $y$ such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or $y$ is blocked.
@@ -405,7 +410,7 @@ DL Tableau algorithm proves concept satisfiability in regard of TBox. Input for 
 \begin{definition}{\textbf{Algorithm - Concept satisfiability}}	
 	
 	\noindent \textbf{Input:} concept C and $\mathcal{T}$ in NNF \newline
-	\textbf{Output:} answers if concept C is satisfiable w.r.t. $\mathcal{T}$ or not \newline
+	\textbf{Output:} answers whether concept C is satisfiable w.r.t. $\mathcal{T}$ or not \newline
 	\textbf{Steps:}
 	\begin{enumerate}
 		\item Initialize a new CTree T := $(\{s_{0}\}, \emptyset, \{s_{0} \rightarrow \{C\}\})$;
@@ -428,17 +433,17 @@ DL Tableau algorithm proves concept satisfiability in regard of TBox. Input for 
 	\end{itemize}
 \end{definition}	
 
-Knowledge base is a pair of a TBox and an Abox and yet only a TBox was mentioned in connection with DL Tableau algorithm. If we also have a given ABox the algorithm must be modified. The algorithm no longer checks concept satisfiability w.r.t. $\mathcal{T}$ but checks consistency of given $\mathcal{KB}$. For result holds the same condition as in proving concept satisfiability. If there is a found clash knowledge base is not consistent otherwise knowledge base is consistent. Difference between the first version of this algorithm is that here are used named nodes. Name of the node is an instance of a concept that comes from ABox. 
+Knowledge base is a pair of a TBox and an Abox and yet only a TBox was mentioned in connection with the DL Tableau algorithm. If we also have a given ABox the algorithm must be modified. The algorithm checks no longer concept satisfiability w.r.t. $\mathcal{T}$ but checks consistency of a given $\mathcal{KB}$. The same condition holds for the result as in proving concept satisfiability. If there is a found clash the knowledge base is not consistent otherwise the knowledge base is consistent. Difference between the first version of this algorithm is that here are used named nodes. Name of the node is an instance of a concept that comes from ABox. 
 
 \begin{definition}{\textbf{Algorithm - Consistency checking}}
 
 \noindent \textbf{Input:} $\mathcal{KB} = (\mathcal{T}, \mathcal{A})$ in NNF \newline
-\textbf{Output:} answers if $\mathcal{KB}$ is consistent or not \newline
+\textbf{Output:} answers whether $\mathcal{KB}$ is consistent or not \newline
 \textbf{Steps:}
 \begin{enumerate}
 	\item Initialize a CTree as follows:
 		\begin{itemize}
-			\item $V := \{ a \text{ } | \text{ constant a occurs in } \mathcal{A} \}$;
+			\item $V := \{ a \text{ } | \text{ individual a occurs in } \mathcal{A} \}$;
 			\item $E := \{ \langle a,b \rangle \text{ } | \text{ } a,b : R \in \mathcal{A} \text{ for some role R} \}$;
 			\item $\mathcal{L}(a) := \{ nnf(E) \text{ } | \text{ } a:E \in \mathcal{A}\} \text{ for all } a \in V$; \newline
 			$\mathcal{L}(\langle a,b \rangle) := \{ R \text{ } | \text{ } a,b:R \in \mathcal{A}\} \text{ for all } \langle a,b \rangle \in E$;
@@ -455,8 +460,8 @@ Let's introduce an example where we know a knowledge base $\mathcal{KB}$. DL Tab
 	\[ 
 	\mathcal{KB} = \left\{
 	\begin{tabular}{c c}
-	$Student \sqsubseteq \exists attends.Logic$ \\
-	$Logic \sqsubseteq Course$ \\
+	$Student \sqsubseteq \exists attends.MathCourse$ \\
+	$MathCourse \sqsubseteq Course$ \\
 	$jack : Student$ \\
 	\end{tabular}
 	\right \}
@@ -468,36 +473,35 @@ Let's introduce an example where we know a knowledge base $\mathcal{KB}$. DL Tab
 	thick,main node/.style={circle, draw}]
 	
 	\node[main node] (1) {jack};
-	\node[main node] (2) [right of=1] {$l_{1}$};
+	\node[main node] (2) [right of=1] {$m_{1}$};
 	
 	\def\myshift#1{\raisebox{1ex}}
 	
-	\draw [thick, ->, postaction={decorate, decoration={text along path, text align=center, text={|\sffamily\myshift|attends}}}] (1) to [bend left=30] (2);
+	\draw [thick, ->, postaction={decorate, decoration={text along path, text align=center, text={|\myshift|attends}}}] (1) to [bend left=30] (2);
 	
 	\node[text width=3cm] at (0,-3) 
-	{$\mathcal{L}(jack) = \{ Student, \neg Student \sqcup \exists attends.Logic, \exists attends.Logic, \neg Logic \sqcup Course, \neg Logic \}$};		
+	{$\mathcal{L}(jack) = \{ Student, \neg Student \sqcup \exists attends.MathCourse, \newline \exists attends.MathCourse, \neg Logic \sqcup Course, \neg MathCourse \}$};		
 
 	\node[text width=5cm] at (10,-3) 
-	{$\mathcal{L}(l_{1}) = \{ Logic, \neg Student \sqcup \exists attends.Logic, \neg Student, \neg Logic \sqcup Course, Course \}$};			
+	{$\mathcal{L}(m_{1}) = \{ MathCourse, \neg Student \sqcup \exists attends.MathCourse, \neg Student, \newline \neg MathCourse \sqcup Course, Course \}$};			
 	\end{tikzpicture}
 \end{center}
 
-The algorithm starts with ABox assertion axioms. It selects axiom $jack : Student$.
-At first it creates a node $jack$ with its label $\mathcal{L}(jack)$. From the assertion axiom $jack : Student$ algorithm knows that jack is a Student and add to the label $\mathcal{L}(jack)$ concept $Student$. Then the algorithm is choosing another axiom from knowledge base. There are no more assertion axioms, so it starts with axioms from TBox. It will take $Student \sqsubseteq \exists attends.Logic$. It must convert it into negation normal form which will be $\neg Student \sqcup \exists attends.Logic$. The algorithm is applying $\sqcup-rule$. According this rule it must choose $\exists attends.Logic$, otherwise there would be a clash. Now it has to apply $\exists - rule$ so a new node $l_{1}$ will be created with its label $\mathcal{L}(l_{1})$. Into this label $\mathcal{L}(l_{1})$ will be added concept $Logic$. Let's go back to $jack$ node. The algorithm has to finish adding all axioms of TBox form. It will add the second axiom from knowledge base in negation normal form as $\neg Logic \sqcup Course$. Now it does not matter which one algorithm chooses if $Course$ or $\neg Logic$ because any of these two does not cause a clash. Now the algorithm goes back to $l_{1}$ node and continues to add axioms from knowledge base similarly as in node $jack$. It starts with axiom $\neg Student \sqcup \exists attends.Logic$, it will choose the first one $\neg Student$. Then continues with axiom $\neg Logic \sqcup Course$. It can not choose $\neg Logic$ because there would be immediately a clash. So it chooses $Course$.
+The algorithm starts with the ABox assertion axioms. It selects the axiom $jack : Student$. At first it creates a node $jack$ with its label $\mathcal{L}(jack)$. From the assertion axiom $jack : Student$ algorithm knows that jack is a Student and adds the concept $Student$ to the label $\mathcal{L}(jack)$. Then the algorithm is choosing another axiom from the knowledge base. There are no more assertion axioms, so it starts with the axioms from TBox. It takes $Student \sqsubseteq \exists attends.MathCourse$. It must convert it into the negation normal form which is $\neg Student \sqcup \exists attends.MathCourse$. The algorithm applies $\sqcup-rule$. According to this rule it must choose $\exists attends.MathCourse$, otherwise there would be a clash. Now it has to apply $\exists - rule$ so a new node $l_{1}$ will be created with its label $\mathcal{L}(m_{1})$. Concept $MathCourse$ will be added into this label. Let's go back to the $jack$ node. The algorithm has to finish adding all axioms of TBox form. It will add the second axiom from the knowledge base in negation normal form as $\neg MathCourse \sqcup Course$. Now it does not matter which one algorithm chooses if $Course$ or $\neg MathCourse$ because any of these two does not cause a clash. Now the algorithm goes back to the $m_{1}$ node and continues to add axioms from the knowledge base similarly as in the node $jack$. It starts with axiom $\neg Student \sqcup \exists attends.MathCourse$, it will choose the first one $\neg Student$. Then continues with axiom $\neg MathCourse \sqcup Course$. It can not choose $\neg MathCourse$ because there would be immediately a clash. So it chooses $Course$.
 
-The created tree contains two nodes ($jack$ and $l_{1}$) and one edge between them. The edge represents that $jack$ attends some Logic $l_{1}$. There is not any instance of a concept $Logic$ so node $l_{1}$ does not represent a concrete instance of concept $Logic$ but represents some instance. There is no clash in both nodes so the answer of DL Tableau algorithm is that given knowledge base $\mathcal{KB}$ is consistent.
+The created tree contains two nodes ($jack$ and $m_{1}$) and one edge between them. The edge represents that $jack$ attends some MathCourse $m_{1}$. There is not any instance of a concept $MathCourse$ so the node $m_{1}$ does not represent a concrete instance of the concept $MathCourse$ but represents some instance. There is no clash in both nodes so the answer of the DL Tableau algorithm is that the given knowledge base $\mathcal{KB}$ is consistent.
 
 \section{Abduction}
-Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known and natural for humans is probably deduction. All three ways are dealing with following parts: theory, data and effect. In description logic we can translate theory as knowledge base, data as explanations and  effect as observation.
+Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known and natural for humans is probably deduction. All three ways are dealing with the following parts: theory, data and effect. In the description logic we can translate the theory as a knowledge base, data as the explanations and the effect as an observation.
 
-Deduction knows knowledge base and explanations, observation is missing and the goal is to deduce the missing observation. Induction knows observation and explanation but does not know knowledge base. Abduction knows knowledge base and observation but explanation is a subject of searching. All definitions are from article by \citep{pukancovaAboxAbduction}.
+By deduction is known a knowledge base and the explanations, the observation is missing and the goal is to deduce the missing observation. By induction is known an observation and an explanation but the knowledge base is unknown. By abduction is known a knowledge base and an observation but the explanation is a subject of searching. All definitions are from article by \cite{pukancovaAboxAbduction}.
 
 \subsection{ABox abduction}
-In description logic abduction is used when we are not familiar with explanation $\mathcal{E}$ but we know knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations. Minimal explanation is such an explanation that it does not exist any other explanation that would be a subset of this minimal explanation.
+In the description logics abduction is used when we are not familiar with the explanation $\mathcal{E}$ but we know a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations. A minimal explanation is such an explanation that it does not exist any other explanation that would be a subset of that minimal explanation.
 
 \begin{definition}{\textbf{(Abduction)}} 
 
-	Given knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$, an abductive explanation is such explanation $\mathcal{E}$ that satisfies $\mathcal{KB} \cup \mathcal{E} \models \mathcal{O}$.
+	Given a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$, an abductive explanation is such an explanation $\mathcal{E}$ that satisfies $\mathcal{KB} \cup \mathcal{E} \models \mathcal{O}$.
 \end{definition}
 
 \begin{definition}{\textbf{(Correct explanation)}}
@@ -511,7 +515,7 @@ In description logic abduction is used when we are not familiar with explanation
 	Minimal explanation is such an explanation that it does not exist any other explanation that would be a subset of this explanation.
 \end{definition}
 
-For better understanding of what ABox abduction is let's introduce a few examples. First example is easy, searched explanation is obvious but it will demonstrate the problem. Second example is not so obvious that's why we have to use an algorithm to compute the solution. For computing the solution we use \textbf{Minimal Hitting Set algorithm}.
+For better understanding of what ABox abduction is let's introduce a few examples. The first example is easy, the searched explanation is obvious but it will demonstrate the problem. The second example is not so obvious that is why we have to use an algorithm to compute the solution. For computing the solution we use the \textbf{Minimal Hitting Set algorithm}.
 
 \begin{example}{(\textbf{ABox Abduction - Emotion})}
 	\[ 
@@ -531,7 +535,7 @@ For better understanding of what ABox abduction is let's introduce a few example
 	\]								
 \end{example}
 
-In this example we are searching for explanations. In this easy assignment is obvious that what we are looking for is that Mary must be sick. If Mary is not happy she must be sick. Formally written solution to this abduction problem is following:
+In this example we are searching the explanations. In this easy assignment it is obvious that what we are looking for is that Mary is sick. If Mary is not happy she must be sick. Formally written solution to this abduction problem is the following:
 \[ 
 \mathcal{E} = \left\{
 \begin{tabular}{c c}
@@ -560,37 +564,56 @@ $mary : Sick$
 	
 \end{example}
 
-If $jack$ is an Academician he must be Professor or Scientist. If he is an Professor he must be also an AssocProfessor. This is an oversimplified explanation how we can retrieve correct explanations. For better introduction into this algorithm we will explain it step by step. We know the observation so we know that jack is an Academician, that is a fact. In our first axiom in TBox is written that if somebody is an Academician he is also a Professor or Scientist. He can be both but at least one of them but that we are not able to determine. That is why are both correct explanations. The second axiom claims that if somebody is a Professor he must be also an AssocProfessor. In this part we are not explaining the whole algorithm yet because it will be explained in our next chapter Minimal Hitting Set algorithm but we need to have at least an idea of how does it work. So as we already know the correct explanations are following:
+If $jack$ is an Academician he must be a Professor or a Scientist. If he is a Professor he must be also an AssocProfessor. This is an oversimplified explanation how we can retrieve correct explanations. For the better introduction into this algorithm we will explain it step by step. We know the observation so we know that jack is an Academician, that is a fact. In our first axiom in TBox it is written that if somebody is an Academician he is also a Professor or a Scientist. He can be both but at least one of them but that we are not able to determine. That is why both explanations are correct. The second axiom claims that if somebody is a Professor he must be also an AssocProfessor. In this part we are not explaining the whole algorithm yet because it will be explained in our next chapter Minimal Hitting Set algorithm but we need to have at least an idea of how it works. So as we already know the correct explanations are following:
 
 \[ 
-\mathcal{E} = \left\{
+\mathcal{E}_{1} = \left\{
 \begin{tabular}{c c}
 	$jack : Professor$ \\
+\end{tabular}
+\right \}
+\]
+
+\[ 
+\mathcal{E}_{3} = \left\{
+\begin{tabular}{c c}
 	$jack : Scientist$ \\
+\end{tabular}
+\right \}
+\]
+
+\[ 
+\mathcal{E}_{3} = \left\{
+\begin{tabular}{c c}
 	$jack : AssocProfessor$ \\
 \end{tabular}
 \right \}
 \]
 
 \subsection{Minimal Hitting Set algorithm}
-In this part we will find out about algorithm: Minimal hitting set. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using.
+In this part we will explain the algorithm: Minimal hitting set. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using. The first term is a hitting set. Let's have collection of sets $C$. Hitting set is such a set that has non empty intersection with each set of collection $C$.
 
-\begin{definition}[Hitting set]
-	Hitting set for a collection of sets $C$ is a set $H \subseteq U_{S \in C}$ such that $H \cap S$ is not empty set for each $S \in C$.
+\begin{definition}{\textbf{Hitting set}}
+	
+	A hitting set for a collection of sets $C$ is a set $H \subseteq \cup_{S \in C}$ such that $H \cap S$ is not an empty set for each $S \in C$.
 \end{definition}
 
-\begin{definition}[HS-tree]
-	Let $C$ be a collection of sets. An HS-tree $T$ for $C$ is a smallest edge-labeled and node-labeled tree with following properties:
+HS-tree is such a tree that contains nodes with three possible values. The first value is a checkmark, the second is a crossmark and the third is a set. Each edge has its own label that determines path from parent to node. Labeled edges determines path from root to node $n$. HS-tree must be the smallest tree for the collection of sets $C$.
+
+\begin{definition}{\textbf{HS-tree}}
+	
+	Let $C$ be a collection of sets. An HS-tree $T$ for $C$ is a smallest edge-labeled and node-labeled tree with the following properties:
 	
 	\begin{itemize}
 		\item The root is labeled by $\checkmark$ if $C$ is empty. Otherwise the root is labeled by an arbitrary set of $C$.
 		
-		\item For each node $n$ of $T$, let $H(n)$ be the set of edge labels on the path in $T$ from the root to node $n$. The label for $n$ is any set $\sigma \in C$ such that $sigma \cap H(n) = \emptyset$, if such a set $\sigma$ exists. Otherwise, the label for $n$ is $\checkmark$. If $n$ is labeled by the set $\sigma$, then for each $o \in \sigma$, $n$ has a successor $n_{0}$ joined to $n$ by an edge of labeled by $o$.
+		\item For each node $n$ of $T$, let $H(n)$ be the set of edge labels on the path in $T$ from the root to a node $n$. The label for $n$ is any set $\sigma \in C$ such that $\Sigma \cap H(n) = \emptyset$, if such a set $\Sigma$ exists. Otherwise, the label for $n$ is $\checkmark$. If $n$ is labeled by the set $\Sigma$, then for each $\sigma \in \Sigma$, $n$ has a successor $n_{\sigma}$ joined to $n$ by an edge of labeled by $\sigma$.
 	\end{itemize}
-	
 \end{definition}
 
-\begin{definition}[Generate pruned HS-tree]{\indent}
+The Minimal Hitting Set algorithm generates a HS-tree. It is a breadth-first search algorithm which means that algorithm creates all nodes in one breadth level and then it goes to the next level if possible. The following definition describes rules of how the algorithm behaves.
+
+\begin{definition}{\textbf{Minimal Hitting Set algorithm}}{\indent}
 	\begin{itemize}
 		\item Generate the pruned HS-tree breadth-first, generating all nodes at any fixed level in the tree before descending to generate the nodes at the next level.
 		
@@ -601,7 +624,7 @@ In this part we will find out about algorithm: Minimal hitting set. This algorit
 		\begin{itemize}
 			\item If node $n$ is labeled by $\checkmark$ and node $n'$ is such that $H(n) \subseteq H(n')$, then close the node $n'$. A label is not computed for $n'$ nor are any successor nodes generated.
 			
-			\item If node $n$ has been generated and node $n'$ is such that $H(n') = H(n)$, then close node $n'$.
+			\item If a node $n$ has been generated and node $n'$ is such that $H(n') = H(n)$, then close node $n'$.
 			
 			\item If nodes $n$ and $n'$ have been labeled by sets $S$ and $S'$ of $C$, respectively and if $S'$ is a proper subset of $S$, then for each $\alpha \in S - S'$ mark as redundant the edge from node $n$ labeled by $\alpha$. A redundant edge, together with the subtree beneath it, may be removed from the HS-tree while preserving the property that the resulting pruned HS-tree will yield all minimal hitting sets for $C$.
 			
@@ -611,18 +634,18 @@ In this part we will find out about algorithm: Minimal hitting set. This algorit
 	
 \end{definition}
 
-Reiter's algorithm is used to compute a minimal hitting set. Input is a set of sets. The goal of Reiter's algorithm is to compute minimal hitting set from this input. It means that the result hitting set will have intersection with each set from input.
+Reiter's algorithm is used to compute a minimal hitting set. Input is a set of sets. The goal of Reiter's algorithm is to compute a minimal hitting set from this input. It means that the result hitting set will have non empty intersection with each set from the input.
 
-Let's show an example with $F$ as input set and $HS$ as result.
+Let's show an example with $F$ as the input set and $HS$ as the result \label{fig:MinimalHS}.
 
 \begin{example}{\textbf{(Minimal Hitting Set)}}
 	\[  F = \{ \{a,b\}, \{b,c\}, \{a,c\}, \{b,d\}, \{b\} \} \]
 	\[ HS = \{ \{a,b\}, \{b,c\} \} \]
 \end{example}
 
-As we can observe in this example the first result set has intersection with each set of $F$ and the second result set also has intersection with each set of $F$. So we can determine that these result sets are definitely minimal hitting sets. They are both minimal because there is no other set that is smaller and at the same time has intersection with each set of $F$.
+As we can observe in this example the first result set has non empty intersection with each set of $F$ and the second result set also has intersection with each set of $F$. So we can determine that these result sets are definitely minimal hitting sets. They are both minimal because there is no other set that is smaller and at the same time has non empty intersection with each set of $F$.
 
-For better and easier understanding of this algorithm we can visualize it and explain.
+For better and easier understanding of this algorithm we can visualize it and explain (Figure \ref*{fig:MinimalHS}).
 
 \begin{figure}[H]
 	\centering
@@ -659,16 +682,17 @@ For better and easier understanding of this algorithm we can visualize it and ex
 	\label{fig:MinimalHS}	
 \end{figure}
 
-Aim is to create a tree where nodes can have three types of value. Node can be set from $F$, check or cross. Each edge is labeled by one element of some set from $F$. At first we have to create root. Root node is first set $\{a,b\}$ from $F$. It will have exactly two children because the size of node is exactly two.
+An aim is to create a tree where nodes can have three types of a value. A node can be set from $F$, check mark or cross mark. Each edge is labeled by one element of some set from $F$. At first we have to create a root. The Root node is the first set $\{a,b\}$ from $F$. It will have exactly two children because the size of the node label is exactly two.
 
-Now we have to decide what will be child's node. Let's check left child. We have to create a set from edges from root to our node. In this case this set contains only one element $\{a\}$. If $\{a\}$ has intersection with each sets from $F$ we can add check as node. But that is not our case so we add the second set as node. Let's continue with right child of root. Labeled path from this node to root is $\{b\}$. That has also not intersection with each set of $F$ so we add third set as node. We continue breadth-first with $\{b,c\}$ node. Left child has labeled path $\{a,b\}$ which has intersection with each set of $F$ and it fulfills condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we are looking for only minimal hitting sets. If already exists checked node that is a proper subset of this possible hitting set we have to add cross as node because it is not a minimal hitting set, otherwise we add check as node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
+Now we have to decide what will be the child's node. Let's check the left child. We have to create a set from edges from the root to the node. In this case this set contains only one element $\{a\}$. If $\{a\}$ has intersection with each set from $F$ we can add check mark as the node. But that is not our case so we add the second set as the node. Let's continue with the right child of root. A labeled path from this node to the root is $\{b\}$. That does not have non empty intersection with each set of $F$ so we add third set as node. We continue breadth-first with $\{b,c\}$ node. Left child has labeled path $\{a,b\}$ which has intersection with each set of $F$ and it fulfills the condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we are looking only for minimal hitting sets. If checked node already exists and it is a proper subset of this possible hitting set we have to add cross mark as the node because it is not a minimal hitting set, otherwise we add check mark as the node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
 
+%mozno zbytocne, vyhodit?
 \subsection{Optimizations}
-To Reiter's original algorithm were added optimizations by \citep{greinerReitersCorrection} and \citep{wotawaReitersVariant} a few years later. 
+To Reiter's original algorithm were added optimizations by \cite{greinerReitersCorrection} and \cite{wotawaReitersVariant} a few years later. 
 
-Greiner claims that Reiter's way of creating a tree handles some situations incorrect. The base algorithm is correct but prunning may lead to loose of minimal hitting sets. Proposed way of preventing this loose is use directed acyclic graph instead of a tree. We did not use this optimization because in our case wrong handling of situation can not happened.
+Greiner claims that Reiter's way of creating a tree handles some situations incorrectly. The base algorithm is correct but prunning may lead to lose minimal hitting sets. Proposed way of preventing this lost is to use a directed acyclic graph instead of a tree. We did not use this optimization because in our case wrong handling of situation can not happened.
 
-The next optimization by Wotawa disclaim the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of edge label and right means the biggest size of edge label in one breadth level. In our case this optimization is also useless because in our tree in one breadth level the size of edge label is always equal.
+The next optimization by Wotawa disclaim the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of edge label and right means the biggest size of edge label in one breadth level. In our case this optimization is also useless because in our tree the size of edge label is always equal.
 
 \subsection{ABox Abduction with Minimal Hitting Set algorithm}
 %For our algorithm to work we have to combine these two algorithms as designed by \citep{pukancovaAboxAbduction}. 
@@ -677,6 +701,31 @@ The next optimization by Wotawa disclaim the proposed way by Greiner. He has ret
 
 
 \section{Reasoning}
+
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+
+%\begin{algorithm}[H]
+%	\caption{Adjusted Minimal Hitting Set algorithm}
+%	\begin{algorithmic} 
+%		\REQUIRE $Ontology, observation \text{ } \mathcal{O}$
+%		\STATE $root \leftarrow negationOfModel$
+%		\STATE $queue \leftarrow queue \cup root$
+%		\WHILE{$queue.isNotEmpty()$}
+%		\STATE $node \leftarrow queue.pop()$
+%		\FOR{(Node child : node.children)}
+%		\STATE $consistent \leftarrow isConsistent(node); relevant \leftarrow isRelevant(node)$
+%		\STATE $explanation \leftarrow isExplanation(node); minimal \leftarrow isMinimal(node)$ 
+%		\IF{\texttt{(explanation)}}
+%		\STATE $explanations \leftarrow explanations \cup node.label$
+%		\ELSE
+%		\STATE $queue \leftarrow queue \cup node$
+%		\ENDIF
+		
+%		\ENDFOR
+%		\ENDWHILE		
+%	\end{algorithmic}
+%\end{algorithm}	
 
 \subsection{Elk reasoner}
 
