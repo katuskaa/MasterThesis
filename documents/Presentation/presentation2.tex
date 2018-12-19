@@ -18,10 +18,6 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{color}
-%\usepackage[]{algorithm2e}
-\usepackage{algorithm}
-\usepackage{algorithmic}
-
 
 % There are many different themes available for Beamer. A comprehensive
 % list with examples is given here:
@@ -124,7 +120,7 @@
 			Implementation
 			\begin{itemize}
 				\item Reiter's algorithm with optimizations
-				\item adjusted MergeXPlain algorithm
+				\item Adjusted MergeXPlain algorithm
 			\end{itemize}
 		}
 
@@ -261,7 +257,7 @@
 		}
 		
 		\item {
-			Algorithm finds this explanation: 
+			Algorithm finds these explanations: 
 			\[ \mathcal{E}_{1} = \{ jack: Professor \} \]
 			\[ \mathcal{E}_{2} = \{ jack: Scientist \} \]
 			\[ \mathcal{E}_{3} = \{ jack: AssocProfessor \} \]
@@ -270,32 +266,25 @@
 \end{frame}
 
 \begin{frame}{Adjusted Reiter's algorithm: Minimal Hitting Set}
-\begin{algorithm}[H]
-	\caption{Adjusted Minimal Hitting Set algorithm}
-	\begin{algorithmic} 
-		\REQUIRE $Ontology, observation \text{ } \mathcal{O}$
-		\STATE $root \leftarrow negationOfModel$
-		\STATE $queue \leftarrow queue \cup root$
-		\WHILE{$queue.isNotEmpty()$}
-		\STATE $node \leftarrow queue.pop()$
-			\FOR{(Node child : node.children)}
-			\STATE $consistent \leftarrow isConsistent(node); relevant \leftarrow isRelevant(node)$
-			\STATE $explanation \leftarrow isExplanation(node); minimal \leftarrow isMinimal(node)$ 
-			\IF{\texttt{(explanation)}}
-				\STATE $explanations \leftarrow explanations \cup node.label$
-			\ELSE
-				\STATE $queue \leftarrow queue \cup node$
-			\ENDIF
-			
-			\ENDFOR
-		\ENDWHILE		
-	\end{algorithmic}
-\end{algorithm}	
-\end{frame}
-
-
-\begin{frame}{Adjusted Reiter's algorithm: Minimal Hitting Set}
 	\begin{itemize}
+		\item {
+			Algorithm:
+			
+			\begin{itemize}
+				\item {
+					Generating a tree using breadth-first search (queue)
+				}
+				\item {
+					Root node: negation of model from $\mathcal{KB} \cup \neg \mathcal{O}$
+				}
+				\item {
+					Checking conditions to determine node value (explanation, possible explanation (continue with negation of model))
+				}
+				\item {
+					Finish if queue is empty
+				}
+			\end{itemize}
+		}
 		\item {
 			Implementation with more reasoners (ELK/JFact/Hermit/Pellet)
 		}
@@ -306,10 +295,10 @@
 		
 		\item {
 			Optimizations: 
-
+			
 			\begin{itemize}
 				\item Observation can not be an explanation
-
+				
 				\item Explanation that is not minimal does not even have to be considered
 			\end{itemize}
 		}
