@@ -1,6 +1,7 @@
 package algorithms.mergeXPlain;
 
 import algorithms.ISolver;
+import common.Printer;
 import models.Explanation;
 import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -33,7 +34,7 @@ public class MergeXPlainSolver implements ISolver {
 
     @Override
     public List<Explanation> getExplanations() {
-        return explanations;
+        return filterExplanations();
     }
 
     private void initialize() {
@@ -98,11 +99,11 @@ public class MergeXPlainSolver implements ISolver {
 
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
-            Conflict temp = new Conflict(conflictC1);
+            // Conflict temp = new Conflict(conflictC1);
 
-            conflictLiterals.getOwlAxioms().removeAll(temp.getLiterals().getOwlAxioms());
-            temp.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
-            conflictLiterals.getOwlAxioms().addAll(temp.getLiterals().getOwlAxioms());
+            conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
+            conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
+            conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
 
             explanations.add(CS);
         }
@@ -152,6 +153,27 @@ public class MergeXPlainSolver implements ISolver {
         }
 
         return dividedLiterals;
+    }
+
+    private List<Explanation> filterExplanations() {
+        List<Explanation> filteredExplanations = new LinkedList<>();
+
+        for (Explanation explanation : explanations) {
+            for (OWLAxiom axiom : explanation.getOwlAxioms()) {
+                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxioms().get(0)))) {
+                    Explanation filter = new Explanation();
+                    filter.getOwlAxioms().addAll(explanation.getOwlAxioms());
+                    filter.getOwlAxioms().remove(axiom);
+
+                    filteredExplanations.add(filter);
+                    break;
+                }
+
+            }
+        }
+
+
+        return filteredExplanations;
     }
 
 }
