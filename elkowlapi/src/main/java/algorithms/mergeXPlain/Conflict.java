@@ -22,6 +22,14 @@ class Conflict {
         this.explanations = explanations;
     }
 
+    Conflict(Conflict conflict) {
+        this.literals = new Literals();
+        this.literals.getOwlAxioms().addAll(conflict.getLiterals().getOwlAxioms());
+
+        this.explanations = new LinkedList<>();
+        this.explanations.addAll(conflict.getExplanations());
+    }
+
     Literals getLiterals() {
         if (literals == null) {
             literals = new Literals(new HashSet<>());

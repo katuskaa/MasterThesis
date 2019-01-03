@@ -54,7 +54,7 @@ class DataProcessing implements IDataProcessing {
                 literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
             }
 
-            literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+            // literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
             literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
 
