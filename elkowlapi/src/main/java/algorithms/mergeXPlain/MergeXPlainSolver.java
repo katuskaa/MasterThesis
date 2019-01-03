@@ -1,10 +1,10 @@
 package algorithms.mergeXPlain;
 
 import algorithms.ISolver;
+import common.Printer;
 import models.Explanation;
 import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
@@ -19,10 +19,7 @@ public class MergeXPlainSolver implements ISolver {
     private ILoader loader;
     private IReasonerManager reasonerManager;
 
-    private OWLOntology base;
     private Literals literals;
-    private MergeXPlainHelper mergeXPlainHelper;
-
     private List<Explanation> explanations;
 
 
@@ -37,15 +34,13 @@ public class MergeXPlainSolver implements ISolver {
 
     @Override
     public List<Explanation> getExplanations() {
-        return explanations;
+        return filterExplanations();
     }
 
     private void initialize() {
-        mergeXPlainHelper = new MergeXPlainHelper();
+        reasonerManager.addAxiomsToOntology(loader.getNegObservation().getOwlAxioms());
 
-        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxioms().get(0));
-        loader.initializeReasoner();
-
+        //TODO vyhodit dataprocessing
         IDataProcessing dataProcessing = new DataProcessing(loader);
         literals = dataProcessing.getLiterals();
     }
@@ -57,19 +52,19 @@ public class MergeXPlainSolver implements ISolver {
 
 
     private Conflict getMergeConflict() {
-        if (mergeXPlainHelper.isBaseNotConsistent(reasonerManager)) {
+        if (!reasonerManager.isOntologyConsistent()) {
             return new Conflict();
         }
 
-        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, literals)) {
+        if (reasonerManager.isOntologyWithLiteralsConsistent(literals)) {
             return new Conflict();
         }
 
-        return findConflicts(base, literals);
+        return findConflicts(literals);
     }
 
-    private Conflict findConflicts(OWLOntology base, Literals literals) {
-        if (mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, literals)) {
+    private Conflict findConflicts(Literals literals) {
+        if (reasonerManager.isOntologyWithLiteralsConsistent(literals)) {
             return new Conflict(literals, new LinkedList<>());
         }
 
@@ -79,10 +74,10 @@ public class MergeXPlainSolver implements ISolver {
             return new Conflict(new Literals(), explanations);
         }
 
-        List<Literals> sets = mergeXPlainHelper.divideIntoSets(literals);
+        List<Literals> sets = divideIntoSets(literals);
 
-        Conflict conflictC1 = findConflicts(base, sets.get(0));
-        Conflict conflictC2 = findConflicts(base, sets.get(1));
+        Conflict conflictC1 = findConflicts(sets.get(0));
+        Conflict conflictC2 = findConflicts(sets.get(1));
 
         List<Explanation> explanations = new LinkedList<>();
         explanations.addAll(conflictC1.getExplanations());
@@ -92,7 +87,7 @@ public class MergeXPlainSolver implements ISolver {
         conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
         conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
 
-        while (!mergeXPlainHelper.isBaseWithLiteralsConsistent(reasonerManager, conflictLiterals)) {
+        while (!reasonerManager.isOntologyWithLiteralsConsistent(conflictLiterals)) {
 
             reasonerManager.addAxiomsToOntology(conflictC2.getLiterals().getOwlAxioms());
             Explanation X = getConflict(conflictC2.getLiterals().getOwlAxioms(), conflictC1.getLiterals());
@@ -103,6 +98,8 @@ public class MergeXPlainSolver implements ISolver {
             reasonerManager.removeAxiomsFromOntology(X.getOwlAxioms());
 
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
+
+            // Conflict temp = new Conflict(conflictC1);
 
             conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
             conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
@@ -116,7 +113,7 @@ public class MergeXPlainSolver implements ISolver {
 
 
     private Explanation getConflict(Collection<OWLAxiom> axioms, Literals literals) {
-        if (!axioms.isEmpty() && mergeXPlainHelper.isBaseNotConsistent(reasonerManager)) {
+        if (!axioms.isEmpty() && !reasonerManager.isOntologyConsistent()) {
             return new Explanation();
         }
 
@@ -124,7 +121,7 @@ public class MergeXPlainSolver implements ISolver {
             return new Explanation(literals.getOwlAxioms());
         }
 
-        List<Literals> sets = mergeXPlainHelper.divideIntoSets(literals);
+        List<Literals> sets = divideIntoSets(literals);
 
         reasonerManager.addAxiomsToOntology(sets.get(0).getOwlAxioms());
         Explanation D2 = getConflict(sets.get(0).getOwlAxioms(), sets.get(1));
@@ -141,5 +138,42 @@ public class MergeXPlainSolver implements ISolver {
         return new Explanation(conflicts);
     }
 
+
+    private List<Literals> divideIntoSets(Literals literals) {
+        List<Literals> dividedLiterals = new ArrayList<>();
+
+        dividedLiterals.add(new Literals());
+        dividedLiterals.add(new Literals());
+
+        int count = 0;
+
+        for (OWLAxiom owlAxiom : literals.getOwlAxioms()) {
+            dividedLiterals.get(count % 2).getOwlAxioms().add(owlAxiom);
+            count++;
+        }
+
+        return dividedLiterals;
+    }
+
+    private List<Explanation> filterExplanations() {
+        List<Explanation> filteredExplanations = new LinkedList<>();
+
+        for (Explanation explanation : explanations) {
+            for (OWLAxiom axiom : explanation.getOwlAxioms()) {
+                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxioms().get(0)))) {
+                    Explanation filter = new Explanation();
+                    filter.getOwlAxioms().addAll(explanation.getOwlAxioms());
+                    filter.getOwlAxioms().remove(axiom);
+
+                    filteredExplanations.add(filter);
+                    break;
+                }
+
+            }
+        }
+
+
+        return filteredExplanations;
+    }
 
 }

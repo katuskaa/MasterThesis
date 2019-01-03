@@ -1,5 +1,6 @@
 package reasoner;
 
+import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.Collection;
@@ -40,6 +41,16 @@ public class ReasonerManager implements IReasonerManager {
     public boolean isOntologyConsistent() {
         loader.initializeReasoner();
         return loader.getReasoner().isConsistent();
+    }
+
+
+    @Override
+    public boolean isOntologyWithLiteralsConsistent(Literals literals) {
+        addAxiomsToOntology(literals.getOwlAxioms());
+        boolean isConsistent = isOntologyConsistent();
+        removeAxiomsFromOntology(literals.getOwlAxioms());
+
+        return isConsistent;
     }
 
 }

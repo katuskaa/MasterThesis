@@ -1,5 +1,6 @@
 package reasoner;
 
+import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.Collection;
@@ -15,5 +16,7 @@ public interface IReasonerManager {
     void removeAxiomsFromOntology(Collection<OWLAxiom> axioms);
 
     boolean isOntologyConsistent();
+
+    boolean isOntologyWithLiteralsConsistent(Literals literals);
 
 }
