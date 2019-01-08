@@ -101,7 +101,9 @@ public class AbductionHSSolver implements ISolver {
 
     //TODO consider object property
     private ModelNode getNegModel(Explanation explanation) {
-        List<OWLAxiom> model = new LinkedList<>(loader.getNegObservation().getOwlAxioms());
+        List<OWLAxiom> model = new LinkedList<>();
+
+        model.add(loader.getNegObservation().getOwlAxiom());
 
         if (explanation != null) {
             model.addAll(explanation.getOwlAxioms());
@@ -133,7 +135,7 @@ public class AbductionHSSolver implements ISolver {
         }
 
         reasonerManager.removeAxiomsFromOntology(model);
-        model.removeAll(loader.getNegObservation().getOwlAxioms());
+        model.remove(loader.getNegObservation().getOwlAxiom());
 
         return getComplementOfModel(model);
     }

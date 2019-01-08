@@ -20,11 +20,11 @@ public interface ILoader {
 
     Observation getObservation();
 
-    void addObservation(OWLAxiom observation);
+    void setObservation(OWLAxiom observation);
 
     Observation getNegObservation();
 
-    void addNegObservation(OWLAxiom negObservation);
+    void setNegObservation(OWLAxiom negObservation);
 
     OWLOntologyManager getOntologyManager();
 

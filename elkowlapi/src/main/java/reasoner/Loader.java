@@ -106,8 +106,6 @@ public class Loader implements ILoader {
     }
 
     private void loadObservation() {
-        observation = new Observation();
-        negObservation = new Observation();
         namedIndividuals = new Individuals();
 
         IObservationParser observationParser = new ObservationParser(this);
@@ -130,8 +128,8 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void addObservation(OWLAxiom observation) {
-        this.observation.addOwlAxiom(observation);
+    public void setObservation(OWLAxiom observation) {
+        this.observation = new Observation(observation);
     }
 
     @Override
@@ -140,8 +138,8 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void addNegObservation(OWLAxiom negObservation) {
-        this.negObservation.addOwlAxiom(negObservation);
+    public void setNegObservation(OWLAxiom negObservation) {
+        this.negObservation = new Observation(negObservation);
     }
 
     @Override

@@ -48,13 +48,12 @@ class DataProcessing implements IDataProcessing {
             OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(Configuration.INDIVIDUAL)));
 
             OWLAxiom owlAxiom = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual);
-            OWLAxiom observation = loader.getObservation().getOwlAxioms().get(0);
+            OWLAxiom observation = loader.getObservation().getOwlAxiom();
 
             if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
                 literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
             }
 
-            // literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
             literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
 

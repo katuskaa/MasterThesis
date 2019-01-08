@@ -47,8 +47,8 @@ public class ObservationParser implements IObservationParser {
 
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
 
-        loader.addObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
-        loader.addNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+        loader.setObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+        loader.setNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
     }
 
     private void parseObjectProperty(String[] expressions) {
@@ -64,8 +64,8 @@ public class ObservationParser implements IObservationParser {
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(subject));
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));
 
-        loader.addObservation(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
-        loader.addNegObservation(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
+        loader.setObservation(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
+        loader.setNegObservation(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
     }
 
 }

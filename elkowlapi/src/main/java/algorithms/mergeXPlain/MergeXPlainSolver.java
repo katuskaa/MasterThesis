@@ -38,7 +38,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private void initialize() {
-        reasonerManager.addAxiomsToOntology(loader.getNegObservation().getOwlAxioms());
+        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
 
         //TODO vyhodit dataprocessing
         IDataProcessing dataProcessing = new DataProcessing(loader);
@@ -99,8 +99,6 @@ public class MergeXPlainSolver implements ISolver {
 
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
-            // Conflict temp = new Conflict(conflictC1);
-
             conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
             conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
             conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
@@ -160,7 +158,7 @@ public class MergeXPlainSolver implements ISolver {
 
         for (Explanation explanation : explanations) {
             for (OWLAxiom axiom : explanation.getOwlAxioms()) {
-                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxioms().get(0)))) {
+                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxiom()))) {
                     Explanation filter = new Explanation();
                     filter.getOwlAxioms().addAll(explanation.getOwlAxioms());
                     filter.getOwlAxioms().remove(axiom);
