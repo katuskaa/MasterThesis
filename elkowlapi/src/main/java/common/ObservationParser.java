@@ -4,7 +4,9 @@ import org.semanticweb.owlapi.model.*;
 import reasoner.Loader;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class ObservationParser implements IObservationParser {
@@ -40,15 +42,26 @@ public class ObservationParser implements IObservationParser {
     }
 
     private void parseClassAssertion(String[] expressions) {
+        // TODO make parser for complex concept, now testing intersection of more two concepts
         OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
-        OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[1])));
+
+        String[] classes = expressions[1].split(DLSyntax.CONJUNCTION);
+
+        OWLClass owlClass1 = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(classes[0])));
+        OWLClass owlClass2 = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(classes[1])));
+
+        Set<OWLClassExpression> intersectionOfConcepts = new HashSet<>();
+
+        intersectionOfConcepts.add(owlClass1);
+        intersectionOfConcepts.add(owlClass2);
+        OWLObjectIntersectionOf axiom = loader.getDataFactory().getOWLObjectIntersectionOf(intersectionOfConcepts);
 
         loader.addNamedIndividual(namedIndividual);
 
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
 
-        loader.setObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
-        loader.setNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+        loader.setObservation(loader.getDataFactory().getOWLClassAssertionAxiom(axiom, namedIndividual));
+        loader.setNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(axiom.getComplementNNF(), namedIndividual));
     }
 
     private void parseObjectProperty(String[] expressions) {

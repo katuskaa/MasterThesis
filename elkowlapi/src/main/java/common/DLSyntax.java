@@ -8,7 +8,9 @@ public class DLSyntax {
     public final static String DELIMITER_ONTOLOGY = "#";
 
     public final static String NEGATION = "~";
-    public final static String CONJUNCTION = "+";
-    public final static String DISJUNCTION = "-";
+    public final static String CONJUNCTION = "\\+";
+    public final static String DISJUNCTION = "\\-";
+    public final static String LEFT_PARENTHESES = "(";
+    public final static String RIGHT_PARENTHESES = ")";
 
 }
