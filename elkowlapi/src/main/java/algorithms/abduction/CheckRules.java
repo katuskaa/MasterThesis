@@ -29,17 +29,16 @@ public class CheckRules implements ICheckRules {
         return isConsistent;
     }
 
+    // TODO not necessary
     @Override
     public boolean isRelevant(Explanation explanation) {
         Collection<OWLAxiom> explanations = explanation.getOwlAxioms();
 
-//        for (OWLAxiom observation : loader.getObservation().getOwlAxiom()) {
-            for (OWLAxiom axiom : explanations) {
-                if (loader.getObservation().getOwlAxiom().equals(axiom)) {
-                    return false;
-                }
+        for (OWLAxiom axiom : explanations) {
+            if (loader.getObservation().getOwlAxiom().equals(axiom)) {
+                return false;
             }
-//        }
+        }
 
         return true;
     }

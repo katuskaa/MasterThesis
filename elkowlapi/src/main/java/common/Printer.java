@@ -4,33 +4,33 @@ import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Printer {
 
     public static String print(OWLAxiom owlAxiom) {
         if (owlAxiom instanceof OWLClassAssertionAxiom) {
-            return Printer.getNamedIndividual(owlAxiom).concat(Configuration.DELIMITER_ASSERTION).concat(Printer.getClassAssertionAxiom(owlAxiom));
+            return Printer.getNamedIndividual(owlAxiom).concat(DLSyntax.DELIMITER_ASSERTION).concat(Printer.getClassAssertionAxiom(owlAxiom));
         }
 
-        return Printer.getNamedIndividual(owlAxiom).concat(Configuration.DELIMITER_ASSERTION).concat(Printer.getObjectPropertyAssertionAxiom(owlAxiom));
+        return Printer.getNamedIndividual(owlAxiom).concat(DLSyntax.DELIMITER_ASSERTION).concat(Printer.getObjectPropertyAssertionAxiom(owlAxiom));
     }
 
     private static String getNamedIndividual(OWLAxiom owlAxiom) {
         List<String> owlNamedIndividuals = new ArrayList<>();
-        Set<OWLNamedIndividual> individualsInSignature = owlAxiom.getIndividualsInSignature();
+        List<OWLNamedIndividual> individualsInSignature = owlAxiom.individualsInSignature().collect(Collectors.toList());
 
         for (OWLNamedIndividual owlNamedIndividual : individualsInSignature) {
             owlNamedIndividuals.add(owlNamedIndividual.getIRI().getFragment());
         }
 
-        return StringUtils.join(owlNamedIndividuals, Configuration.DELIMITER_INDIVIDUAL);
+        return StringUtils.join(owlNamedIndividuals, DLSyntax.DELIMITER_INDIVIDUAL);
     }
 
     private static String getClassAssertionAxiom(OWLAxiom owlAxiom) {
-        Set<OWLAxiom> axioms = new HashSet<>();
+        List<OWLAxiom> axioms = new ArrayList<>();
         axioms.add(owlAxiom);
 
         Set<OWLAxiom> classAssertionAxioms = AxiomType.getAxiomsOfTypes(axioms, AxiomType.CLASS_ASSERTION);
@@ -50,7 +50,7 @@ public class Printer {
     }
 
     private static String getObjectPropertyAssertionAxiom(OWLAxiom owlAxiom) {
-        Set<OWLAxiom> axioms = new HashSet<>();
+        List<OWLAxiom> axioms = new ArrayList<>();
         axioms.add(owlAxiom);
 
         Set<OWLAxiom> objectPropertyAssertionAxioms = AxiomType.getAxiomsOfTypes(axioms, AxiomType.OBJECT_PROPERTY_ASSERTION);
@@ -59,13 +59,13 @@ public class Printer {
         List<String> objectPropertyAssertions = new ArrayList<>();
 
         for (OWLAxiom objectPropertyAssertionAxiom : objectPropertyAssertionAxioms) {
-            objectPropertyAssertionAxiom.getObjectPropertiesInSignature().forEach(objectProperty -> {
+            objectPropertyAssertionAxiom.objectPropertiesInSignature().forEach(objectProperty -> {
                 objectPropertyAssertions.add(objectProperty.getIRI().getFragment());
             });
         }
 
         for (OWLAxiom negativeObjectPropertyAssertionAxiom : negativeObjectPropertyAssertionAxioms) {
-            negativeObjectPropertyAssertionAxiom.getObjectPropertiesInSignature().forEach(objectProperty -> {
+            negativeObjectPropertyAssertionAxiom.objectPropertiesInSignature().forEach(objectProperty -> {
                 objectPropertyAssertions.add("¬" + objectProperty.getIRI().getFragment());
             });
         }

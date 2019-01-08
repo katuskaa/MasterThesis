@@ -3,22 +3,22 @@ package models;
 import common.Printer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Literals {
 
-    private Set<OWLAxiom> owlAxioms;
+    private List<OWLAxiom> owlAxioms;
 
     public Literals() {
-        this.owlAxioms = new HashSet<>();
+        this.owlAxioms = new ArrayList<>();
     }
 
-    public Literals(Set<OWLAxiom> owlAxioms) {
+    public Literals(List<OWLAxiom> owlAxioms) {
         this.owlAxioms = owlAxioms;
     }
 
-    public Set<OWLAxiom> getOwlAxioms() {
+    public List<OWLAxiom> getOwlAxioms() {
         return owlAxioms;
     }
 

@@ -40,18 +40,29 @@ public class AbductionHSSolver implements ISolver {
         assertionsAxioms = new ArrayList<>();
         negAssertionsAxioms = new ArrayList<>();
 
-        //TODO add object property
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
-            List<OWLAxiom> assertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom);
 
-            if (assertionAxiom != null && assertionAxiom.size() == 2) {
-                assertionsAxioms.add(assertionAxiom.get(0));
-                negAssertionsAxioms.add(assertionAxiom.get(1));
+            List<OWLAxiom> classAssertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom);
+            List<OWLAxiom> objectPropertyAssertionAxiom = AxiomManager.createObjectPropertyAssertionAxiom(loader, axiom);
+
+            for (int i = 0; i < classAssertionAxiom.size(); i++) {
+                if (i % 2 == 0) {
+                    assertionsAxioms.add(classAssertionAxiom.get(i));
+                } else {
+                    negAssertionsAxioms.add(classAssertionAxiom.get(i));
+                }
+            }
+
+            for (int i = 0; i < objectPropertyAssertionAxiom.size(); i++) {
+                if (i % 2 == 0) {
+                    assertionsAxioms.add(objectPropertyAssertionAxiom.get(i));
+                } else {
+                    negAssertionsAxioms.add(objectPropertyAssertionAxiom.get(i));
+                }
             }
         });
     }
 
-    // TODO add optimisations
     private void startSolving() {
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
@@ -75,9 +86,8 @@ public class AbductionHSSolver implements ISolver {
                     explanation.addAxiom(child);
 
                     boolean isConsistent = checkRules.isConsistent(explanation);
-                    boolean isRelevant = checkRules.isRelevant(explanation);
 
-                    if (isConsistent && isRelevant) {
+                    if (isConsistent) {
                         boolean isExplanation = checkRules.isExplanation(explanation);
 
                         if (isExplanation) {
@@ -99,7 +109,6 @@ public class AbductionHSSolver implements ISolver {
         }
     }
 
-    //TODO consider object property
     private ModelNode getNegModel(Explanation explanation) {
         List<OWLAxiom> model = new LinkedList<>();
 

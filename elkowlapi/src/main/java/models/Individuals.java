@@ -1,6 +1,6 @@
 package models;
 
-import common.Configuration;
+import common.DLSyntax;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 
@@ -31,6 +31,6 @@ public class Individuals {
             individuals.add(namedIndividual.getIRI().getFragment());
         }
 
-        return StringUtils.join(individuals, Configuration.DELIMITER_INDIVIDUAL);
+        return StringUtils.join(individuals, DLSyntax.DELIMITER_INDIVIDUAL);
     }
 }

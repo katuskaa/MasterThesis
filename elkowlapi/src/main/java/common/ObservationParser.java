@@ -1,10 +1,10 @@
 package common;
 
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.*;
 import reasoner.Loader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ObservationParser implements IObservationParser {
@@ -27,9 +27,9 @@ public class ObservationParser implements IObservationParser {
         }
 
         for (String observation : observations) {
-            String[] expressions = observation.split(Configuration.DELIMITER_ASSERTION);
+            String[] expressions = observation.split(DLSyntax.DELIMITER_ASSERTION);
 
-            if (expressions[0].contains(Configuration.DELIMITER_OBJECT_PROPERTY)) {
+            if (expressions[0].contains(DLSyntax.DELIMITER_OBJECT_PROPERTY)) {
                 parseObjectProperty(expressions);
             } else {
                 parseClassAssertion(expressions);
@@ -40,8 +40,8 @@ public class ObservationParser implements IObservationParser {
     }
 
     private void parseClassAssertion(String[] expressions) {
-        OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(expressions[0])));
-        OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(expressions[1])));
+        OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
+        OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[1])));
 
         loader.addNamedIndividual(namedIndividual);
 
@@ -52,14 +52,28 @@ public class ObservationParser implements IObservationParser {
     }
 
     private void parseObjectProperty(String[] expressions) {
-        String[] individuals = expressions[0].split(Configuration.DELIMITER_OBJECT_PROPERTY);
+        String[] individuals = expressions[0].split(DLSyntax.DELIMITER_OBJECT_PROPERTY);
 
-        OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(individuals[0])));
-        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(individuals[1])));
-        OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(expressions[1])));
+        OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(individuals[0])));
+        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(individuals[1])));
+        OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[1])));
 
-        loader.addNamedIndividual(subject);
-        loader.addNamedIndividual(object);
+
+        List<OWLNamedIndividual> alreadyInOntology = new ArrayList<>();
+
+        loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
+            if (OWLNamedIndividual.class.isAssignableFrom(axiom.getEntity().getClass())) {
+                alreadyInOntology.add((OWLNamedIndividual) axiom.getEntity());
+            }
+        });
+
+        if (!alreadyInOntology.contains(subject)) {
+            loader.addNamedIndividual(subject);
+        }
+
+        if (!alreadyInOntology.contains(object)) {
+            loader.addNamedIndividual(object);
+        }
 
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(subject));
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));

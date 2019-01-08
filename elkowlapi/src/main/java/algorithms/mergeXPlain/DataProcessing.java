@@ -1,32 +1,32 @@
 package algorithms.mergeXPlain;
 
-import common.Configuration;
 import common.Printer;
 import models.Literals;
 import org.semanticweb.owlapi.model.*;
 import reasoner.ILoader;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 class DataProcessing implements IDataProcessing {
 
     private ILoader loader;
-    private Set<OWLClass> owlClasses;
+    private List<OWLClass> owlClasses;
+    private List<OWLObjectProperty> owlObjectProperties;
 
     DataProcessing(ILoader loader) {
         this.loader = loader;
-        this.owlClasses = new HashSet<>();
+
+        this.owlClasses = new ArrayList<>();
+        this.owlObjectProperties = new ArrayList<>();
     }
 
     @Override
     public Literals getLiterals() {
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(owlAxiom -> {
-
-            Set<OWLClass> classes = owlAxiom.getClassesInSignature();
-            owlClasses.addAll(classes);
+            owlClasses.addAll(owlAxiom.classesInSignature().collect(Collectors.toList()));
+            owlObjectProperties.addAll(owlAxiom.objectPropertiesInSignature().collect(Collectors.toList()));
         });
 
         return createLiterals();
@@ -36,25 +36,25 @@ class DataProcessing implements IDataProcessing {
         Literals literals = new Literals();
 
         literals.addLiterals(createLiteralsFromClasses());
-        // literals.addLiterals(createLiteralsFromObjectProperties());
+        literals.addLiterals(createLiteralsFromObjectProperties());
 
         return literals;
     }
 
     private Literals createLiteralsFromClasses() {
         Literals literals = new Literals();
+        OWLAxiom observation = loader.getObservation().getOwlAxiom();
 
         for (OWLClass owlClass : owlClasses) {
-            OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(Configuration.INDIVIDUAL)));
+            for (OWLNamedIndividual namedIndividual : loader.getIndividuals().getNamedIndividuals()) {
+                OWLAxiom owlAxiom = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual);
 
-            OWLAxiom owlAxiom = loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual);
-            OWLAxiom observation = loader.getObservation().getOwlAxiom();
+                if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
+                    literals.getOwlAxioms().add(owlAxiom);
+                }
 
-            if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
-                literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+                literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
             }
-
-            literals.getOwlAxioms().add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
         }
 
         return literals;
@@ -62,25 +62,24 @@ class DataProcessing implements IDataProcessing {
 
     private Literals createLiteralsFromObjectProperties() {
         Literals literals = new Literals();
+        OWLAxiom observation = loader.getObservation().getOwlAxiom();
 
-        loader.getOntology().axioms().forEach(axiom -> {
-            Set<OWLClass> classes = axiom.getClassesInSignature();
-            Set<OWLObjectProperty> objectProperties = axiom.getObjectPropertiesInSignature();
+        for (OWLObjectProperty owlObjectProperty : owlObjectProperties) {
+            for (OWLNamedIndividual subject : loader.getIndividuals().getNamedIndividuals()) {
+                for (OWLNamedIndividual object : loader.getIndividuals().getNamedIndividuals()) {
 
-            if (classes.size() == 2 && objectProperties.size() == 1) {
-                for (OWLObjectProperty owlObjectProperty : objectProperties) {
+                    if (!subject.equals(object)) {
+                        OWLAxiom owlAxiom = loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(owlObjectProperty, subject, object);
 
-                    List<OWLClass> classList = new ArrayList<>(classes);
+                        if (!Printer.print(owlAxiom).equals(Printer.print(observation))) {
+                            literals.getOwlAxioms().add(owlAxiom);
+                        }
 
-                    OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(classList.get(0).getIRI().getFragment())));
-                    OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(classList.get(1).getIRI().getFragment())));
-                    OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(Configuration.DELIMITER_ONTOLOGY).concat(owlObjectProperty.getNamedProperty().getIRI().getFragment())));
-
-                    literals.getOwlAxioms().add(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
-                    literals.getOwlAxioms().add(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
+                        literals.getOwlAxioms().add(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(owlObjectProperty, subject, object));
+                    }
                 }
             }
-        });
+        }
 
         return literals;
     }
