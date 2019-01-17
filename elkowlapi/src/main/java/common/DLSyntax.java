@@ -6,11 +6,16 @@ public class DLSyntax {
     public final static String DELIMITER_OBJECT_PROPERTY = ",";
     public final static String DELIMITER_INDIVIDUAL = ",";
     public final static String DELIMITER_ONTOLOGY = "#";
+    public final static String DELIMITER_EXPRESSION = " ";
 
-    public final static String NEGATION = "~";
-    public final static String CONJUNCTION = "\\+";
-    public final static String DISJUNCTION = "\\-";
+    public final static String NEGATION = "not";
+    public final static String CONJUNCTION = "and";
+    public final static String DISJUNCTION = "or";
+    public final static String FOR_ALL = "only";
+    public final static String EXISTS = "some";
+    public final static String NOMINAL = "value";
     public final static String LEFT_PARENTHESES = "(";
     public final static String RIGHT_PARENTHESES = ")";
+
 
 }
