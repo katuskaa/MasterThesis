@@ -51,19 +51,20 @@ class PostfixNotation {
                 tokens.add(possibleTokens[i].substring(0, possibleTokens[i].length() - 1));
                 tokens.add(DLSyntax.RIGHT_PARENTHESES);
 
-            } else if (possibleTokens[i].equals(DLSyntax.NOMINAL)) {
+            } else if (possibleTokens[i].equals(DLSyntax.NOMINAL) || possibleTokens[i].equals(DLSyntax.NEGATION)) {
                 if (i + 1 < possibleTokens.length) {
+                    String actualToken = possibleTokens[i];
                     String nextToken = possibleTokens[++i];
 
                     if (nextToken.endsWith(DLSyntax.RIGHT_PARENTHESES)) {
                         String validNextToken = nextToken.substring(0, nextToken.length() - 1);
-                        String token = DLSyntax.NOMINAL.concat(DLSyntax.DELIMITER_EXPRESSION).concat(validNextToken);
+                        String token = actualToken.concat(DLSyntax.DELIMITER_EXPRESSION).concat(validNextToken);
 
                         tokens.add(token);
                         tokens.add(DLSyntax.RIGHT_PARENTHESES);
 
                     } else {
-                        String token = DLSyntax.NOMINAL.concat(DLSyntax.DELIMITER_EXPRESSION).concat(nextToken);
+                        String token = actualToken.concat(DLSyntax.DELIMITER_EXPRESSION).concat(nextToken);
                         tokens.add(token);
                     }
 

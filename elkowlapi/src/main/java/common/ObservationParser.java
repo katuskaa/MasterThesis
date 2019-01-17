@@ -26,59 +26,41 @@ public class ObservationParser implements IObservationParser {
         }
 
         for (String observation : observations) {
-            String[] expressions = observation.split(DLSyntax.DELIMITER_ASSERTION);
-
-            if (expressions[0].contains(DLSyntax.DELIMITER_OBJECT_PROPERTY)) {
-                parseObjectProperty(expressions);
-            } else {
-                parseClassAssertion(expressions);
-            }
+            parseAssertion(observation.split(DLSyntax.DELIMITER_ASSERTION));
         }
     }
 
-    private void parseClassAssertion(String[] expressions) {
+    private void parseAssertion(String[] expressions) {
         OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
-
-        PostfixNotation postfixNotation = new PostfixNotation(expressions[1]);
-        OWLExpression expression = parseExpression(postfixNotation.getPostfixExpression());
 
         loader.addNamedIndividual(namedIndividual);
         loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
 
-        loader.setObservation(loader.getDataFactory().getOWLClassAssertionAxiom(expression.classExpression, namedIndividual));
-        loader.setNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(expression.classExpression.getComplementNNF(), namedIndividual));
+        PostfixNotation postfixNotation = new PostfixNotation(expressions[1]);
+        OWLExpression expression = parseExpression(postfixNotation.getPostfixExpression());
+
+        switch (expression.typ) {
+            case CLASS_EXPRESSION:
+                loader.setObservation(loader.getDataFactory().getOWLClassAssertionAxiom(expression.classExpression, namedIndividual));
+                loader.setNegObservation(loader.getDataFactory().getOWLClassAssertionAxiom(expression.classExpression.getComplementNNF(), namedIndividual));
+                break;
+
+            case NEGATIVE_OBJECT_PROPERTY_ASSERTION:
+                loader.setObservation(expression.negativeObjectPropertyAssertionAxiom);
+                loader.setNegObservation(expression.objectPropertyAssertionAxiom);
+                break;
+
+            case OBJECT_PROPERTY_ASSERTION:
+                loader.setObservation(expression.objectPropertyAssertionAxiom);
+                loader.setNegObservation(expression.negativeObjectPropertyAssertionAxiom);
+                break;
+
+            default:
+                break;
+        }
+
 
         //TODO test if nominal needs to be added to ontology as individual if it is not already in
-    }
-
-    private void parseObjectProperty(String[] expressions) {
-        String[] individuals = expressions[0].split(DLSyntax.DELIMITER_OBJECT_PROPERTY);
-
-        OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(individuals[0])));
-        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(individuals[1])));
-        OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[1])));
-
-        List<OWLNamedIndividual> alreadyInOntology = new ArrayList<>();
-
-        loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
-            if (OWLNamedIndividual.class.isAssignableFrom(axiom.getEntity().getClass())) {
-                alreadyInOntology.add((OWLNamedIndividual) axiom.getEntity());
-            }
-        });
-
-        if (!alreadyInOntology.contains(subject)) {
-            loader.addNamedIndividual(subject);
-        }
-
-        if (!alreadyInOntology.contains(object)) {
-            loader.addNamedIndividual(object);
-        }
-
-        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(subject));
-        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));
-
-        loader.setObservation(loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object));
-        loader.setNegObservation(loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object));
     }
 
     private OWLExpression parseExpression(List<String> postfixExpression) {
@@ -89,6 +71,24 @@ public class ObservationParser implements IObservationParser {
 
             expression.classExpression = createClassExpression(postfixExpression.get(0));
             expression.typ = OWLTyp.CLASS_EXPRESSION;
+
+            return expression;
+        } else if (postfixExpression.size() == 3 && (postfixExpression.get(2).equals(DLSyntax.EXISTS) || postfixExpression.get(2).equals(DLSyntax.FOR_ALL))) {
+
+            OWLExpression expression = new OWLExpression();
+
+            String left = postfixExpression.get(0);
+            String right = postfixExpression.get(1);
+
+            if (containsNegation(left)) {
+                expression.negativeObjectPropertyAssertionAxiom = createNegativeObjectPropertyAssertionAxiom(left, right);
+                expression.objectPropertyAssertionAxiom = createObjectPropertyAssertionAxiom(left, right);
+                expression.typ = OWLTyp.NEGATIVE_OBJECT_PROPERTY_ASSERTION;
+            } else {
+                expression.objectPropertyAssertionAxiom = createObjectPropertyAssertionAxiom(left, right);
+                expression.negativeObjectPropertyAssertionAxiom = createNegativeObjectPropertyAssertionAxiom(left, right);
+                expression.typ = OWLTyp.OBJECT_PROPERTY_ASSERTION;
+            }
 
             return expression;
         }
@@ -246,21 +246,57 @@ public class ObservationParser implements IObservationParser {
     }
 
     private OWLClassExpression createClassExpression(String name) {
-        OWLClassExpression classExpression = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
+        OWLClassExpression classExpression;
 
         if (containsNegation(name)) {
-            classExpression = classExpression.getComplementNNF();
+            String className = name.split(DLSyntax.DELIMITER_EXPRESSION)[1];
+            classExpression = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(className))).getComplementNNF();
+        } else {
+            classExpression = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
         }
 
         return classExpression;
     }
 
     private OWLObjectProperty createObjectPropertyExpression(String name) {
-        return loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
+        OWLObjectProperty objectProperty;
+
+        if (containsNegation(name)) {
+            String objectPropertyName = name.split(DLSyntax.DELIMITER_EXPRESSION)[1];
+            objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(objectPropertyName)));
+        } else {
+            objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
+        }
+
+        return objectProperty;
     }
 
     private OWLNamedIndividual createNamedIndividual(String name) {
         return loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
+    }
+
+    private OWLObjectPropertyAssertionAxiom createObjectPropertyAssertionAxiom(String left, String right) {
+        OWLObjectProperty objectProperty = createObjectPropertyExpression(left);
+
+        OWLNamedIndividual subject = loader.getIndividuals().getNamedIndividuals().get(0);
+        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(right)));
+
+        loader.addNamedIndividual(object);
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));
+
+        return loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object);
+    }
+
+    private OWLNegativeObjectPropertyAssertionAxiom createNegativeObjectPropertyAssertionAxiom(String left, String right) {
+        OWLObjectProperty objectProperty = createObjectPropertyExpression(left);
+
+        OWLNamedIndividual subject = loader.getIndividuals().getNamedIndividuals().get(0);
+        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(right)));
+
+        loader.addNamedIndividual(object);
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));
+
+        return loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object);
     }
 
     private boolean containsNegation(String concept) {
