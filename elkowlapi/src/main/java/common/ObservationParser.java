@@ -33,8 +33,6 @@ public class ObservationParser implements IObservationParser {
             } else {
                 parseClassAssertion(expressions);
             }
-
-            Configuration.INDIVIDUAL = expressions[0];
         }
     }
 
@@ -86,6 +84,15 @@ public class ObservationParser implements IObservationParser {
     private OWLExpression parseExpression(List<String> postfixExpression) {
         Stack<OWLExpression> stack = new Stack<>();
 
+        if (postfixExpression.size() == 1) {
+            OWLExpression expression = new OWLExpression();
+
+            expression.classExpression = createClassExpression(postfixExpression.get(0));
+            expression.typ = OWLTyp.CLASS_EXPRESSION;
+
+            return expression;
+        }
+
         for (String token : postfixExpression) {
             if (!isOperator(token)) {
                 OWLExpression expression = new OWLExpression();
@@ -109,7 +116,7 @@ public class ObservationParser implements IObservationParser {
                 OWLExpression left = stack.pop();
 
                 if (right.typ == OWLTyp.TOKEN_NOT_DEFINED) {
-                    right.classExpression = createClassExpression(left.token);
+                    right.classExpression = createClassExpression(right.token);
                     right.token = null;
                     right.typ = OWLTyp.CLASS_EXPRESSION;
                 }
@@ -134,7 +141,7 @@ public class ObservationParser implements IObservationParser {
                         OWLExpression union = new OWLExpression();
 
                         if (left.typ == OWLTyp.TOKEN_NOT_DEFINED) {
-                            left.classExpression = createClassExpression(right.token);
+                            left.classExpression = createClassExpression(left.token);
                             left.token = null;
                             left.typ = OWLTyp.CLASS_EXPRESSION;
                         }
