@@ -7,20 +7,16 @@ import common.IObservationParser;
 import common.LogMessage;
 import common.ObservationParser;
 import models.Individuals;
-import models.KnowledgeBase;
 import models.Observation;
 import openllet.owlapi.OpenlletReasonerFactory;
 import org.semanticweb.HermiT.ReasonerFactory;
-import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 
 import java.io.File;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +29,6 @@ public class Loader implements ILoader {
     private OWLOntology ontology;
     private OWLReasoner reasoner;
 
-    private KnowledgeBase knowledgeBase;
     private Observation observation;
     private Observation negObservation;
     private String ontologyIRI;
@@ -42,7 +37,6 @@ public class Loader implements ILoader {
     @Override
     public void initialize(ReasonerType reasonerType) {
         loadReasoner(reasonerType);
-        loadKnowledgeBase();
         loadObservation();
     }
 
@@ -72,10 +66,6 @@ public class Loader implements ILoader {
     @Override
     public void changeReasoner(ReasonerType reasonerType) {
         switch (reasonerType) {
-            case ELK:
-                setOWLReasonerFactory(new ElkReasonerFactory());
-                break;
-
             case PELLET:
                 setOWLReasonerFactory(OpenlletReasonerFactory.getInstance());
                 break;
@@ -98,30 +88,11 @@ public class Loader implements ILoader {
         reasoner.flush();
     }
 
-    private void loadKnowledgeBase() {
-        Set<OWLAxiom> TBoxAxioms = ontology.getTBoxAxioms(Imports.EXCLUDED);
-        Set<OWLAxiom> ABoxAxioms = ontology.getABoxAxioms(Imports.EXCLUDED);
-
-        knowledgeBase = new KnowledgeBase(TBoxAxioms, ABoxAxioms);
-    }
-
     private void loadObservation() {
-        observation = new Observation();
-        negObservation = new Observation();
         namedIndividuals = new Individuals();
 
         IObservationParser observationParser = new ObservationParser(this);
         observationParser.parse();
-
-        logger.log(Level.INFO, "individuals = ".concat(namedIndividuals.toString()));
-
-        logger.log(Level.INFO, "Observation = ".concat(observation.toString()));
-        logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
-    }
-
-    @Override
-    public KnowledgeBase getKnowledgeBase() {
-        return knowledgeBase;
     }
 
     @Override
@@ -130,8 +101,8 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void addObservation(OWLAxiom observation) {
-        this.observation.addOwlAxiom(observation);
+    public void setObservation(OWLAxiom observation) {
+        this.observation = new Observation(observation);
     }
 
     @Override
@@ -140,8 +111,8 @@ public class Loader implements ILoader {
     }
 
     @Override
-    public void addNegObservation(OWLAxiom negObservation) {
-        this.negObservation.addOwlAxiom(negObservation);
+    public void setNegObservation(OWLAxiom negObservation) {
+        this.negObservation = new Observation(negObservation);
     }
 
     @Override

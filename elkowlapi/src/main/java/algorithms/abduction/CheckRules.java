@@ -29,15 +29,14 @@ public class CheckRules implements ICheckRules {
         return isConsistent;
     }
 
+    // TODO not necessary
     @Override
     public boolean isRelevant(Explanation explanation) {
         Collection<OWLAxiom> explanations = explanation.getOwlAxioms();
 
-        for (OWLAxiom observation : loader.getObservation().getOwlAxioms()) {
-            for (OWLAxiom axiom : explanations) {
-                if (axiom.equals(observation)) {
-                    return false;
-                }
+        for (OWLAxiom axiom : explanations) {
+            if (loader.getObservation().getOwlAxiom().equals(axiom)) {
+                return false;
             }
         }
 
@@ -46,12 +45,12 @@ public class CheckRules implements ICheckRules {
 
     @Override
     public boolean isExplanation(Explanation explanation) {
-        reasonerManager.addAxiomsToOntology(loader.getNegObservation().getOwlAxioms());
+        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
         reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
 
         boolean isConsistent = reasonerManager.isOntologyConsistent();
 
-        reasonerManager.removeAxiomsFromOntology(loader.getNegObservation().getOwlAxioms());
+        reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
         reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
 
         return !isConsistent;

@@ -4,7 +4,9 @@ import algorithms.ISolver;
 import common.Printer;
 import models.Explanation;
 import models.Literals;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
 
@@ -37,12 +39,25 @@ public class MergeXPlainSolver implements ISolver {
         return filterExplanations();
     }
 
-    private void initialize() {
-        reasonerManager.addAxiomsToOntology(loader.getNegObservation().getOwlAxioms());
+    @Override
+    public boolean isShowingExplanations() {
+        return false;
+    }
 
-        //TODO vyhodit dataprocessing
-        IDataProcessing dataProcessing = new DataProcessing(loader);
-        literals = dataProcessing.getLiterals();
+    private void initialize() {
+        reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
+
+        Set<OWLAxiom> allLiterals = new HashSet<>();
+
+        loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
+            List<OWLAxiom> classAssertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom, false);
+            List<OWLAxiom> objectPropertyAssertionAxiom = AxiomManager.createObjectPropertyAssertionAxiom(loader, axiom);
+
+            allLiterals.addAll(classAssertionAxiom);
+            allLiterals.addAll(objectPropertyAssertionAxiom);
+        });
+
+        literals = new Literals(allLiterals);
     }
 
     private void startSolving() {
@@ -99,11 +114,13 @@ public class MergeXPlainSolver implements ISolver {
 
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
-            // Conflict temp = new Conflict(conflictC1);
-
             conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
             conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
             conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
+
+            if (explanations.contains(CS)) {
+                break;
+            }
 
             explanations.add(CS);
         }
@@ -156,11 +173,13 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private List<Explanation> filterExplanations() {
+        System.out.println("Not filtered explanations:");
+        System.out.println(explanations);
         List<Explanation> filteredExplanations = new LinkedList<>();
 
         for (Explanation explanation : explanations) {
             for (OWLAxiom axiom : explanation.getOwlAxioms()) {
-                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxioms().get(0)))) {
+                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxiom()))) {
                     Explanation filter = new Explanation();
                     filter.getOwlAxioms().addAll(explanation.getOwlAxioms());
                     filter.getOwlAxioms().remove(axiom);
@@ -171,7 +190,6 @@ public class MergeXPlainSolver implements ISolver {
 
             }
         }
-
 
         return filteredExplanations;
     }

@@ -31,12 +31,15 @@ public class Main {
 
         if (solver != null) {
             solver.solve(loader, reasonerManager);
-            Collection<Explanation> explanations = solver.getExplanations();
 
-            System.out.println("\nExplanations are:");
+            if (!solver.isShowingExplanations()) {
+                Collection<Explanation> explanations = solver.getExplanations();
 
-            for (Explanation explanation : explanations) {
-                System.out.println(explanation);
+                System.out.println("\nExplanations are:");
+
+                for (Explanation explanation : explanations) {
+                    System.out.println(explanation);
+                }
             }
         }
     }

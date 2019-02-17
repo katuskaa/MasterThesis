@@ -591,14 +591,14 @@ If $jack$ is an Academician he must be a Professor or a Scientist. If he is a Pr
 \]
 
 \subsection{Minimal Hitting Set algorithm}
-In this part we will explain the algorithm: Minimal hitting set. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using. The first term is a hitting set. Let's have collection of sets $C$. Hitting set is such a set that has non empty intersection with each set of collection $C$.
+In this part we will explain the algorithm: Minimal hitting set algorithm. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using. The first term is a hitting set. Let's have collection of sets $C$. Hitting set is such a set that has non-empty intersection with each set of collection $C$.
 
 \begin{definition}{\textbf{Hitting set}}
 	
 	A hitting set for a collection of sets $C$ is a set $H \subseteq \cup_{S \in C}$ such that $H \cap S$ is not an empty set for each $S \in C$.
 \end{definition}
 
-HS-tree is such a tree that contains nodes with three possible values. The first value is a checkmark, the second is a crossmark and the third is a set. Each edge has its own label that determines path from parent to node. Labeled edges determines path from root to node $n$. HS-tree must be the smallest tree for the collection of sets $C$.
+HS-tree is such a tree that contains nodes with three possible values. The first value is check mark, the second is cross mark and the third is a set. Each edge has its own label that determines a path from the parent to node. Labeled edges determines path from the root to node $n$. HS-tree must be the smallest tree for the collection of sets $C$.
 
 \begin{definition}{\textbf{HS-tree}}
 	
@@ -611,7 +611,7 @@ HS-tree is such a tree that contains nodes with three possible values. The first
 	\end{itemize}
 \end{definition}
 
-The Minimal Hitting Set algorithm generates a HS-tree. It is a breadth-first search algorithm which means that algorithm creates all nodes in one breadth level and then it goes to the next level if possible. The following definition describes rules of how the algorithm behaves.
+The minimal hitting set algorithm generates a HS-tree. It is a breadth-first search algorithm which means that algorithm creates all nodes in one breadth level and then it goes to the next level if possible. The following definition describes rules of how the algorithm behaves.
 
 \begin{definition}{\textbf{Minimal Hitting Set algorithm}}{\indent}
 	\begin{itemize}
@@ -634,7 +634,7 @@ The Minimal Hitting Set algorithm generates a HS-tree. It is a breadth-first sea
 	
 \end{definition}
 
-Reiter's algorithm is used to compute a minimal hitting set. Input is a set of sets. The goal of Reiter's algorithm is to compute a minimal hitting set from this input. It means that the result hitting set will have non empty intersection with each set from the input.
+Reiter's algorithm is used to compute minimal hitting sets. Input is a set of sets. The goal of Reiter's algorithm is to compute minimal hitting sets from this input. It means that the resulting hitting sets will have a non-empty intersection with each set from the input.
 
 Let's show an example with $F$ as the input set and $HS$ as the result \label{fig:MinimalHS}.
 
@@ -643,7 +643,7 @@ Let's show an example with $F$ as the input set and $HS$ as the result \label{fi
 	\[ HS = \{ \{a,b\}, \{b,c\} \} \]
 \end{example}
 
-As we can observe in this example the first result set has non empty intersection with each set of $F$ and the second result set also has intersection with each set of $F$. So we can determine that these result sets are definitely minimal hitting sets. They are both minimal because there is no other set that is smaller and at the same time has non empty intersection with each set of $F$.
+As we can observe in this example the first result set has a non-empty intersection with each set of $F$ and the second result set also has an intersection with each set of $F$. So we can determine that these resulting sets are definitely minimal hitting sets. They are both minimal because there is no other set that is smaller and at the same time has non-empty intersection with each set of $F$.
 
 For better and easier understanding of this algorithm we can visualize it and explain (Figure \ref*{fig:MinimalHS}).
 
@@ -682,17 +682,16 @@ For better and easier understanding of this algorithm we can visualize it and ex
 	\label{fig:MinimalHS}	
 \end{figure}
 
-An aim is to create a tree where nodes can have three types of a value. A node can be set from $F$, check mark or cross mark. Each edge is labeled by one element of some set from $F$. At first we have to create a root. The Root node is the first set $\{a,b\}$ from $F$. It will have exactly two children because the size of the node label is exactly two.
+An aim is to create a tree where nodes can have three types of a value. A node can be a set from $F$, check mark or cross mark. Each edge is labeled by one element of some set from $F$. At first we have to create a root. The root node is the first set $\{a,b\}$ from $F$. It will have exactly two children because the size of the node label is two.
 
-Now we have to decide what will be the child's node. Let's check the left child. We have to create a set from edges from the root to the node. In this case this set contains only one element $\{a\}$. If $\{a\}$ has intersection with each set from $F$ we can add check mark as the node. But that is not our case so we add the second set as the node. Let's continue with the right child of root. A labeled path from this node to the root is $\{b\}$. That does not have non empty intersection with each set of $F$ so we add third set as node. We continue breadth-first with $\{b,c\}$ node. Left child has labeled path $\{a,b\}$ which has intersection with each set of $F$ and it fulfills the condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we are looking only for minimal hitting sets. If checked node already exists and it is a proper subset of this possible hitting set we have to add cross mark as the node because it is not a minimal hitting set, otherwise we add check mark as the node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
+Now we have to decide what will be the child's node. Let's check the left child. A labeled path from root to the left node is $\{a\}$. If $\{a\}$ has an intersection with each set from $F$ we can add check mark as the node. But that is not our case so we add such a set that has no intersection with the set $\{ a \}$, as the node. That set is $\{b,c\}$. Let's continue with the right child of the root. A labeled path from this node to the root is $\{b\}$. That does not have non-empty intersection with each set of $F$ so we add set $\{ a,c \}$ as node. We continue breadth-first with $\{b,c\}$ node. Left child has the path labeled by $\{a,b\}$ which has an intersection with each set of $F$ and it fulfills the condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we are looking only for the minimal hitting sets. If a checked node already exists and it is a proper subset of this possible hitting set we have to add cross mark as the node because it is not a minimal hitting set, otherwise we add check mark as the node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
 
-%mozno zbytocne, vyhodit?
 \subsection{Optimizations}
-To Reiter's original algorithm were added optimizations by \cite{greinerReitersCorrection} and \cite{wotawaReitersVariant} a few years later. 
+Optimizations by \cite{greinerReitersCorrection} and \cite{wotawaReitersVariant} were added to Reiter's original algorithm a few years later. 
 
-Greiner claims that Reiter's way of creating a tree handles some situations incorrectly. The base algorithm is correct but prunning may lead to lose minimal hitting sets. Proposed way of preventing this lost is to use a directed acyclic graph instead of a tree. We did not use this optimization because in our case wrong handling of situation can not happened.
+Greiner claims that Reiter's way of creating a tree handles some situations incorrectly. The base algorithm is correct but prunning may lead to lose minimal hitting sets. Proposed way of preventing this lost is to use a directed acyclic graph instead of a tree. We did not use this optimization because in our case this situation can not happened. They provided a different approach for prunning. But the new prunning rule is applicable only then if input set $F$ contains a strict superset of some other set from $F$. Our input does not contain such a superset.
 
-The next optimization by Wotawa disclaim the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of edge label and right means the biggest size of edge label in one breadth level. In our case this optimization is also useless because in our tree the size of edge label is always equal.
+The next optimization by Wotawa disclaims the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of an edge label and right means the biggest size of an edge label in one breadth level. In our case this optimization is also useless because in our tree the size of the edge label is always equal.
 
 \subsection{ABox Abduction with Minimal Hitting Set algorithm}
 %For our algorithm to work we have to combine these two algorithms as designed by \citep{pukancovaAboxAbduction}. 

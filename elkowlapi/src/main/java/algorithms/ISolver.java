@@ -11,4 +11,6 @@ public interface ISolver {
     void solve(ILoader loader, IReasonerManager reasonerManager);
 
     Collection<Explanation> getExplanations();
+
+    boolean isShowingExplanations();
 }

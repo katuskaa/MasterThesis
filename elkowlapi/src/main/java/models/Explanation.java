@@ -13,6 +13,8 @@ public class Explanation {
 
     private Collection<OWLAxiom> owlAxioms;
 
+    private Integer depth;
+
     public Explanation(Collection<OWLAxiom> owlAxioms) {
         this.owlAxioms = owlAxioms;
     }
@@ -23,6 +25,14 @@ public class Explanation {
 
     public Collection<OWLAxiom> getOwlAxioms() {
         return owlAxioms;
+    }
+
+    public Integer getDepth() {
+        return depth;
+    }
+
+    public void setDepth(Integer depth) {
+        this.depth = depth;
     }
 
     public void addAxioms(Collection<OWLAxiom> axioms) {
@@ -42,5 +52,20 @@ public class Explanation {
         }
 
         return "{ " + StringUtils.join(result, ",") + " }";
+    }
+
+    @Override
+    public int hashCode() {
+        return owlAxioms.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Explanation) {
+            Explanation exp = (Explanation) obj;
+            return exp.getOwlAxioms().equals(owlAxioms);
+        }
+
+        return false;
     }
 }

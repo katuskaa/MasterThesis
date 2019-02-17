@@ -1,7 +1,6 @@
 package reasoner;
 
 import models.Individuals;
-import models.KnowledgeBase;
 import models.Observation;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -16,15 +15,13 @@ public interface ILoader {
 
     void initializeReasoner();
 
-    KnowledgeBase getKnowledgeBase();
-
     Observation getObservation();
 
-    void addObservation(OWLAxiom observation);
+    void setObservation(OWLAxiom observation);
 
     Observation getNegObservation();
 
-    void addNegObservation(OWLAxiom negObservation);
+    void setNegObservation(OWLAxiom negObservation);
 
     OWLOntologyManager getOntologyManager();
 
