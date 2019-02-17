@@ -1,6 +1,7 @@
 package algorithms.abduction;
 
 import algorithms.ISolver;
+import common.Configuration;
 import models.Explanation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -21,19 +22,31 @@ public class AbductionHSSolver implements ISolver {
     private List<Explanation> explanations;
     private List<OWLAxiom> assertionsAxioms;
     private List<OWLAxiom> negAssertionsAxioms;
+    private List<OWLAxiom> inconsistentCandidates;
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
 
+        long startTime = System.currentTimeMillis();
         initialize();
         startSolving();
+
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+
+        System.out.println("Time: " + elapsedTime);
     }
 
     @Override
     public List<Explanation> getExplanations() {
         return explanations;
+    }
+
+    @Override
+    public boolean isShowingExplanations() {
+        return true;
     }
 
     private void initialize() {
@@ -42,7 +55,7 @@ public class AbductionHSSolver implements ISolver {
 
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
 
-            List<OWLAxiom> classAssertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom);
+            List<OWLAxiom> classAssertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom, true);
             List<OWLAxiom> objectPropertyAssertionAxiom = AxiomManager.createObjectPropertyAssertionAxiom(loader, axiom);
 
             for (int i = 0; i < classAssertionAxiom.size(); i++) {
@@ -64,11 +77,14 @@ public class AbductionHSSolver implements ISolver {
     }
 
     private void startSolving() {
+        inconsistentCandidates = new LinkedList<>();
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
+        int currentDepth = 0;
 
         ModelNode root = getNegModel(null);
         root.label = new LinkedList<>();
+        root.depth = 0;
 
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
@@ -78,6 +94,15 @@ public class AbductionHSSolver implements ISolver {
 
             if (ModelNode.class.isAssignableFrom(node.getClass())) {
                 ModelNode model = (ModelNode) node;
+
+                if (model.depth > currentDepth) {
+                    showExplanationsWithDepth(model.depth);
+                    currentDepth++;
+                }
+
+                if (model.depth.equals(Configuration.DEPTH)) {
+                    break;
+                }
 
                 for (OWLAxiom child : model.data) {
                     Explanation explanation = new Explanation();
@@ -94,6 +119,7 @@ public class AbductionHSSolver implements ISolver {
                             boolean isMinimal = checkRules.isMinimal(explanations, explanation);
 
                             if (isMinimal) {
+                                explanation.setDepth(model.depth + 1);
                                 explanations.add(explanation);
                             }
 
@@ -101,8 +127,11 @@ public class AbductionHSSolver implements ISolver {
                             ModelNode modelNode = getNegModel(explanation);
 
                             modelNode.label = explanation.getOwlAxioms();
+                            modelNode.depth = model.depth + 1;
                             queue.add(modelNode);
                         }
+                    } else {
+                        inconsistentCandidates.addAll(explanation.getOwlAxioms());
                     }
                 }
             }
@@ -124,7 +153,7 @@ public class AbductionHSSolver implements ISolver {
             OWLAxiom axiom = assertionsAxioms.get(i);
             OWLAxiom complementOfAxiom = negAssertionsAxioms.get(i);
 
-            if (!model.contains(axiom) && !model.contains(complementOfAxiom)) {
+            if (!model.contains(axiom) && !model.contains(complementOfAxiom) && !inconsistentCandidates.contains(axiom) && !inconsistentCandidates.contains(complementOfAxiom)) {
                 reasonerManager.addAxiomToOntology(axiom);
                 boolean isConsistent = reasonerManager.isOntologyConsistent();
                 reasonerManager.removeAxiomFromOntology(axiom);
@@ -163,4 +192,12 @@ public class AbductionHSSolver implements ISolver {
         return modelNode;
     }
 
+    private void showExplanationsWithDepth(Integer depth) {
+        System.out.println("Explanations with depth: " + depth);
+        for (Explanation explanation : explanations) {
+            if (explanation.getDepth().equals(depth)) {
+                System.out.println(explanation);
+            }
+        }
+    }
 }

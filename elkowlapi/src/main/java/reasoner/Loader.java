@@ -10,7 +10,6 @@ import models.Individuals;
 import models.Observation;
 import openllet.owlapi.OpenlletReasonerFactory;
 import org.semanticweb.HermiT.ReasonerFactory;
-import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -67,10 +66,6 @@ public class Loader implements ILoader {
     @Override
     public void changeReasoner(ReasonerType reasonerType) {
         switch (reasonerType) {
-            case ELK:
-                setOWLReasonerFactory(new ElkReasonerFactory());
-                break;
-
             case PELLET:
                 setOWLReasonerFactory(OpenlletReasonerFactory.getInstance());
                 break;
@@ -98,11 +93,6 @@ public class Loader implements ILoader {
 
         IObservationParser observationParser = new ObservationParser(this);
         observationParser.parse();
-
-        logger.log(Level.INFO, "individuals = ".concat(namedIndividuals.toString()));
-
-        logger.log(Level.INFO, "Observation = ".concat(observation.toString()));
-        logger.log(Level.INFO, "Negative observation = ".concat(negObservation.toString()));
     }
 
     @Override

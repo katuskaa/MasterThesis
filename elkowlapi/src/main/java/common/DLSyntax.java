@@ -7,6 +7,7 @@ public class DLSyntax {
     public final static String DELIMITER_INDIVIDUAL = ",";
     public final static String DELIMITER_ONTOLOGY = "#";
     public final static String DELIMITER_EXPRESSION = " ";
+    public final static String DELIMITER_OBSERVATION = ";";
 
     public final static String NEGATION = "not";
     public final static String CONJUNCTION = "and";
@@ -17,5 +18,5 @@ public class DLSyntax {
     public final static String LEFT_PARENTHESES = "(";
     public final static String RIGHT_PARENTHESES = ")";
 
-
+    public final static String DISPLAY_NEGATION = "¬";
 }

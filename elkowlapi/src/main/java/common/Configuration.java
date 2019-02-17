@@ -7,7 +7,6 @@ public class Configuration {
     public static String OBSERVATION = "";
     public static String INPUT_FILE = "";
     public static ReasonerType REASONER;
-    public final static String DELIMITER_OBSERVATION = ";";
-    public static Boolean MULTI_OBSERVATION = false;
     public static Strategy STRATEGY;
+    public static Integer DEPTH;
 }

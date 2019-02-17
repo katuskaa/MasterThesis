@@ -4,10 +4,13 @@ import org.semanticweb.owlapi.model.*;
 import reasoner.Loader;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class ObservationParser implements IObservationParser {
 
+    private Logger logger = Logger.getLogger(ObservationParser.class.getSimpleName());
     private Loader loader;
 
     public ObservationParser(Loader loader) {
@@ -18,8 +21,8 @@ public class ObservationParser implements IObservationParser {
     public void parse() {
         String[] observations;
 
-        if (Configuration.MULTI_OBSERVATION) {
-            observations = Configuration.OBSERVATION.split(Configuration.DELIMITER_OBSERVATION);
+        if (Configuration.OBSERVATION.contains(DLSyntax.DELIMITER_OBSERVATION)) {
+            observations = Configuration.OBSERVATION.split(DLSyntax.DELIMITER_OBSERVATION);
         } else {
             observations = new String[1];
             observations[0] = Configuration.OBSERVATION;
@@ -28,16 +31,25 @@ public class ObservationParser implements IObservationParser {
         for (String observation : observations) {
             parseAssertion(observation.split(DLSyntax.DELIMITER_ASSERTION));
         }
+
+        logger.log(Level.INFO, "Observation: ".concat(Configuration.OBSERVATION));
     }
 
     private void parseAssertion(String[] expressions) {
-        OWLNamedIndividual namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
+        OWLExpression expression = null;
+        OWLNamedIndividual namedIndividual = null;
 
-        loader.addNamedIndividual(namedIndividual);
-        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
+        if (expressions[0].contains(DLSyntax.DELIMITER_OBJECT_PROPERTY)) {
+            expression = parseObjectProperty(expressions);
+        } else {
+            PostfixNotation postfixNotation = new PostfixNotation(expressions[1]);
+            expression = parseExpression(postfixNotation.getPostfixExpression());
 
-        PostfixNotation postfixNotation = new PostfixNotation(expressions[1]);
-        OWLExpression expression = parseExpression(postfixNotation.getPostfixExpression());
+            namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
+
+            loader.addNamedIndividual(namedIndividual);
+            loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
+        }
 
         switch (expression.typ) {
             case CLASS_EXPRESSION:
@@ -63,6 +75,36 @@ public class ObservationParser implements IObservationParser {
         //TODO test if nominal needs to be added to ontology as individual if it is not already in
     }
 
+    private OWLExpression parseObjectProperty(String[] expressions) {
+        String[] individuals = expressions[0].split(DLSyntax.DELIMITER_INDIVIDUAL);
+
+        OWLNamedIndividual subject = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(individuals[0])));
+        OWLNamedIndividual object = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(individuals[1])));
+
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(subject));
+        loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(object));
+        OWLObjectProperty objectProperty = loader.getDataFactory().getOWLObjectProperty(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[1])));
+
+        loader.addNamedIndividual(subject);
+        loader.addNamedIndividual(object);
+
+        OWLExpression expression = new OWLExpression();
+        OWLObjectPropertyAssertionAxiom objectPropertyAssertionAxiom = loader.getDataFactory().getOWLObjectPropertyAssertionAxiom(objectProperty, subject, object);
+        OWLNegativeObjectPropertyAssertionAxiom negativeObjectPropertyAssertionAxiom = loader.getDataFactory().getOWLNegativeObjectPropertyAssertionAxiom(objectProperty, subject, object);
+
+        if (containsNegation(expressions[1])) {
+            expression.negativeObjectPropertyAssertionAxiom = negativeObjectPropertyAssertionAxiom;
+            expression.objectPropertyAssertionAxiom = objectPropertyAssertionAxiom;
+            expression.typ = OWLTyp.NEGATIVE_OBJECT_PROPERTY_ASSERTION;
+        } else {
+            expression.objectPropertyAssertionAxiom = objectPropertyAssertionAxiom;
+            expression.negativeObjectPropertyAssertionAxiom = negativeObjectPropertyAssertionAxiom;
+            expression.typ = OWLTyp.OBJECT_PROPERTY_ASSERTION;
+        }
+
+        return expression;
+    }
+
     private OWLExpression parseExpression(List<String> postfixExpression) {
         Stack<OWLExpression> stack = new Stack<>();
 
@@ -73,8 +115,7 @@ public class ObservationParser implements IObservationParser {
             expression.typ = OWLTyp.CLASS_EXPRESSION;
 
             return expression;
-        } else if (postfixExpression.size() == 3 && (postfixExpression.get(2).equals(DLSyntax.EXISTS) || postfixExpression.get(2).equals(DLSyntax.FOR_ALL))) {
-
+        } else if (postfixExpression.size() == 3 && isRole(postfixExpression.get(2))) {
             OWLExpression expression = new OWLExpression();
 
             String left = postfixExpression.get(0);
@@ -307,4 +348,13 @@ public class ObservationParser implements IObservationParser {
         return nominal.startsWith(DLSyntax.NOMINAL);
     }
 
+    private boolean isRole(String role) {
+        String possibleRole = role;
+
+        if (containsNegation(role)) {
+            possibleRole = role.split(DLSyntax.DELIMITER_EXPRESSION)[1];
+        }
+
+        return possibleRole.equals(DLSyntax.EXISTS) || possibleRole.equals(DLSyntax.FOR_ALL);
+    }
 }

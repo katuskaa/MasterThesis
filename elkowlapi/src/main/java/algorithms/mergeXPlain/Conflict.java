@@ -3,6 +3,7 @@ package algorithms.mergeXPlain;
 import models.Explanation;
 import models.Literals;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ class Conflict {
 
     Literals getLiterals() {
         if (literals == null) {
-            literals = new Literals(new LinkedList<>());
+            literals = new Literals(new HashSet<>());
         }
         return literals;
     }

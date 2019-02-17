@@ -7,4 +7,5 @@ import java.util.Collection;
 abstract class Node {
 
     Collection<OWLAxiom> label;
+    Integer depth;
 }

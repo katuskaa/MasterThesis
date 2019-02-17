@@ -15,7 +15,7 @@ public class Printer {
             return Printer.getNamedIndividual(owlAxiom).concat(DLSyntax.DELIMITER_ASSERTION).concat(Printer.getClassAssertionAxiom(owlAxiom));
         }
 
-        return Printer.getNamedIndividual(owlAxiom).concat(DLSyntax.DELIMITER_ASSERTION).concat(Printer.getObjectPropertyAssertionAxiom(owlAxiom));
+        return Printer.getObjectPropertyAssertionAxiom(owlAxiom);
     }
 
     private static String getNamedIndividual(OWLAxiom owlAxiom) {
@@ -29,7 +29,7 @@ public class Printer {
         return StringUtils.join(owlNamedIndividuals, DLSyntax.DELIMITER_INDIVIDUAL);
     }
 
-    private static String getClassAssertionAxiom(OWLAxiom owlAxiom) {
+    public static String getClassAssertionAxiom(OWLAxiom owlAxiom) {
         List<OWLAxiom> axioms = new ArrayList<>();
         axioms.add(owlAxiom);
 
@@ -42,7 +42,7 @@ public class Printer {
             if (owlClassExpression instanceof OWLClass) {
                 classAssertions.add(owlClassExpression.asOWLClass().getIRI().getFragment());
             } else if (owlClassExpression instanceof OWLObjectComplementOf) {
-                classAssertions.add("¬" + owlClassExpression.getComplementNNF().asOWLClass().getIRI().getFragment());
+                classAssertions.add(DLSyntax.DISPLAY_NEGATION + owlClassExpression.getComplementNNF().asOWLClass().getIRI().getFragment());
             }
         }
 
@@ -50,26 +50,37 @@ public class Printer {
     }
 
     private static String getObjectPropertyAssertionAxiom(OWLAxiom owlAxiom) {
-        List<OWLAxiom> axioms = new ArrayList<>();
-        axioms.add(owlAxiom);
+        String property = "";
+        String subject = "";
+        String object = "";
 
-        Set<OWLAxiom> objectPropertyAssertionAxioms = AxiomType.getAxiomsOfTypes(axioms, AxiomType.OBJECT_PROPERTY_ASSERTION);
-        Set<OWLAxiom> negativeObjectPropertyAssertionAxioms = AxiomType.getAxiomsOfTypes(axioms, AxiomType.NEGATIVE_OBJECT_PROPERTY_ASSERTION);
+        if (OWLObjectPropertyAssertionAxiom.class.isAssignableFrom(owlAxiom.getClass())) {
+            OWLObjectPropertyAssertionAxiom objectPropertyAssertionAxiom = (OWLObjectPropertyAssertionAxiom) owlAxiom;
 
-        List<String> objectPropertyAssertions = new ArrayList<>();
+            property = objectPropertyAssertionAxiom.getProperty().getNamedProperty().getIRI().getFragment();
 
-        for (OWLAxiom objectPropertyAssertionAxiom : objectPropertyAssertionAxioms) {
-            objectPropertyAssertionAxiom.objectPropertiesInSignature().forEach(objectProperty -> {
-                objectPropertyAssertions.add(objectProperty.getIRI().getFragment());
-            });
+            if (objectPropertyAssertionAxiom.getSubject().isOWLNamedIndividual()) {
+                subject = objectPropertyAssertionAxiom.getSubject().asOWLNamedIndividual().getIRI().getFragment();
+            }
+
+            if (objectPropertyAssertionAxiom.getObject().isOWLNamedIndividual()) {
+                object = objectPropertyAssertionAxiom.getObject().asOWLNamedIndividual().getIRI().getFragment();
+            }
+
+        } else if (OWLNegativeObjectPropertyAssertionAxiom.class.isAssignableFrom(owlAxiom.getClass())) {
+            OWLNegativeObjectPropertyAssertionAxiom negativeObjectPropertyAssertionAxiom = (OWLNegativeObjectPropertyAssertionAxiom) owlAxiom;
+
+            property = DLSyntax.DISPLAY_NEGATION + negativeObjectPropertyAssertionAxiom.getProperty().getNamedProperty().getIRI().getFragment();
+
+            if (negativeObjectPropertyAssertionAxiom.getSubject().isOWLNamedIndividual()) {
+                subject = negativeObjectPropertyAssertionAxiom.getSubject().asOWLNamedIndividual().getIRI().getFragment();
+            }
+
+            if (negativeObjectPropertyAssertionAxiom.getObject().isOWLNamedIndividual()) {
+                object = negativeObjectPropertyAssertionAxiom.getObject().asOWLNamedIndividual().getIRI().getFragment();
+            }
         }
 
-        for (OWLAxiom negativeObjectPropertyAssertionAxiom : negativeObjectPropertyAssertionAxioms) {
-            negativeObjectPropertyAssertionAxiom.objectPropertiesInSignature().forEach(objectProperty -> {
-                objectPropertyAssertions.add("¬" + objectProperty.getIRI().getFragment());
-            });
-        }
-
-        return StringUtils.join(objectPropertyAssertions, " ");
+        return subject.concat(DLSyntax.DELIMITER_OBJECT_PROPERTY).concat(object).concat(DLSyntax.DELIMITER_ASSERTION).concat(property);
     }
 }

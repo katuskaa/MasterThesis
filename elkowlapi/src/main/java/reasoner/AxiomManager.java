@@ -1,6 +1,7 @@
 package reasoner;
 
 import common.DLSyntax;
+import common.Printer;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.LinkedList;
@@ -10,17 +11,37 @@ import java.util.stream.Collectors;
 
 public class AxiomManager {
 
-    public static List<OWLAxiom> createClassAssertionAxiom(ILoader loader, OWLAxiom axiom) {
+    public static List<OWLAxiom> createClassAssertionAxiom(ILoader loader, OWLAxiom axiom, boolean preserveObservation) {
         List<OWLAxiom> owlAxioms = new LinkedList<>();
 
         if (OWLDeclarationAxiom.class.isAssignableFrom(axiom.getClass()) && OWLClass.class.isAssignableFrom(((OWLDeclarationAxiom) axiom).getEntity().getClass())) {
             String name = ((OWLDeclarationAxiom) axiom).getEntity().getIRI().getFragment();
-
             OWLClass owlClass = loader.getDataFactory().getOWLClass(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(name)));
 
+            String className = Printer.getClassAssertionAxiom(loader.getObservation().getOwlAxiom());
+            boolean containsNegation = className.contains(DLSyntax.DISPLAY_NEGATION);
+
+            if (containsNegation) {
+                className = className.substring(1);
+            }
+
             for (OWLNamedIndividual namedIndividual : loader.getIndividuals().getNamedIndividuals()) {
-                owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
-                owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+
+                if (!preserveObservation) {
+                    if (!name.equals(className)) {
+                        owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+                        owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+                    } else {
+                        if (containsNegation) {
+                            owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+                        } else {
+                            owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+                        }
+                    }
+                } else {
+                    owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass, namedIndividual));
+                    owlAxioms.add(loader.getDataFactory().getOWLClassAssertionAxiom(owlClass.getComplementNNF(), namedIndividual));
+                }
             }
         }
 

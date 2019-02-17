@@ -17,9 +17,6 @@ public class ArgumentParser {
     @Option(name = "-o", aliases = "--observation", usage = "Argument is required. Format: -o a:C (a,b:R). If you want multi observation as delimiter use \";\".")
     private String observation;
 
-    @Option(name = "-m", aliases = "--multiObservation", usage = "If not given, simple observation is considered.")
-    private Boolean multiObservation = false;
-
     @Option(name = "-r", aliases = "--reasoner", usage = "If not given, default is hermit. Format: -r hermit|pellet|jfact|elk")
     private ReasonerType reasonerType;
 
@@ -29,6 +26,8 @@ public class ArgumentParser {
     @Option(name = "-h", aliases = "--help", usage = "-f (--f) and -o (--observation) are required arguments. For example: -f pathToFile -o a:C (a,b:R)")
     private Boolean help = false;
 
+    @Option(name = "-d", aliases = "--depth", usage = "-d (--depth) 2")
+    private Integer depth;
 
     public void parse(String[] args) {
         CmdLineParser cmdLineParser = new CmdLineParser(this);
@@ -47,15 +46,10 @@ public class ArgumentParser {
                 Application.finish(ExitCode.ERROR);
             }
 
-            if ((!multiObservation && observation.contains(Configuration.DELIMITER_OBSERVATION))
-                    || (multiObservation && !observation.contains(Configuration.DELIMITER_OBSERVATION))) {
-                cmdLineParser.printUsage(System.err);
-                Application.finish(ExitCode.ERROR);
-            }
-
-            Configuration.MULTI_OBSERVATION = multiObservation;
             Configuration.OBSERVATION = observation;
             Configuration.INPUT_FILE = fileName;
+
+            Configuration.DEPTH = (depth != null) ? depth : 2;
 
             if (reasonerType == null) {
                 Configuration.REASONER = ReasonerType.HERMIT;

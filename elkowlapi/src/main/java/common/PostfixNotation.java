@@ -8,31 +8,11 @@ class PostfixNotation {
 
     private final List<String> postfixExpression;
     private String[][] operatorsByPrecedence = {{DLSyntax.CONJUNCTION, DLSyntax.DISJUNCTION}, {DLSyntax.EXISTS, DLSyntax.FOR_ALL}};
-    private TreeNode root;
 
     PostfixNotation(String expression) {
         List<String> tokens = convertToTokens(expression);
         postfixExpression = convertToPostfixNotation(tokens);
     }
-
-//    void createArithmeticTree() {
-//        final Stack<TreeNode> nodes = new Stack<>();
-//
-//        for (String token : postfixExpression) {
-//            if (isOperator(token)) {
-//                TreeNode rightNode = nodes.pop();
-//                TreeNode leftNode = nodes.pop();
-//                nodes.push(new TreeNode(leftNode, token, rightNode));
-//            } else {
-//                nodes.add(new TreeNode(null, token, null));
-//            }
-//        }
-//        root = nodes.pop();
-//    }
-//
-//    TreeNode getRoot() {
-//        return root;
-//    }
 
     List<String> getPostfixExpression() {
         return postfixExpression;
@@ -147,18 +127,6 @@ class PostfixNotation {
         }
 
         throw new RuntimeException("Invalid operator specified (" + operator + ")");
-    }
-
-    class TreeNode {
-        TreeNode left;
-        String value;
-        TreeNode right;
-
-        TreeNode(TreeNode left, String value, TreeNode right) {
-            this.left = left;
-            this.value = value;
-            this.right = right;
-        }
     }
 
 }
