@@ -6,6 +6,7 @@ import models.Explanation;
 import models.Literals;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
 import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
@@ -20,6 +21,7 @@ public class MergeXPlainSolver implements ISolver {
 
     private ILoader loader;
     private IReasonerManager reasonerManager;
+    private OWLOntology ontology;
 
     private Literals literals;
     private List<Explanation> explanations;
@@ -29,6 +31,7 @@ public class MergeXPlainSolver implements ISolver {
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
+        this.ontology = this.loader.getOriginalOntology();
 
         initialize();
         startSolving();
@@ -45,6 +48,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private void initialize() {
+        loader.getOntologyManager().addAxiom(ontology, loader.getNegObservation().getOwlAxiom());
         reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
 
         Set<OWLAxiom> allLiterals = new HashSet<>();
@@ -71,7 +75,7 @@ public class MergeXPlainSolver implements ISolver {
             return new Conflict();
         }
 
-        if (reasonerManager.isOntologyWithLiteralsConsistent(literals)) {
+        if (reasonerManager.isOntologyWithLiteralsConsistent(literals, ontology)) {
             return new Conflict();
         }
 
@@ -79,7 +83,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private Conflict findConflicts(Literals literals) {
-        if (reasonerManager.isOntologyWithLiteralsConsistent(literals)) {
+        if (reasonerManager.isOntologyWithLiteralsConsistent(literals, ontology)) {
             return new Conflict(literals, new LinkedList<>());
         }
 
@@ -102,20 +106,31 @@ public class MergeXPlainSolver implements ISolver {
         conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
         conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
 
-        while (!reasonerManager.isOntologyWithLiteralsConsistent(conflictLiterals)) {
+        OWLAxiom lastThrown = null;
+
+        while (!reasonerManager.isOntologyWithLiteralsConsistent(conflictLiterals, ontology)) {
 
             reasonerManager.addAxiomsToOntology(conflictC2.getLiterals().getOwlAxioms());
             Explanation X = getConflict(conflictC2.getLiterals().getOwlAxioms(), conflictC1.getLiterals());
-            reasonerManager.removeAxiomsFromOntology(conflictC2.getLiterals().getOwlAxioms());
+            reasonerManager.resetOntology(this.ontology.axioms());
 
             reasonerManager.addAxiomsToOntology(X.getOwlAxioms());
             Explanation CS = getConflict(X.getOwlAxioms(), conflictC2.getLiterals());
-            reasonerManager.removeAxiomsFromOntology(X.getOwlAxioms());
+            reasonerManager.resetOntology(this.ontology.axioms());
 
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
             conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
-            conflictC1.getLiterals().getOwlAxioms().removeAll(X.getOwlAxioms());
+
+            for (OWLAxiom axiom : X.getOwlAxioms()) {
+                conflictC1.getLiterals().getOwlAxioms().remove(axiom);
+                if (lastThrown != null) {
+                    conflictC1.getLiterals().getOwlAxioms().add(lastThrown);
+                }
+                lastThrown = axiom;
+                break;
+            }
+
             conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
 
             if (explanations.contains(CS)) {
@@ -127,7 +142,6 @@ public class MergeXPlainSolver implements ISolver {
 
         return new Conflict(conflictLiterals, explanations);
     }
-
 
     private Explanation getConflict(Collection<OWLAxiom> axioms, Literals literals) {
         if (!axioms.isEmpty() && !reasonerManager.isOntologyConsistent()) {
@@ -142,11 +156,11 @@ public class MergeXPlainSolver implements ISolver {
 
         reasonerManager.addAxiomsToOntology(sets.get(0).getOwlAxioms());
         Explanation D2 = getConflict(sets.get(0).getOwlAxioms(), sets.get(1));
-        reasonerManager.removeAxiomsFromOntology(sets.get(0).getOwlAxioms());
+        reasonerManager.resetOntology(this.ontology.axioms());
 
         reasonerManager.addAxiomsToOntology(D2.getOwlAxioms());
         Explanation D1 = getConflict(D2.getOwlAxioms(), sets.get(0));
-        reasonerManager.removeAxiomsFromOntology(D2.getOwlAxioms());
+        reasonerManager.resetOntology(this.ontology.axioms());
 
         Set<OWLAxiom> conflicts = new HashSet<>();
         conflicts.addAll(D1.getOwlAxioms());

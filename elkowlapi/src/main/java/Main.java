@@ -42,6 +42,7 @@ public class Main {
                 }
             }
         }
+
     }
 
     private static ISolver createSolver() {

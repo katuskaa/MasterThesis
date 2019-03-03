@@ -48,7 +48,7 @@
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>jfact</artifactId>
-            <version>[5.0.3,)</version>
+            <version>5.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.github.galigator.openllet</groupId>

@@ -21,11 +21,8 @@ public class CheckRules implements ICheckRules {
     @Override
     public boolean isConsistent(Explanation explanation) {
         reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
-
         boolean isConsistent = reasonerManager.isOntologyConsistent();
-
-        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
-
+        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
         return isConsistent;
     }
 
@@ -47,12 +44,9 @@ public class CheckRules implements ICheckRules {
     public boolean isExplanation(Explanation explanation) {
         reasonerManager.addAxiomToOntology(loader.getNegObservation().getOwlAxiom());
         reasonerManager.addAxiomsToOntology(explanation.getOwlAxioms());
-
         boolean isConsistent = reasonerManager.isOntologyConsistent();
-
         reasonerManager.removeAxiomFromOntology(loader.getNegObservation().getOwlAxiom());
-        reasonerManager.removeAxiomsFromOntology(explanation.getOwlAxioms());
-
+        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
         return !isConsistent;
     }
 
@@ -62,15 +56,14 @@ public class CheckRules implements ICheckRules {
             return false;
         }
 
-        OWLAxiom lastAxiom = ((List<OWLAxiom>) explanation.getOwlAxioms()).get(explanation.getOwlAxioms().size() - 1);
-
         for (Explanation minimalExplanation : explanationList) {
-            if (minimalExplanation.getOwlAxioms().contains(lastAxiom)) {
+            if (explanation.getOwlAxioms().containsAll(minimalExplanation.getOwlAxioms())) {
                 return false;
             }
         }
 
         return true;
     }
+
 
 }
