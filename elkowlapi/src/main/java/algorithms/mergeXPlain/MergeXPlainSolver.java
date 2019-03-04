@@ -1,6 +1,7 @@
 package algorithms.mergeXPlain;
 
 import algorithms.ISolver;
+import common.DLSyntax;
 import common.Printer;
 import models.Explanation;
 import models.Literals;
@@ -55,10 +56,7 @@ public class MergeXPlainSolver implements ISolver {
 
         loader.getOntology().axioms(AxiomType.DECLARATION).forEach(axiom -> {
             List<OWLAxiom> classAssertionAxiom = AxiomManager.createClassAssertionAxiom(loader, axiom, false);
-            List<OWLAxiom> objectPropertyAssertionAxiom = AxiomManager.createObjectPropertyAssertionAxiom(loader, axiom);
-
             allLiterals.addAll(classAssertionAxiom);
-            allLiterals.addAll(objectPropertyAssertionAxiom);
         });
 
         literals = new Literals(allLiterals);
@@ -75,7 +73,7 @@ public class MergeXPlainSolver implements ISolver {
             return new Conflict();
         }
 
-        if (reasonerManager.isOntologyWithLiteralsConsistent(literals, ontology)) {
+        if (reasonerManager.isOntologyWithLiteralsConsistent(literals.getOwlAxioms(), ontology)) {
             return new Conflict();
         }
 
@@ -83,7 +81,7 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private Conflict findConflicts(Literals literals) {
-        if (reasonerManager.isOntologyWithLiteralsConsistent(literals, ontology)) {
+        if (reasonerManager.isOntologyWithLiteralsConsistent(literals.getOwlAxioms(), ontology)) {
             return new Conflict(literals, new LinkedList<>());
         }
 
@@ -106,9 +104,7 @@ public class MergeXPlainSolver implements ISolver {
         conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
         conflictLiterals.getOwlAxioms().addAll(conflictC2.getLiterals().getOwlAxioms());
 
-        OWLAxiom lastThrown = null;
-
-        while (!reasonerManager.isOntologyWithLiteralsConsistent(conflictLiterals, ontology)) {
+        while (!reasonerManager.isOntologyWithLiteralsConsistent(conflictLiterals.getOwlAxioms(), ontology)) {
 
             reasonerManager.addAxiomsToOntology(conflictC2.getLiterals().getOwlAxioms());
             Explanation X = getConflict(conflictC2.getLiterals().getOwlAxioms(), conflictC1.getLiterals());
@@ -121,16 +117,7 @@ public class MergeXPlainSolver implements ISolver {
             CS.getOwlAxioms().addAll(X.getOwlAxioms());
 
             conflictLiterals.getOwlAxioms().removeAll(conflictC1.getLiterals().getOwlAxioms());
-
-            for (OWLAxiom axiom : X.getOwlAxioms()) {
-                conflictC1.getLiterals().getOwlAxioms().remove(axiom);
-                if (lastThrown != null) {
-                    conflictC1.getLiterals().getOwlAxioms().add(lastThrown);
-                }
-                lastThrown = axiom;
-                break;
-            }
-
+            X.getOwlAxioms().stream().findFirst().ifPresent(axiom -> conflictC1.getLiterals().getOwlAxioms().remove(axiom));
             conflictLiterals.getOwlAxioms().addAll(conflictC1.getLiterals().getOwlAxioms());
 
             if (explanations.contains(CS)) {
@@ -187,25 +174,58 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private List<Explanation> filterExplanations() {
-        System.out.println("Not filtered explanations:");
-        System.out.println(explanations);
-        List<Explanation> filteredExplanations = new LinkedList<>();
+        //System.out.println("Not filtered explanations:\n" + explanations);
+        loader.getOntologyManager().removeAxiom(ontology, loader.getNegObservation().getOwlAxiom());
+        List<Explanation> filteredExplanations = new ArrayList<>();
 
         for (Explanation explanation : explanations) {
-            for (OWLAxiom axiom : explanation.getOwlAxioms()) {
-                if (Printer.print(axiom).equals(Printer.print(loader.getNegObservation().getOwlAxiom()))) {
-                    Explanation filter = new Explanation();
-                    filter.getOwlAxioms().addAll(explanation.getOwlAxioms());
-                    filter.getOwlAxioms().remove(axiom);
-
-                    filteredExplanations.add(filter);
-                    break;
+            if (isExplanation(explanation)) {
+                if (reasonerManager.isOntologyWithLiteralsConsistent(explanation.getOwlAxioms(), ontology)) {
+                    filteredExplanations.add(explanation);
                 }
-
             }
         }
 
         return filteredExplanations;
     }
 
+    private boolean isExplanation(Explanation explanation) {
+        if (explanation.getOwlAxioms().size() == 1) {
+            return true;
+        }
+
+        for (OWLAxiom axiom1 : explanation.getOwlAxioms()) {
+            String name1 = getClassName(axiom1);
+
+            boolean negated1 = containsNegation(name1);
+            if (negated1) {
+                name1 = name1.substring(1);
+            }
+
+            for (OWLAxiom axiom2 : explanation.getOwlAxioms()) {
+                if (!axiom1.equals(axiom2)) {
+                    String name2 = getClassName(axiom2);
+
+                    boolean negated2 = containsNegation(name2);
+                    if (negated2) {
+                        name2 = name2.substring(1);
+                    }
+
+                    if (name1.equals(name2) && ((!negated1 && negated2) || (negated1 && !negated2))) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private String getClassName(OWLAxiom axiom) {
+        return Printer.print(axiom).split(DLSyntax.DELIMITER_ASSERTION)[1];
+    }
+
+    private boolean containsNegation(String name) {
+        return name.contains(DLSyntax.DISPLAY_NEGATION);
+    }
 }

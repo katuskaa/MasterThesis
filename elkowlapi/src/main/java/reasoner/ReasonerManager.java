@@ -1,6 +1,5 @@
 package reasoner;
 
-import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -48,8 +47,8 @@ public class ReasonerManager implements IReasonerManager {
     }
 
     @Override
-    public boolean isOntologyWithLiteralsConsistent(Literals literals, OWLOntology ontology) {
-        addAxiomsToOntology(literals.getOwlAxioms());
+    public boolean isOntologyWithLiteralsConsistent(Collection<OWLAxiom> axioms, OWLOntology ontology) {
+        addAxiomsToOntology(axioms);
         boolean isConsistent = isOntologyConsistent();
         resetOntology(ontology.axioms());
         return isConsistent;
