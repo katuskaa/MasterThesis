@@ -1,10 +1,10 @@
 package reasoner;
 
-import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public class ReasonerManager implements IReasonerManager {
 
@@ -33,8 +33,10 @@ public class ReasonerManager implements IReasonerManager {
     }
 
     @Override
-    public void removeAxiomsFromOntology(Collection<OWLAxiom> axioms) {
-        loader.getOntologyManager().removeAxioms(loader.getOntology(), axioms);
+    public void resetOntology(Stream<OWLAxiom> axioms) {
+        loader.getOntologyManager().removeAxioms(loader.getOntology(), loader.getOntology().axioms());
+        loader.initializeReasoner();
+        loader.getOntologyManager().addAxioms(loader.getOntology(), axioms);
         loader.initializeReasoner();
     }
 
@@ -44,33 +46,12 @@ public class ReasonerManager implements IReasonerManager {
         return loader.getReasoner().isConsistent();
     }
 
-    public boolean isOntologySatisfiable(Literals literals) {
-        loader.initializeReasoner();
-        boolean isSatisfiable = true;
-
-        for (OWLAxiom axiom : literals.getOwlAxioms()) {
-            try {
-                isSatisfiable = loader.getReasoner().isSatisfiable(((OWLClassAssertionAxiom) axiom).getClassExpression());
-            } catch (Exception exception) {
-                isSatisfiable = false;
-            }
-
-            if (!isSatisfiable) {
-                break;
-            }
-        }
-
-        return isSatisfiable;
-    }
-
     @Override
-    public boolean isOntologyWithLiteralsConsistent(Literals literals) {
-        addAxiomsToOntology(literals.getOwlAxioms());
+    public boolean isOntologyWithLiteralsConsistent(Collection<OWLAxiom> axioms, OWLOntology ontology) {
+        addAxiomsToOntology(axioms);
         boolean isConsistent = isOntologyConsistent();
-        boolean isSatisfiable = isOntologySatisfiable(literals);
-        removeAxiomsFromOntology(literals.getOwlAxioms());
-
-        return isSatisfiable;
+        resetOntology(ontology.axioms());
+        return isConsistent;
     }
 
 }

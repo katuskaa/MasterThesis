@@ -20,6 +20,28 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    <!--O = {jack:Person} E = {
+    {jack: Employee},
+    {jack: FullProfessor},
+    {jack: UndergraduateStudent},
+    {jack: AdministrativeStaff},
+    {jack: Faculty},
+    {jack: GraduateStudent},
+    {jack: SystemsStaff},
+    {jack: VisitingProfessor},
+    {jack: AssociateProfessor},
+    {jack: Chair},
+    {jack: Director},
+    {jack: Professor},
+    {jack: Dean},
+    {jack: Lecturer},
+    {jack: ClericalStaff},
+    {jack: Student},
+    {jack: AssistantProfessor},
+    {jack: TeachingAssistant},
+    {jack: PostDoc},
+    {jack: ResearchAssistant}
+    }-->
 
     <!-- http://swat.cse.lehigh.edu/onto/univ-bench.owl#advisor -->
 

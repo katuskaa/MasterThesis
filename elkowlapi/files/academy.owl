@@ -16,6 +16,12 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    <!--O = {jack:Academician}
+    E = {
+    #1 {jack:Professor}
+    #2 {jack:Scientist}
+    #3 {jack:AssociateProfessor}
+    }-->
 
     <!-- http://www.semanticweb.org/katka/ontologies/2018/10/academy#Academician -->
 

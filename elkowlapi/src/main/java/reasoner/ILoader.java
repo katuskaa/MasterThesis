@@ -38,4 +38,6 @@ public interface ILoader {
     Individuals getIndividuals();
 
     void addNamedIndividual(OWLNamedIndividual namedIndividual);
+
+    OWLOntology getOriginalOntology();
 }

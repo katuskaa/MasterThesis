@@ -33,6 +33,7 @@ public class Loader implements ILoader {
     private Observation negObservation;
     private String ontologyIRI;
     private Individuals namedIndividuals;
+    private OWLOntology originalOntology;
 
     @Override
     public void initialize(ReasonerType reasonerType) {
@@ -44,6 +45,7 @@ public class Loader implements ILoader {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
+            originalOntology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
 
             changeReasoner(reasonerType);
             initializeReasoner();
@@ -159,4 +161,8 @@ public class Loader implements ILoader {
         namedIndividuals.addNamedIndividual(namedIndividual);
     }
 
+    @Override
+    public OWLOntology getOriginalOntology() {
+        return originalOntology;
+    }
 }

@@ -1,9 +1,10 @@
 package reasoner;
 
-import models.Literals;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 public interface IReasonerManager {
 
@@ -13,10 +14,10 @@ public interface IReasonerManager {
 
     void removeAxiomFromOntology(OWLAxiom axiom);
 
-    void removeAxiomsFromOntology(Collection<OWLAxiom> axioms);
+    void resetOntology(Stream<OWLAxiom> axioms);
 
     boolean isOntologyConsistent();
 
-    boolean isOntologyWithLiteralsConsistent(Literals literals);
+    boolean isOntologyWithLiteralsConsistent(Collection<OWLAxiom> axioms, OWLOntology ontology);
 
 }

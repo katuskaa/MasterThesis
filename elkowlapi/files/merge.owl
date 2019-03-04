@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<rdf:RDF
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:owl="http://www.w3.org/2002/07/owl#"
+        xmlns:xml="http://www.w3.org/XML/1998/namespace"
+        xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+        xml:base="http://www.semanticweb.org/katka/ontologies/2019/1/katka">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka"/>
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <!--O = {a:F} E = {
+    #1 {a:A and a:B and a:C and a:D}
+    #2 {a:A and a:B and a:C and a:E}
+    #3 {a:A and a:B and a:D and a:E}
+    #4 {a:A and a:C and a:D and a:E}
+    #5 {a:B and a:C and a:D and a:E}
+    }-->
+
+
+    <!-- http://www.semanticweb.org/katka/ontologies/2019/1/katka#A -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#A"/>
+
+
+    <!-- http://www.semanticweb.org/katka/ontologies/2019/1/katka#B -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#B"/>
+
+
+    <!-- http://www.semanticweb.org/katka/ontologies/2019/1/katka#C -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#C"/>
+
+
+    <!-- http://www.semanticweb.org/katka/ontologies/2019/1/katka#D -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#D"/>
+
+
+    <!-- http://www.semanticweb.org/katka/ontologies/2019/1/katka#E -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#E"/>
+
+
+    <!-- http://www.semanticweb.org/katka/ontologies/2019/1/katka#F -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#F"/>
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#A"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#B"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#C"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#D"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2019/1/katka#F"/>
+    </owl:Class>
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#A"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#B"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#C"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#E"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2019/1/katka#F"/>
+    </owl:Class>
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#A"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#B"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#D"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#E"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2019/1/katka#F"/>
+    </owl:Class>
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#A"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#C"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#D"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#E"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2019/1/katka#F"/>
+    </owl:Class>
+    <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#B"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#C"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#D"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/katka/ontologies/2019/1/katka#E"/>
+        </owl:intersectionOf>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/katka/ontologies/2019/1/katka#F"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+        <!-- Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi -->
+

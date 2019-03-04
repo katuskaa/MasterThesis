@@ -16,6 +16,12 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    <!--O = {a:Macchiato}
+    E = {
+    #1 {a:LongMacchiato}
+    #2 {a:ShortMacchiato}
+    }-->
+
 
     <!-- http://www.co-ode.org/ontologies/pizza/pizza.owl#hasBase -->
 

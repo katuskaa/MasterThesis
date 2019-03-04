@@ -36,7 +36,7 @@ public class ObservationParser implements IObservationParser {
     }
 
     private void parseAssertion(String[] expressions) {
-        OWLExpression expression = null;
+        OWLExpression expression;
         OWLNamedIndividual namedIndividual = null;
 
         if (expressions[0].contains(DLSyntax.DELIMITER_OBJECT_PROPERTY)) {
@@ -49,6 +49,7 @@ public class ObservationParser implements IObservationParser {
 
             loader.addNamedIndividual(namedIndividual);
             loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
+            loader.getOntologyManager().addAxiom(loader.getOriginalOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
         }
 
         switch (expression.typ) {

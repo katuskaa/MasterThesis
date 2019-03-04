@@ -22,7 +22,7 @@ public class AbductionHSSolver implements ISolver {
     private List<Explanation> explanations;
     private List<OWLAxiom> assertionsAxioms;
     private List<OWLAxiom> negAssertionsAxioms;
-    private List<OWLAxiom> inconsistentCandidates;
+    //private List<OWLAxiom> inconsistentCandidates;
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
@@ -77,7 +77,7 @@ public class AbductionHSSolver implements ISolver {
     }
 
     private void startSolving() {
-        inconsistentCandidates = new LinkedList<>();
+        //inconsistentCandidates = new LinkedList<>();
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
         int currentDepth = 0;
@@ -131,11 +131,13 @@ public class AbductionHSSolver implements ISolver {
                             queue.add(modelNode);
                         }
                     } else {
-                        inconsistentCandidates.addAll(explanation.getOwlAxioms());
+                        //inconsistentCandidates.addAll(explanation.getOwlAxioms());
                     }
                 }
             }
         }
+
+        showExplanationsWithDepth(currentDepth + 1);
     }
 
     private ModelNode getNegModel(Explanation explanation) {
@@ -153,7 +155,8 @@ public class AbductionHSSolver implements ISolver {
             OWLAxiom axiom = assertionsAxioms.get(i);
             OWLAxiom complementOfAxiom = negAssertionsAxioms.get(i);
 
-            if (!model.contains(axiom) && !model.contains(complementOfAxiom) && !inconsistentCandidates.contains(axiom) && !inconsistentCandidates.contains(complementOfAxiom)) {
+            //&& !inconsistentCandidates.contains(axiom) && !inconsistentCandidates.contains(complementOfAxiom)
+            if (!model.contains(axiom) && !model.contains(complementOfAxiom)) {
                 reasonerManager.addAxiomToOntology(axiom);
                 boolean isConsistent = reasonerManager.isOntologyConsistent();
                 reasonerManager.removeAxiomFromOntology(axiom);
@@ -172,7 +175,8 @@ public class AbductionHSSolver implements ISolver {
             }
         }
 
-        reasonerManager.removeAxiomsFromOntology(model);
+        //reasonerManager.resetOntology(model, true);
+        reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
         model.remove(loader.getNegObservation().getOwlAxiom());
 
         return getComplementOfModel(model);
