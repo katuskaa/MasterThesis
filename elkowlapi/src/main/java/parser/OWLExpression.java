@@ -1,4 +1,4 @@
-package common;
+package parser;
 
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;

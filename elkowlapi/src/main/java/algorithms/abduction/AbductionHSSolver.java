@@ -3,16 +3,19 @@ package algorithms.abduction;
 import algorithms.ISolver;
 import common.Configuration;
 import models.Explanation;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
+import timer.ThreadTimes;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 
 public class AbductionHSSolver implements ISolver {
@@ -22,6 +25,11 @@ public class AbductionHSSolver implements ISolver {
     private List<Explanation> explanations;
     private List<OWLAxiom> assertionsAxioms;
     private List<OWLAxiom> negAssertionsAxioms;
+    private ThreadTimes threadTimes;
+
+    public AbductionHSSolver(ThreadTimes threadTimes) {
+        this.threadTimes = threadTimes;
+    }
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
@@ -30,16 +38,6 @@ public class AbductionHSSolver implements ISolver {
 
         initialize();
         startSolving();
-    }
-
-    @Override
-    public List<Explanation> getExplanations() {
-        return explanations;
-    }
-
-    @Override
-    public boolean isShowingExplanations() {
-        return true;
     }
 
     private void initialize() {
@@ -72,7 +70,7 @@ public class AbductionHSSolver implements ISolver {
     private void startSolving() {
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
-        int currentDepth = 0;
+        Integer currentDepth = 0;
 
         ModelNode root = getNegModel(null);
         root.label = new LinkedList<>();
@@ -84,11 +82,17 @@ public class AbductionHSSolver implements ISolver {
         while (!queue.isEmpty()) {
             Node node = queue.poll();
 
+            if (Configuration.TIMEOUT != null && threadTimes.getTotalUserTimeInSec() > Configuration.TIMEOUT) {
+                showExplanationsWithDepth(currentDepth + 1, true);
+                currentDepth = null;
+                break;
+            }
+
             if (ModelNode.class.isAssignableFrom(node.getClass())) {
                 ModelNode model = (ModelNode) node;
 
                 if (model.depth > currentDepth) {
-                    showExplanationsWithDepth(model.depth);
+                    showExplanationsWithDepth(model.depth, false);
                     currentDepth++;
                 }
 
@@ -127,8 +131,8 @@ public class AbductionHSSolver implements ISolver {
             }
         }
 
-        if (currentDepth + 1 <= Configuration.DEPTH) {
-            showExplanationsWithDepth(currentDepth + 1);
+        if (currentDepth != null && currentDepth + 1 <= Configuration.DEPTH) {
+            showExplanationsWithDepth(currentDepth + 1, false);
         }
     }
 
@@ -186,12 +190,9 @@ public class AbductionHSSolver implements ISolver {
         return modelNode;
     }
 
-    private void showExplanationsWithDepth(Integer depth) {
-        System.out.println("Explanations with depth: " + depth);
-        for (Explanation explanation : explanations) {
-            if (explanation.getDepth().equals(depth)) {
-                System.out.println(explanation);
-            }
-        }
+    private void showExplanationsWithDepth(Integer depth, boolean timeout) {
+        List<Explanation> currentExplanations = explanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
+        String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
+        System.out.println(String.format("%d;%d;%.2f%s;{%s}", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), timeout ? "-TIMEOUT" : "", currentExplanationsFormat));
     }
 }

@@ -1,5 +1,7 @@
-package common;
+package parser;
 
+import common.Configuration;
+import common.DLSyntax;
 import org.semanticweb.owlapi.model.*;
 import reasoner.Loader;
 

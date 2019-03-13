@@ -19,8 +19,14 @@ public class Explanation {
         this.owlAxioms = owlAxioms;
     }
 
+    public Explanation(Collection<OWLAxiom> owlAxioms, Integer depth) {
+        this.owlAxioms = owlAxioms;
+        this.depth = depth;
+    }
+
     public Explanation() {
         this.owlAxioms = new LinkedList<>();
+        this.depth = 0;
     }
 
     public Collection<OWLAxiom> getOwlAxioms() {
@@ -51,7 +57,7 @@ public class Explanation {
             result.add(Printer.print(owlAxiom));
         }
 
-        return "{ " + StringUtils.join(result, ",") + " }";
+        return "{" + StringUtils.join(result, ",") + "}";
     }
 
     @Override

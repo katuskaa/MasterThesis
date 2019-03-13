@@ -29,6 +29,9 @@ public class ArgumentParser {
     @Option(name = "-d", aliases = "--depth", usage = "-d (--depth) if not given, whole tree is searched")
     private Integer depth;
 
+    @Option(name = "-t", aliases = "--timeout", usage = "-t (--timeout) (in seconds) if not given, MHS algorithm won't be stopped")
+    private Long timeout;
+
     public void parse(String[] args) {
         CmdLineParser cmdLineParser = new CmdLineParser(this);
 
@@ -50,6 +53,7 @@ public class ArgumentParser {
             Configuration.INPUT_FILE = fileName;
 
             Configuration.DEPTH = (depth != null) ? depth : Integer.MAX_VALUE;
+            Configuration.TIMEOUT = timeout;
 
             if (reasonerType == null) {
                 Configuration.REASONER = ReasonerType.HERMIT;

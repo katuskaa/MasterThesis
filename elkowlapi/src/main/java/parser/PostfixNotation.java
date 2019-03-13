@@ -1,4 +1,6 @@
-package common;
+package parser;
+
+import common.DLSyntax;
 
 import java.util.ArrayList;
 import java.util.List;

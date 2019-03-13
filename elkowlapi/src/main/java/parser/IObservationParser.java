@@ -1,4 +1,4 @@
-package common;
+package parser;
 
 public interface IObservationParser {
 
