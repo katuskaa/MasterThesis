@@ -14,10 +14,10 @@ public class ArgumentParser {
     @Option(name = "-f", aliases = "--file", usage = "Argument is required. Format: -f path.owl")
     private String fileName;
 
-    @Option(name = "-o", aliases = "--observation", usage = "Argument is required. Format: -o a:C (a,b:R). If you want multi observation as delimiter use \";\".")
+    @Option(name = "-o", aliases = "--observation", usage = "Argument is required. Format: -o a:C (a,b:R). For more complicated observation use manchester syntax.")
     private String observation;
 
-    @Option(name = "-r", aliases = "--reasoner", usage = "If not given, default is hermit. Format: -r hermit|pellet|jfact|elk")
+    @Option(name = "-r", aliases = "--reasoner", usage = "If not given, default is hermit. Format: -r hermit|pellet|jfact")
     private ReasonerType reasonerType;
 
     @Option(name = "-s", aliases = "--strategy", usage = "If not given, default is abductionhs. Format: -m abductionhs|mergexplain")
@@ -26,7 +26,7 @@ public class ArgumentParser {
     @Option(name = "-h", aliases = "--help", usage = "-f (--f) and -o (--observation) are required arguments. For example: -f pathToFile -o a:C (a,b:R)")
     private Boolean help = false;
 
-    @Option(name = "-d", aliases = "--depth", usage = "-d (--depth) 2")
+    @Option(name = "-d", aliases = "--depth", usage = "-d (--depth) if not given, whole tree is searched")
     private Integer depth;
 
     public void parse(String[] args) {
@@ -49,7 +49,7 @@ public class ArgumentParser {
             Configuration.OBSERVATION = observation;
             Configuration.INPUT_FILE = fileName;
 
-            Configuration.DEPTH = (depth != null) ? depth : 2;
+            Configuration.DEPTH = (depth != null) ? depth : Integer.MAX_VALUE;
 
             if (reasonerType == null) {
                 Configuration.REASONER = ReasonerType.HERMIT;
