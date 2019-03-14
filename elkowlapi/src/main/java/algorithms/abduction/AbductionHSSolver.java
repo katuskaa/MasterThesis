@@ -2,6 +2,7 @@ package algorithms.abduction;
 
 import algorithms.ISolver;
 import common.Configuration;
+import fileLogger.FileLogger;
 import models.Explanation;
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -16,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
-
 
 public class AbductionHSSolver implements ISolver {
 
@@ -117,6 +117,8 @@ public class AbductionHSSolver implements ISolver {
                             if (isMinimal) {
                                 explanation.setDepth(model.depth + 1);
                                 explanations.add(explanation);
+                                String line = String.format("%.2f;%s\n", threadTimes.getTotalUserTimeInSec(), explanation);
+                                FileLogger.appendToFile(FileLogger.MHS_PARTIAL_EXPLANATIONS_LOG_FILE, line);
                             }
 
                         } else {
@@ -134,6 +136,7 @@ public class AbductionHSSolver implements ISolver {
         if (currentDepth != null && currentDepth + 1 <= Configuration.DEPTH) {
             showExplanationsWithDepth(currentDepth + 1, false);
         }
+
     }
 
     private ModelNode getNegModel(Explanation explanation) {
@@ -193,6 +196,8 @@ public class AbductionHSSolver implements ISolver {
     private void showExplanationsWithDepth(Integer depth, boolean timeout) {
         List<Explanation> currentExplanations = explanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
-        System.out.println(String.format("%d;%d;%.2f%s;{%s}", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), timeout ? "-TIMEOUT" : "", currentExplanationsFormat));
+        String line = String.format("%d;%d;%.2f%s;{%s}\n", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), timeout ? "-TIMEOUT" : "", currentExplanationsFormat);
+        FileLogger.appendToFile(FileLogger.MHS_LOG_FILE, line);
+        System.out.print(line);
     }
 }

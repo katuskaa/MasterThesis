@@ -3,6 +3,7 @@ import algorithms.abduction.AbductionHSSolver;
 import algorithms.mergeXPlain.MergeXPlainSolver;
 import common.ArgumentParser;
 import common.Configuration;
+import fileLogger.FileLogger;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,6 +19,8 @@ public class Main {
     public static void main(String[] args) {
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
+
+        FileLogger.deleteLogs();
 
         ArgumentParser argumentParser = new ArgumentParser();
         argumentParser.parse(args);

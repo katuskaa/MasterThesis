@@ -3,6 +3,7 @@ package algorithms.mergeXPlain;
 import algorithms.ISolver;
 import common.DLSyntax;
 import common.Printer;
+import fileLogger.FileLogger;
 import models.Explanation;
 import models.Literals;
 import org.apache.commons.lang3.StringUtils;
@@ -228,14 +229,20 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private void showExplanations() {
+        StringBuilder result = new StringBuilder();
         List<Explanation> filteredExplanations = filterExplanations();
+
         int depth = 1;
         while (filteredExplanations.size() > 0) {
             List<Explanation> currentExplanations = removeExplanationsWithDepth(filteredExplanations, depth);
             String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
-            System.out.println(String.format("%d;%d;%.2f;{%s}", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), currentExplanationsFormat));
+            String line = String.format("%d;%d;%.2f;{%s}\n", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), currentExplanationsFormat);
+            System.out.print(line);
+            result.append(line);
             depth++;
         }
+
+        FileLogger.appendToFile(FileLogger.MERGEXPLAIN_LOG_FILE, result.toString());
     }
 
     private List<Explanation> removeExplanationsWithDepth(List<Explanation> filteredExplanations, Integer depth) {
