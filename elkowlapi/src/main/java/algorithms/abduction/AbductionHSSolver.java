@@ -26,9 +26,11 @@ public class AbductionHSSolver implements ISolver {
     private List<OWLAxiom> assertionsAxioms;
     private List<OWLAxiom> negAssertionsAxioms;
     private ThreadTimes threadTimes;
+    private long currentTimeMillis;
 
-    public AbductionHSSolver(ThreadTimes threadTimes) {
+    public AbductionHSSolver(ThreadTimes threadTimes, long currentTimeMillis) {
         this.threadTimes = threadTimes;
+        this.currentTimeMillis = currentTimeMillis;
     }
 
     @Override
@@ -118,7 +120,7 @@ public class AbductionHSSolver implements ISolver {
                                 explanation.setDepth(model.depth + 1);
                                 explanations.add(explanation);
                                 String line = String.format("%.2f;%s\n", threadTimes.getTotalUserTimeInSec(), explanation);
-                                FileLogger.appendToFile(FileLogger.MHS_PARTIAL_EXPLANATIONS_LOG_FILE, line);
+                                FileLogger.appendToFile(FileLogger.MHS_PARTIAL_EXPLANATIONS_LOG_FILE__PREFIX, currentTimeMillis, line);
                             }
 
                         } else {
@@ -197,7 +199,7 @@ public class AbductionHSSolver implements ISolver {
         List<Explanation> currentExplanations = explanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
         String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
         String line = String.format("%d;%d;%.2f%s;{%s}\n", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), timeout ? "-TIMEOUT" : "", currentExplanationsFormat);
-        FileLogger.appendToFile(FileLogger.MHS_LOG_FILE, line);
+        FileLogger.appendToFile(FileLogger.MHS_LOG_FILE__PREFIX, currentTimeMillis, line);
         System.out.print(line);
     }
 }

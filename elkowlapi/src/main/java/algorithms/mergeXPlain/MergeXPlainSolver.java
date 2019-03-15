@@ -32,9 +32,11 @@ public class MergeXPlainSolver implements ISolver {
     private List<Explanation> explanations;
 
     private ThreadTimes threadTimes;
+    private long currentTimeMillis;
 
-    public MergeXPlainSolver(ThreadTimes threadTimes) {
+    public MergeXPlainSolver(ThreadTimes threadTimes, long currentTimeMillis) {
         this.threadTimes = threadTimes;
+        this.currentTimeMillis = currentTimeMillis;
     }
 
     @Override
@@ -242,7 +244,7 @@ public class MergeXPlainSolver implements ISolver {
             depth++;
         }
 
-        FileLogger.appendToFile(FileLogger.MERGEXPLAIN_LOG_FILE, result.toString());
+        FileLogger.appendToFile(FileLogger.MERGEXPLAIN_LOG_FILE__PREFIX, currentTimeMillis, result.toString());
     }
 
     private List<Explanation> removeExplanationsWithDepth(List<Explanation> filteredExplanations, Integer depth) {

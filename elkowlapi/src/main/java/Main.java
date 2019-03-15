@@ -3,7 +3,6 @@ import algorithms.abduction.AbductionHSSolver;
 import algorithms.mergeXPlain.MergeXPlainSolver;
 import common.ArgumentParser;
 import common.Configuration;
-import fileLogger.FileLogger;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -20,7 +19,7 @@ public class Main {
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
 
-        FileLogger.deleteLogs();
+        //FileLogger.deleteLogs();
 
         ArgumentParser argumentParser = new ArgumentParser();
         argumentParser.parse(args);
@@ -42,12 +41,13 @@ public class Main {
     }
 
     private static ISolver createSolver(ThreadTimes threadTimes) {
+        long currentTimeMillis = System.currentTimeMillis();
         switch (Configuration.STRATEGY) {
             case ABDUCTIONHS:
-                return new AbductionHSSolver(threadTimes);
+                return new AbductionHSSolver(threadTimes, currentTimeMillis);
 
             case MERGEXPLAIN:
-                return new MergeXPlainSolver(threadTimes);
+                return new MergeXPlainSolver(threadTimes, currentTimeMillis);
         }
 
         return null;
