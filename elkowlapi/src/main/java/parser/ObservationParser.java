@@ -44,12 +44,12 @@ public class ObservationParser implements IObservationParser {
         if (expressions[0].contains(DLSyntax.DELIMITER_OBJECT_PROPERTY)) {
             expression = parseObjectProperty(expressions);
         } else {
+            namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
+            loader.addNamedIndividual(namedIndividual);
+
             PostfixNotation postfixNotation = new PostfixNotation(expressions[1]);
             expression = parseExpression(postfixNotation.getPostfixExpression());
 
-            namedIndividual = loader.getDataFactory().getOWLNamedIndividual(IRI.create(loader.getOntologyIRI().concat(DLSyntax.DELIMITER_ONTOLOGY).concat(expressions[0])));
-
-            loader.addNamedIndividual(namedIndividual);
             loader.getOntologyManager().addAxiom(loader.getOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
             loader.getOntologyManager().addAxiom(loader.getOriginalOntology(), loader.getDataFactory().getOWLDeclarationAxiom(namedIndividual));
         }
