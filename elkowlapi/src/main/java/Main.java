@@ -19,8 +19,6 @@ public class Main {
         Logger.getRootLogger().setLevel(Level.OFF);
         BasicConfigurator.configure();
 
-        //FileLogger.deleteLogs();
-
         ArgumentParser argumentParser = new ArgumentParser();
         argumentParser.parse(args);
 
