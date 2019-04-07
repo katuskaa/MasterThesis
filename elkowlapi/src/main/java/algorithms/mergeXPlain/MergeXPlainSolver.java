@@ -3,16 +3,20 @@ package algorithms.mergeXPlain;
 import algorithms.ISolver;
 import common.DLSyntax;
 import common.Printer;
+import fileLogger.FileLogger;
 import models.Explanation;
 import models.Literals;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
+import timer.ThreadTimes;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Base = knowledgeBase + negObservation
@@ -27,6 +31,13 @@ public class MergeXPlainSolver implements ISolver {
     private Literals literals;
     private List<Explanation> explanations;
 
+    private ThreadTimes threadTimes;
+    private long currentTimeMillis;
+
+    public MergeXPlainSolver(ThreadTimes threadTimes, long currentTimeMillis) {
+        this.threadTimes = threadTimes;
+        this.currentTimeMillis = currentTimeMillis;
+    }
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
@@ -36,16 +47,7 @@ public class MergeXPlainSolver implements ISolver {
 
         initialize();
         startSolving();
-    }
-
-    @Override
-    public List<Explanation> getExplanations() {
-        return filterExplanations();
-    }
-
-    @Override
-    public boolean isShowingExplanations() {
-        return false;
+        showExplanations();
     }
 
     private void initialize() {
@@ -87,7 +89,7 @@ public class MergeXPlainSolver implements ISolver {
 
         if (literals.getOwlAxioms().size() == 1) {
             List<Explanation> explanations = new LinkedList<>();
-            explanations.add(new Explanation(literals.getOwlAxioms()));
+            explanations.add(new Explanation(literals.getOwlAxioms(), literals.getOwlAxioms().size()));
             return new Conflict(new Literals(), explanations);
         }
 
@@ -136,7 +138,7 @@ public class MergeXPlainSolver implements ISolver {
         }
 
         if (literals.getOwlAxioms().size() == 1) {
-            return new Explanation(literals.getOwlAxioms());
+            return new Explanation(literals.getOwlAxioms(), 1);
         }
 
         List<Literals> sets = divideIntoSets(literals);
@@ -153,7 +155,7 @@ public class MergeXPlainSolver implements ISolver {
         conflicts.addAll(D1.getOwlAxioms());
         conflicts.addAll(D2.getOwlAxioms());
 
-        return new Explanation(conflicts);
+        return new Explanation(conflicts, conflicts.size());
     }
 
 
@@ -174,7 +176,6 @@ public class MergeXPlainSolver implements ISolver {
     }
 
     private List<Explanation> filterExplanations() {
-        //System.out.println("Not filtered explanations:\n" + explanations);
         loader.getOntologyManager().removeAxiom(ontology, loader.getNegObservation().getOwlAxiom());
         List<Explanation> filteredExplanations = new ArrayList<>();
 
@@ -227,5 +228,28 @@ public class MergeXPlainSolver implements ISolver {
 
     private boolean containsNegation(String name) {
         return name.contains(DLSyntax.DISPLAY_NEGATION);
+    }
+
+    private void showExplanations() {
+        StringBuilder result = new StringBuilder();
+        List<Explanation> filteredExplanations = filterExplanations();
+
+        int depth = 1;
+        while (filteredExplanations.size() > 0) {
+            List<Explanation> currentExplanations = removeExplanationsWithDepth(filteredExplanations, depth);
+            String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
+            String line = String.format("%d;%d;%.2f;{%s}\n", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), currentExplanationsFormat);
+            System.out.print(line);
+            result.append(line);
+            depth++;
+        }
+
+        FileLogger.appendToFile(FileLogger.MERGEXPLAIN_LOG_FILE__PREFIX, currentTimeMillis, result.toString());
+    }
+
+    private List<Explanation> removeExplanationsWithDepth(List<Explanation> filteredExplanations, Integer depth) {
+        List<Explanation> currentExplanations = filteredExplanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
+        filteredExplanations.removeAll(currentExplanations);
+        return currentExplanations;
     }
 }

@@ -2,18 +2,21 @@ package algorithms.abduction;
 
 import algorithms.ISolver;
 import common.Configuration;
+import fileLogger.FileLogger;
 import models.Explanation;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import reasoner.AxiomManager;
 import reasoner.ILoader;
 import reasoner.IReasonerManager;
+import timer.ThreadTimes;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
+import java.util.stream.Collectors;
 
 public class AbductionHSSolver implements ISolver {
 
@@ -22,31 +25,21 @@ public class AbductionHSSolver implements ISolver {
     private List<Explanation> explanations;
     private List<OWLAxiom> assertionsAxioms;
     private List<OWLAxiom> negAssertionsAxioms;
-    //private List<OWLAxiom> inconsistentCandidates;
+    private ThreadTimes threadTimes;
+    private long currentTimeMillis;
+
+    public AbductionHSSolver(ThreadTimes threadTimes, long currentTimeMillis) {
+        this.threadTimes = threadTimes;
+        this.currentTimeMillis = currentTimeMillis;
+    }
 
     @Override
     public void solve(ILoader loader, IReasonerManager reasonerManager) {
         this.loader = loader;
         this.reasonerManager = reasonerManager;
 
-        long startTime = System.currentTimeMillis();
         initialize();
         startSolving();
-
-        long stopTime = System.currentTimeMillis();
-        long elapsedTime = stopTime - startTime;
-
-        System.out.println("Time: " + elapsedTime);
-    }
-
-    @Override
-    public List<Explanation> getExplanations() {
-        return explanations;
-    }
-
-    @Override
-    public boolean isShowingExplanations() {
-        return true;
     }
 
     private void initialize() {
@@ -77,10 +70,9 @@ public class AbductionHSSolver implements ISolver {
     }
 
     private void startSolving() {
-        //inconsistentCandidates = new LinkedList<>();
         explanations = new LinkedList<>();
         ICheckRules checkRules = new CheckRules(loader, reasonerManager);
-        int currentDepth = 0;
+        Integer currentDepth = 0;
 
         ModelNode root = getNegModel(null);
         root.label = new LinkedList<>();
@@ -92,11 +84,17 @@ public class AbductionHSSolver implements ISolver {
         while (!queue.isEmpty()) {
             Node node = queue.poll();
 
+            if (Configuration.TIMEOUT != null && threadTimes.getTotalUserTimeInSec() > Configuration.TIMEOUT) {
+                showExplanationsWithDepth(currentDepth + 1, true);
+                currentDepth = null;
+                break;
+            }
+
             if (ModelNode.class.isAssignableFrom(node.getClass())) {
                 ModelNode model = (ModelNode) node;
 
                 if (model.depth > currentDepth) {
-                    showExplanationsWithDepth(model.depth);
+                    showExplanationsWithDepth(model.depth, false);
                     currentDepth++;
                 }
 
@@ -121,6 +119,8 @@ public class AbductionHSSolver implements ISolver {
                             if (isMinimal) {
                                 explanation.setDepth(model.depth + 1);
                                 explanations.add(explanation);
+                                String line = String.format("%.2f;%s\n", threadTimes.getTotalUserTimeInSec(), explanation);
+                                FileLogger.appendToFile(FileLogger.MHS_PARTIAL_EXPLANATIONS_LOG_FILE__PREFIX, currentTimeMillis, line);
                             }
 
                         } else {
@@ -130,14 +130,15 @@ public class AbductionHSSolver implements ISolver {
                             modelNode.depth = model.depth + 1;
                             queue.add(modelNode);
                         }
-                    } else {
-                        //inconsistentCandidates.addAll(explanation.getOwlAxioms());
                     }
                 }
             }
         }
 
-        showExplanationsWithDepth(currentDepth + 1);
+        if (currentDepth != null && currentDepth + 1 <= Configuration.DEPTH) {
+            showExplanationsWithDepth(currentDepth + 1, false);
+        }
+
     }
 
     private ModelNode getNegModel(Explanation explanation) {
@@ -155,7 +156,6 @@ public class AbductionHSSolver implements ISolver {
             OWLAxiom axiom = assertionsAxioms.get(i);
             OWLAxiom complementOfAxiom = negAssertionsAxioms.get(i);
 
-            //&& !inconsistentCandidates.contains(axiom) && !inconsistentCandidates.contains(complementOfAxiom)
             if (!model.contains(axiom) && !model.contains(complementOfAxiom)) {
                 reasonerManager.addAxiomToOntology(axiom);
                 boolean isConsistent = reasonerManager.isOntologyConsistent();
@@ -175,7 +175,6 @@ public class AbductionHSSolver implements ISolver {
             }
         }
 
-        //reasonerManager.resetOntology(model, true);
         reasonerManager.resetOntology(loader.getOriginalOntology().axioms());
         model.remove(loader.getNegObservation().getOwlAxiom());
 
@@ -196,12 +195,11 @@ public class AbductionHSSolver implements ISolver {
         return modelNode;
     }
 
-    private void showExplanationsWithDepth(Integer depth) {
-        System.out.println("Explanations with depth: " + depth);
-        for (Explanation explanation : explanations) {
-            if (explanation.getDepth().equals(depth)) {
-                System.out.println(explanation);
-            }
-        }
+    private void showExplanationsWithDepth(Integer depth, boolean timeout) {
+        List<Explanation> currentExplanations = explanations.stream().filter(explanation -> explanation.getDepth().equals(depth)).collect(Collectors.toList());
+        String currentExplanationsFormat = StringUtils.join(currentExplanations, ",");
+        String line = String.format("%d;%d;%.2f%s;{%s}\n", depth, currentExplanations.size(), threadTimes.getTotalUserTimeInSec(), timeout ? "-TIMEOUT" : "", currentExplanationsFormat);
+        FileLogger.appendToFile(FileLogger.MHS_LOG_FILE__PREFIX, currentTimeMillis, line);
+        System.out.print(line);
     }
 }

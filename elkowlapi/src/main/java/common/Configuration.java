@@ -9,4 +9,5 @@ public class Configuration {
     public static ReasonerType REASONER;
     public static Strategy STRATEGY;
     public static Integer DEPTH;
+    public static Long TIMEOUT;
 }

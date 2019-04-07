@@ -3,7 +3,6 @@ import algorithms.abduction.AbductionHSSolver;
 import algorithms.mergeXPlain.MergeXPlainSolver;
 import common.ArgumentParser;
 import common.Configuration;
-import models.Explanation;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -11,8 +10,8 @@ import reasoner.ILoader;
 import reasoner.IReasonerManager;
 import reasoner.Loader;
 import reasoner.ReasonerManager;
+import timer.ThreadTimes;
 
-import java.util.Collection;
 
 public class Main {
 
@@ -26,32 +25,27 @@ public class Main {
         ILoader loader = new Loader();
         loader.initialize(Configuration.REASONER);
 
+        ThreadTimes threadTimes = new ThreadTimes(100);
+        threadTimes.start();
+
         IReasonerManager reasonerManager = new ReasonerManager(loader);
-        ISolver solver = createSolver();
+        ISolver solver = createSolver(threadTimes);
 
         if (solver != null) {
             solver.solve(loader, reasonerManager);
-
-            if (!solver.isShowingExplanations()) {
-                Collection<Explanation> explanations = solver.getExplanations();
-
-                System.out.println("\nExplanations are:");
-
-                for (Explanation explanation : explanations) {
-                    System.out.println(explanation);
-                }
-            }
         }
 
+        threadTimes.interrupt();
     }
 
-    private static ISolver createSolver() {
+    private static ISolver createSolver(ThreadTimes threadTimes) {
+        long currentTimeMillis = System.currentTimeMillis();
         switch (Configuration.STRATEGY) {
             case ABDUCTIONHS:
-                return new AbductionHSSolver();
+                return new AbductionHSSolver(threadTimes, currentTimeMillis);
 
             case MERGEXPLAIN:
-                return new MergeXPlainSolver();
+                return new MergeXPlainSolver(threadTimes, currentTimeMillis);
         }
 
         return null;

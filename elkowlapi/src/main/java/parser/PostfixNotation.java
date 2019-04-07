@@ -1,8 +1,12 @@
-package common;
+package parser;
+
+import common.DLSyntax;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class PostfixNotation {
 
@@ -19,22 +23,29 @@ class PostfixNotation {
     }
 
     private List<String> convertToTokens(String expression) {
-        String[] possibleTokens = expression.split(DLSyntax.DELIMITER_EXPRESSION);
+        List<String> possibleTokens = new ArrayList<>();
+        Matcher matcher = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'").matcher(expression);
+        while (matcher.find()) {
+            String token = matcher.group();
+            possibleTokens.add(token);
+        }
+
+        //String[] possibleTokens = expression.split(DLSyntax.DELIMITER_EXPRESSION);
         List<String> tokens = new ArrayList<>();
 
-        for (int i = 0; i < possibleTokens.length; i++) {
-            if (possibleTokens[i].startsWith(DLSyntax.LEFT_PARENTHESES)) {
+        for (int i = 0; i < possibleTokens.size(); i++) {
+            if (possibleTokens.get(i).startsWith(DLSyntax.LEFT_PARENTHESES)) {
                 tokens.add(DLSyntax.LEFT_PARENTHESES);
-                tokens.add(possibleTokens[i].substring(1));
+                tokens.add(possibleTokens.get(i).substring(1));
 
-            } else if (possibleTokens[i].endsWith(DLSyntax.RIGHT_PARENTHESES)) {
-                tokens.add(possibleTokens[i].substring(0, possibleTokens[i].length() - 1));
+            } else if (possibleTokens.get(i).endsWith(DLSyntax.RIGHT_PARENTHESES)) {
+                tokens.add(possibleTokens.get(i).substring(0, possibleTokens.get(i).length() - 1));
                 tokens.add(DLSyntax.RIGHT_PARENTHESES);
 
-            } else if (possibleTokens[i].equals(DLSyntax.NOMINAL) || possibleTokens[i].equals(DLSyntax.NEGATION)) {
-                if (i + 1 < possibleTokens.length) {
-                    String actualToken = possibleTokens[i];
-                    String nextToken = possibleTokens[++i];
+            } else if (possibleTokens.get(i).equals(DLSyntax.NOMINAL) || possibleTokens.get(i).equals(DLSyntax.NEGATION)) {
+                if (i + 1 < possibleTokens.size()) {
+                    String actualToken = possibleTokens.get(i);
+                    String nextToken = possibleTokens.get(++i);
 
                     if (nextToken.endsWith(DLSyntax.RIGHT_PARENTHESES)) {
                         String validNextToken = nextToken.substring(0, nextToken.length() - 1);
@@ -53,7 +64,7 @@ class PostfixNotation {
                 }
 
             } else {
-                tokens.add(possibleTokens[i]);
+                tokens.add(possibleTokens.get(i));
             }
         }
 

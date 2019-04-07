@@ -3,9 +3,7 @@ package reasoner;
 import application.Application;
 import application.ExitCode;
 import common.Configuration;
-import common.IObservationParser;
 import common.LogMessage;
-import common.ObservationParser;
 import models.Individuals;
 import models.Observation;
 import openllet.owlapi.OpenlletReasonerFactory;
@@ -14,6 +12,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import parser.IObservationParser;
+import parser.ObservationParser;
 import uk.ac.manchester.cs.jfact.JFactFactory;
 
 import java.io.File;
@@ -45,7 +45,7 @@ public class Loader implements ILoader {
         try {
             ontologyManager = OWLManager.createOWLOntologyManager();
             ontology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
-            originalOntology = ontologyManager.loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
+            originalOntology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(Configuration.INPUT_FILE));
 
             changeReasoner(reasonerType);
             initializeReasoner();
