@@ -16,6 +16,11 @@
 \graphicspath{{.png}{images/}}
 \renewcommand{\baselinestretch}{1.8}
 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{setspace}
+\usepackage[table]{xcolor}
+
 \usepackage{pdfpages}
 
 \usepackage{hyperref}
@@ -123,8 +128,8 @@
 \listoffigures
 
 \pagebreak
+\setcounter{page}{1}
 \section*{Introduction}
-\addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
 
 \pagebreak
@@ -693,50 +698,204 @@ Greiner claims that Reiter's way of creating a tree handles some situations inco
 
 The next optimization by Wotawa disclaims the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of an edge label and right means the biggest size of an edge label in one breadth level. In our case this optimization is also useless because in our tree the size of the edge label is always equal.
 
-\subsection{ABox Abduction with Minimal Hitting Set algorithm}
-%For our algorithm to work we have to combine these two algorithms as designed by \citep{pukancovaAboxAbduction}. 
-
-%TODO add pseudocode
-
 \subsection{MergeXPlain}
+?? teoria o mergexplain
 
-
-%\usepackage{algorithm}
-%\usepackage{algorithmic}
-
-%\begin{algorithm}[H]
-%	\caption{Adjusted Minimal Hitting Set algorithm}
-%	\begin{algorithmic} 
-%		\REQUIRE $Ontology, observation \text{ } \mathcal{O}$
-%		\STATE $root \leftarrow negationOfModel$
-%		\STATE $queue \leftarrow queue \cup root$
-%		\WHILE{$queue.isNotEmpty()$}
-%		\STATE $node \leftarrow queue.pop()$
-%		\FOR{(Node child : node.children)}
-%		\STATE $consistent \leftarrow isConsistent(node); relevant \leftarrow isRelevant(node)$
-%		\STATE $explanation \leftarrow isExplanation(node); minimal \leftarrow isMinimal(node)$ 
-%		\IF{\texttt{(explanation)}}
-%		\STATE $explanations \leftarrow explanations \cup node.label$
-%		\ELSE
-%		\STATE $queue \leftarrow queue \cup node$
-%		\ENDIF
-		
-%		\ENDFOR
-%		\ENDWHILE		
-%	\end{algorithmic}
-%\end{algorithm}	
-
-\section{Implementation}
-In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one is ABox abduction algorithm and the second one is MergeXPlain. Our both approaches are using reasoners for consistency checking.
+\section{Our approach}
+In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one is Minimal Hitting Set (MHS) and the second one is MergeXPlain (MXP). Our both approaches are using reasoners for consistency checking. 
 
 \subsection{Reasoning}
+We use three reasoners, HermiT, JFact and Pellet. We use them only for consistency checking which means that in both algorithms (MHS, MXP) we need to ask the reasoner if our ontology is consistent in current state. We do not use all three reasoners at the same time but we use only one. The ontology is changing in the flow of algorithm, so we ask many times if ontology is consistent or other words if the ontology is clash free.
 
+\subsection{Minimal Hitting Set}
 
-\subsection{ABox Abduction algorithm}
-%TODO add pseudocode
+\begin{algorithm}[H] 
+	\setstretch{1.40}
+	\footnotesize
+	\caption{MHS($\mathcal{K}$,$O$)} \label{alg:mhs}
+	\label{alg:SOA}
+	\begin{algorithmic}[1]
+		\Require knowledge base $\mathcal{K}$, observation $O$
+		\Ensure set $\mathcal{S}_{\mathcal{E}}$ of all explanations of $\mathcal{P}=(\mathcal{K},O)$ of the class Abd
+		\State $M \gets$ a model $M$ of $\mathcal{K} \cup \{\neg O\}$
+		\label{soal:ta_init}
+		\If { $M = \mathtt{null}$ }
+		\State \Return \texttt{"nothing to explain"} %4
+		\label{soal:nte}
+		\EndIf %5
+		\label{soal:init:e}
+		\State create new HS-tree $T=(V,E,L)$ with root $r$ %7
+		\label{soal:root:b}
+		\State label $r$ by $L(r) \gets$ Abd($M$)
+		\label{soal:r-label}
+		\State for each $\sigma\in L(r)$ create a successor $n_\sigma$ of $r$
+		and label the resp.\ edge by $\sigma$ %9
+		\label{soal:root:e}
+		\State $\mathcal{S}_{\mathcal{E}} \gets$ $\{\}$ %10
+		\label{soal:SE:init}
+		\While {there is next node $n$ in $T$ w.r.t.\ BFS}  %12
+		\label{soal:loop:b}
+		\If { $n$ can be pruned } %13
+		\label{soal:prune:b}
+		\State prune $n$
+		\label{soal:prune:e}
+		\ElsIf{there is a model $M$ of $\mathcal{K} \cup \{\neg O\} \cup H(n)$}
+		\label{soal:ta}
+		\State label $n$ by $L(n) \gets$  Abd($M$) 
+		\Else %17
+		\State $\mathcal{S}_\mathcal{E} \gets \mathcal{S}_\mathcal{E} \cup \{H(n)\}$ 
+		\EndIf
+		\State for each $\sigma\in L(n)$ create a successor $n_\sigma$ of $n$
+		and label the resp.\ edge by $\sigma$ %28
+		\label{soal:modproc:e}
+		\EndWhile
+		\label{soal:loop:e}
+		\label{soal:output}
+		\State \Return $\mathcal{S}_\mathcal{E}$
+	\end{algorithmic}
+\end{algorithm}
 
-\subsection{MergeXPlain algorithm}
-%TODO add pseudocode
+\subsection{MergeXPlain}
+\begin{algorithm}[H]
+	\setstretch{1.35}
+	\label{alg:mxp}
+	\footnotesize
+	\caption{MXP($\mathcal{B}$,$\mathcal{C}$)}
+	\label{alg:MERGEXPLAIN}
+	\textbf{Input:} $\mathcal{B}$: Background theory, $\mathcal{C}$: the set of possibly faulty constraints  \\
+	\textbf{Output:} $\Gamma$, a set of minimal conflicts
+	\begin{algorithmic}[1]
+		\If { $\neg \mathit{isConsistent}(\mathcal{B})$ }
+		\State \Return {\texttt{"no solution"}}
+		\ElsIf { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
+		\State \Return {$\emptyset$}
+		\EndIf
+		\State {$\langle \_,\Gamma \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}$}}
+		\State \Return {$\Gamma$}
+		
+		\medskip
+		\Function {FindConflicts} {$\mathcal{B}, \mathcal{C}$} \textbf{returns} a tuple $\langle \mathcal{C}^{\prime}, \Gamma \rangle$
+		\If { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
+		\State \Return $\langle \mathcal{C}, \emptyset \rangle$
+		\ElsIf { $|\mathcal{C}| = 1$ }
+		\State \Return $\langle \emptyset, \{\mathcal{C}\} \rangle$
+		\EndIf
+		\State {Split $\mathcal{C}$ into disjoint, non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$}
+		\State $\langle \mathcal{C}_{1}^{\prime}, \Gamma_{1} \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}_{1}$}
+		\State $\langle \mathcal{C}_{2}^{\prime}, \Gamma_{2} \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}_{2}$}
+		\State $\Gamma \gets \Gamma_{1} \cup \Gamma_{2}$
+		\While {$\neg \mathit{isConsistent}(\mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime} \cup \mathcal{B})$}
+		\State $X \gets $ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{2}^{\prime}, \mathcal{C}_{2}^{\prime}, \mathcal{C}_{1}^{\prime}$}
+		\State $\gamma \gets X$ $\cup$ \Call{GetConflict}{$\mathcal{B} \cup X, X, \mathcal{C}_{2}^{\prime}$}
+		\State $\mathcal{C}_{1}^{\prime} \gets \mathcal{C}_{1}^{\prime} \backslash \{a\}$ where $a \in X$
+		\State $\Gamma \gets \Gamma \cup \{\gamma\}$
+		\EndWhile
+		\State \Return $\langle \mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime}, \Gamma \rangle$
+		\EndFunction			
+		
+		\medskip
+		\Function {GetConflict} {$\mathcal{B}, D, \mathcal{C}$}
+		\If { $D \neq \emptyset \land \neg \mathit{isConsistent}(\mathcal{B})$}
+		\State \Return {$\emptyset$}
+		\ElsIf { $|\mathcal{C}| = 1$ }
+		\State \Return {$\mathcal{C}$}
+		\EndIf
+		\State {Split $\mathcal{C}$ into disjoint, non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$}
+		\State $D_{2} \gets$ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{1}, \mathcal{C}_{1}, \mathcal{C}_{2}$}
+		\State $D_{1} \gets$ \Call{GetConflict}{$\mathcal{B} \cup D_{2}, D_{2}, \mathcal{C}_{1}$}
+		\State \Return $D_{1} \cup D_{2}$
+		\EndFunction			
+	\end{algorithmic}
+\end{algorithm}
+
+\section{Evaluation}
+??? citovat, prepisat?
+
+A preliminary experimental evaluation was conducted with implementations of
+MHS and MXP, both paired with three  DL reasoners -- Pellet, HermiT, and
+JFact. Both algorithms are implemented in Java and communicate with the
+reasoners through OWL API.
+%
+The source code of both implementations is available online.%
+\footnote{\url{https://github.com/katuskaa/MasterThesis}}
+
+The evaluation is split into two experiments. Experiment 1 is focused on
+computing explanations of size one. In this case MHS can be
+made more effective by bounding the HS-tree depth, and on the other hand
+MXP is complete in this case. Experiment 2 was conducted without any
+constraints on the size of explanations, but a timeout needed to be set. Both
+experiments were focused on comparing execution times between the two
+approaches and the three reasoners. Each time was computed as an average
+value from ten runs with ten different observations.
+
+\subsection{Dataset and Methodology}
+??? citovat, prepisat?
+
+Three ontologies were chosen. The Family ontology%
+\footnote{\url{http://dai.fmph.uniba.sk/~pukancova/aaa/ont/family2.owl}}%
+, is our own ontology of family relations. It is smaller,
+but it is particularly useful in this use case as it generates a number of
+explanations of size higher than one. The second ontology, LUBM (Lehigh University
+Benchmark \cite{LUBM}), is a standard benchmark. The Beer
+ontology\footnote{\url{https://www.cs.umd.edu/projects/plus/SHOE/onts/beer1.0.html}}
+was chosen. Both LUBM and Beer were chosen because of their larger size compared to the Family ontology, but on the other hand as in the case of many real world ontologies their axiomatic structure is less complex which implies that most if not all explanations are
+of size one.
+
+\begin{table}[h!]
+	\scriptsize
+	\centering
+	\caption{Parameters of the ontologies}
+	\label{tab:ont}
+	\rowcolors{0}{gray!35}{}
+	\begin{tabular}{lcccc}
+		\scriptsize
+		\textbf{Ontology} & \textbf{Concepts} & \textbf{Roles} & \textbf{Individuals} & \textbf{Axioms} \\
+		Family ontology & $10$ & $1$ & $0$ & $28$\\
+		Beer ontology & $58$ & $9$ & $0$ & $165$\\
+		LUBM & $43$ & $25$ & $0$ & $243$
+	\end{tabular}
+\end{table}
+
+\subsection{Experiment 1}
+
+\begin{figure}[H]
+	\noindent
+	\begin{tabular}{@{}c@{\ }c@{\ }c@{}}
+		\includegraphics[width=0.33\textwidth, height=4cm]{eval1Family} 
+		&
+		\includegraphics[width=0.33\textwidth, height=4cm]{eval1Beer} 
+		&
+		\includegraphics[width=0.33\textwidth, height=4cm]{eval1LUBM} 
+		\\
+		(a) Family & (b) Beer & (c) LUBM \\
+	\end{tabular}
+	\caption{Result times in seconds for Exp.\,1:\quad
+		\protect\includegraphics[width=1.5ex]{cl-mhs}~MHS\quad
+		\protect\includegraphics[width=1.5ex]{cl-mxp}~MXP
+	}
+	\label{fig:eval1}
+\end{figure}
+
+\subsection{Experiment 2}
+
+\begin{figure}[H]
+	\noindent
+	\begin{tabular}{@{}c@{\ }c@{\ }c@{}}
+		\includegraphics[width=0.33\textwidth, height=4cm]{eval2Family} 
+		&
+		\includegraphics[width=0.33\textwidth, height=4cm]{eval2Beer} 
+		&
+		\includegraphics[width=0.33\textwidth, height=4cm]{eval2LUBM} 
+		\\
+		(a) Family & (b) Beer & (c) LUBM \\
+	\end{tabular}
+	\caption{Results in seconds (a) and hours (b--c) for Exp.\,2:\quad
+		\protect\includegraphics[height=1.5ex]{cl-mhs-scale}~MHS (depth 1--6)\quad
+		\protect\includegraphics[width=1.5ex]{cl-mxp}~MXP
+	}
+	\label{fig:eval2}
+\end{figure}
+
 
 \pagebreak
 \section*{Conclusion}
