@@ -130,6 +130,7 @@
 \pagebreak
 \setcounter{page}{1}
 \section*{Introduction}
+\addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
 
 \pagebreak
@@ -595,7 +596,7 @@ If $jack$ is an Academician he must be a Professor or a Scientist. If he is a Pr
 \right \}
 \]
 
-\subsection{Minimal Hitting Set algorithm}
+\subsection{Minimal Hitting Set}
 In this part we will explain the algorithm: Minimal hitting set algorithm. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using. The first term is a hitting set. Let's have collection of sets $C$. Hitting set is such a set that has non-empty intersection with each set of collection $C$.
 
 \begin{definition}{\textbf{Hitting set}}
@@ -699,16 +700,112 @@ Greiner claims that Reiter's way of creating a tree handles some situations inco
 The next optimization by Wotawa disclaims the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of an edge label and right means the biggest size of an edge label in one breadth level. In our case this optimization is also useless because in our tree the size of the edge label is always equal.
 
 \subsection{MergeXPlain}
-?? teoria o mergexplain
+The main goal of this algorithm is to find some minimal conflicts. That is a complex task that can be done by this algorithm. But the result is a subset of all minimal conflicts. On the other hand the algorithm runs in seconds which is so much quicker compared to Minimal Hitting Set algorithm. This algorithm is proposed by \citep{MXP}. The main algorithm is MergeXPlain that finds some minimal conflicts and it uses an algorithm that is called QuickXPlain. The QuickXPlain algorithm uses divide and conquere strategy and it returns one minimal conflict if such conflict exists. 
+
+To characterize a conflict we have to first characterize what is a diagnosable system and diagnosis from \citep{reiterHS}. 
+
+\begin{definition}{\textbf{Diagnosable System}} \\
+	\noindent A diagnosable system is a pair (SD, COMPS) where SD is a system description (a set of logical sentences) and COMPS represents the system's components (a finite set of constants).
+\end{definition}
+
+A diagnosis problem is when observations ($OBS$) are inconsistent with the diagnosable system.
+
+\begin{definition}{\textbf{Diagnosis}} \\
+	\noindent Given a diagnosis problem (SD, COMPS, OBS), a diagnosis is a minimal set $\Delta \subseteq COMPS$ such that $SD \cup OBS \cup \{ AB(c) | c \in \Delta \} \cup \{ \neg \{AB(c) | c \in COMPS \backslash \Delta \}$ is consistent.
+\end{definition}
+
+A minimal conflict seems to be the same as minimal diagnosis. Finding all minimal conflicts corresponds to finding all minimal hitting sets (\cite{reiterHS}). Conflict CS is minimal if exists no proper subset of CS such as this subset is a conflict.
+
+\begin{definition}{\textbf{Conflict}} \\
+	\noindent A conflict CS for (SD, COMPS, OBS) is a set $\{c_{1}, ..., c_{k}\} \subseteq COMPS$ such that $SD \cup OBS \cup \{ \neg AB(c_{i}) | c_{i} \in CS \} $ is incosistent.
+\end{definition}
+
+The QuickXPlain algorithm is designed for computation of explanations. In its current state it has the ability to return one conflict which means one possible explanation. It is a recursive algorithm showed in Algorithm \ref{alg:qxp}.
+
+\begin{algorithm}[H]
+	\setstretch{1.40}
+	\footnotesize
+	\caption{QXP($\mathcal{B}$,$\mathcal{C}$)}
+	\label{alg:qxp}
+	\textbf{Input:} $\mathcal{B}$: Background theory, $\mathcal{C}$: the set of possibly faulty constraints  \\
+	\textbf{Output:} A minimal conflict $CS \subseteq C$
+	\begin{algorithmic}[1]
+		\If { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
+		\State \Return {\texttt{"no conflict"}}
+		\ElsIf { $\mathcal{C} = \emptyset$ }
+		\State \Return {$\emptyset$}
+		\EndIf
+		\State \Return {$\mathit{GETCONFLICT(\mathcal{B}, \mathcal{B}, \mathcal{C})}$}
+		
+		\medskip
+		\Function {GetConflict} {$\mathcal{B}, D, \mathcal{C}$}
+		\If { $D \neq \emptyset \land \neg \mathit{isConsistent}(\mathcal{B})$}
+		\State \Return {$\emptyset$}
+		\EndIf
+		\If { $|\mathcal{C}| = 1$ }
+		\State \Return {$\mathcal{C}$}
+		\EndIf
+		\State {Split $\mathcal{C}$ into disjoint, non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$}
+		\State $D_{2} \gets$ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{1}, \mathcal{C}_{1}, \mathcal{C}_{2}$}
+		\State $D_{1} \gets$ \Call{GetConflict}{$\mathcal{B} \cup D_{2}, D_{2}, \mathcal{C}_{1}$}
+		\State \Return $D_{1} \cup D_{2}$
+		\EndFunction			
+	\end{algorithmic}
+\end{algorithm}
+
+At first the algorithm is checking consistency of $\mathcal{B}$ and $\mathcal{C}$. There is no conflict if they are consistent so algorithm returns "no conflict". Otherwise the next check in the algorithm is if $\mathcal{C}$ is empty. If it is empty there can not be any conflict. Then algorithm calls method $\mathit{GETCONFLICT}$ with parameters $\mathcal{B}$, $\mathcal{B}$ and $\mathcal{C}$. The $\mathit{GETCONFLICT}$ method is checking if the second parameter $D$ is not empty and if $\mathcal{B}$ is not consistent. Otherwise if $\mathcal{C}$ has size 1 then the result is $\mathbb{C}$ because $\mathcal{C}$ can not be divided into two sets anymore. It is already a conflict. If algorithm continues then $\mathcal{C}$ is randomly divided into two sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. Then the method $\mathit{GETCONFLICT}$ is recursively called, first with parameters $\mathcal{B} \cup \mathcal{C}_{1}$, $\mathcal{C}_{1}$ and $\mathcal{C_{2}}$, second with $\mathcal{B} \cup D_{2}$, $D_{2}$ and $\mathcal{C}_{1}$. After returning from recursion the results $D_{1}$ and $D_{2}$ are joined and returned as result.
+
+Difference between QuickXPlain and MergeXPlain algorithm (Algorithm \ref{alg:mxp}) is that MergeXPlain can return multiple conflicts at a time. MergeXPlain is repeatedly calling QuickXPlain for computation of an conflict.
+
+\begin{algorithm}[H]
+	\setstretch{1.40}
+	\footnotesize
+	\caption{MXP($\mathcal{B}$,$\mathcal{C}$)}
+	\label{alg:mxp}
+	\textbf{Input:} $\mathcal{B}$: Background theory, $\mathcal{C}$: the set of possibly faulty constraints  \\
+	\textbf{Output:} $\Gamma$, a set of minimal conflicts
+	\begin{algorithmic}[1]
+		\If { $\neg \mathit{isConsistent}(\mathcal{B})$ }
+		\State \Return {\texttt{"no solution"}}
+		\ElsIf { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
+		\State \Return {$\emptyset$}
+		\EndIf
+		\State {$\langle \_,\Gamma \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}$}}
+		\State \Return {$\Gamma$}
+		
+		\medskip
+		\Function {FindConflicts} {$\mathcal{B}, \mathcal{C}$} \textbf{returns} a tuple $\langle \mathcal{C}^{\prime}, \Gamma \rangle$
+		\If { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
+		\State \Return $\langle \mathcal{C}, \emptyset \rangle$
+		\ElsIf { $|\mathcal{C}| = 1$ }
+		\State \Return $\langle \emptyset, \{\mathcal{C}\} \rangle$
+		\EndIf
+		\State {Split $\mathcal{C}$ into disjoint, non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$}
+		\State $\langle \mathcal{C}_{1}^{\prime}, \Gamma_{1} \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}_{1}$}
+		\State $\langle \mathcal{C}_{2}^{\prime}, \Gamma_{2} \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}_{2}$}
+		\State $\Gamma \gets \Gamma_{1} \cup \Gamma_{2}$
+		\While {$\neg \mathit{isConsistent}(\mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime} \cup \mathcal{B})$}
+		\State $X \gets $ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{2}^{\prime}, \mathcal{C}_{2}^{\prime}, \mathcal{C}_{1}^{\prime}$}
+		\State $\gamma \gets X$ $\cup$ \Call{GetConflict}{$\mathcal{B} \cup X, X, \mathcal{C}_{2}^{\prime}$}
+		\State $\mathcal{C}_{1}^{\prime} \gets \mathcal{C}_{1}^{\prime} \backslash \{a\}$ where $a \in X$
+		\State $\Gamma \gets \Gamma \cup \{\gamma\}$
+		\EndWhile
+		\State \Return $\langle \mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime}, \Gamma \rangle$
+		\EndFunction			
+	\end{algorithmic}
+\end{algorithm}
+
+TODO popisat mergexplain, zakomponovat pseudokod do mhs (vymysliet novy)
+
+\begin{example}{\textbf{MergeXPlain example}}
+\end{example}
 
 \section{Our approach}
 In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one is Minimal Hitting Set (MHS) and the second one is MergeXPlain (MXP). Our both approaches are using reasoners for consistency checking. 
 
-\subsection{Reasoning}
-We use three reasoners, HermiT, JFact and Pellet. We use them only for consistency checking which means that in both algorithms (MHS, MXP) we need to ask the reasoner if our ontology is consistent in current state. We do not use all three reasoners at the same time but we use only one. The ontology is changing in the flow of algorithm, so we ask many times if ontology is consistent or other words if the ontology is clash free.
+\subsection{Our approach based on Minimal Hitting Set}
 
-\subsection{Minimal Hitting Set}
-
+TODO tento algoritmus je prisposobeny na nasu situaciu - abdukcia
 \begin{algorithm}[H] 
 	\setstretch{1.40}
 	\footnotesize
@@ -755,58 +852,12 @@ We use three reasoners, HermiT, JFact and Pellet. We use them only for consisten
 	\end{algorithmic}
 \end{algorithm}
 
-\subsection{MergeXPlain}
-\begin{algorithm}[H]
-	\setstretch{1.35}
-	\label{alg:mxp}
-	\footnotesize
-	\caption{MXP($\mathcal{B}$,$\mathcal{C}$)}
-	\label{alg:MERGEXPLAIN}
-	\textbf{Input:} $\mathcal{B}$: Background theory, $\mathcal{C}$: the set of possibly faulty constraints  \\
-	\textbf{Output:} $\Gamma$, a set of minimal conflicts
-	\begin{algorithmic}[1]
-		\If { $\neg \mathit{isConsistent}(\mathcal{B})$ }
-		\State \Return {\texttt{"no solution"}}
-		\ElsIf { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
-		\State \Return {$\emptyset$}
-		\EndIf
-		\State {$\langle \_,\Gamma \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}$}}
-		\State \Return {$\Gamma$}
-		
-		\medskip
-		\Function {FindConflicts} {$\mathcal{B}, \mathcal{C}$} \textbf{returns} a tuple $\langle \mathcal{C}^{\prime}, \Gamma \rangle$
-		\If { $\mathit{isConsistent}(\mathcal{B} \cup \mathcal{C})$ }
-		\State \Return $\langle \mathcal{C}, \emptyset \rangle$
-		\ElsIf { $|\mathcal{C}| = 1$ }
-		\State \Return $\langle \emptyset, \{\mathcal{C}\} \rangle$
-		\EndIf
-		\State {Split $\mathcal{C}$ into disjoint, non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$}
-		\State $\langle \mathcal{C}_{1}^{\prime}, \Gamma_{1} \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}_{1}$}
-		\State $\langle \mathcal{C}_{2}^{\prime}, \Gamma_{2} \rangle \gets$ \Call{FindConflicts}{$\mathcal{B}, \mathcal{C}_{2}$}
-		\State $\Gamma \gets \Gamma_{1} \cup \Gamma_{2}$
-		\While {$\neg \mathit{isConsistent}(\mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime} \cup \mathcal{B})$}
-		\State $X \gets $ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{2}^{\prime}, \mathcal{C}_{2}^{\prime}, \mathcal{C}_{1}^{\prime}$}
-		\State $\gamma \gets X$ $\cup$ \Call{GetConflict}{$\mathcal{B} \cup X, X, \mathcal{C}_{2}^{\prime}$}
-		\State $\mathcal{C}_{1}^{\prime} \gets \mathcal{C}_{1}^{\prime} \backslash \{a\}$ where $a \in X$
-		\State $\Gamma \gets \Gamma \cup \{\gamma\}$
-		\EndWhile
-		\State \Return $\langle \mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime}, \Gamma \rangle$
-		\EndFunction			
-		
-		\medskip
-		\Function {GetConflict} {$\mathcal{B}, D, \mathcal{C}$}
-		\If { $D \neq \emptyset \land \neg \mathit{isConsistent}(\mathcal{B})$}
-		\State \Return {$\emptyset$}
-		\ElsIf { $|\mathcal{C}| = 1$ }
-		\State \Return {$\mathcal{C}$}
-		\EndIf
-		\State {Split $\mathcal{C}$ into disjoint, non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$}
-		\State $D_{2} \gets$ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{1}, \mathcal{C}_{1}, \mathcal{C}_{2}$}
-		\State $D_{1} \gets$ \Call{GetConflict}{$\mathcal{B} \cup D_{2}, D_{2}, \mathcal{C}_{1}$}
-		\State \Return $D_{1} \cup D_{2}$
-		\EndFunction			
-	\end{algorithmic}
-\end{algorithm}
+\subsection{Our approach based on MergeXPlain}
+
+\subsection{Implementation}
+%%Reasoners
+We use three reasoners, HermiT, JFact and Pellet. We use them only for consistency checking which means that in both algorithms (MHS, MXP) we need to ask the reasoner if our ontology is consistent in current state. We do not use all three reasoners at the same time but we use only one. The ontology is changing in the flow of algorithm, so we ask many times if ontology is consistent or other words if the ontology is clash free.
+
 
 \section{Evaluation}
 ??? citovat, prepisat?
@@ -879,22 +930,18 @@ of size one.
 \subsection{Experiment 2}
 
 \begin{figure}[H]
-	\noindent
-	\begin{tabular}{@{}c@{\ }c@{\ }c@{}}
-		\includegraphics[width=0.33\textwidth, height=4cm]{eval2Family} 
-		&
-		\includegraphics[width=0.33\textwidth, height=4cm]{eval2Beer} 
-		&
-		\includegraphics[width=0.33\textwidth, height=4cm]{eval2LUBM} 
-		\\
-		(a) Family & (b) Beer & (c) LUBM \\
-	\end{tabular}
-	\caption{Results in seconds (a) and hours (b--c) for Exp.\,2:\quad
-		\protect\includegraphics[height=1.5ex]{cl-mhs-scale}~MHS (depth 1--6)\quad
-		\protect\includegraphics[width=1.5ex]{cl-mxp}~MXP
-	}
-	\label{fig:eval2}
+	\includegraphics[width=\textwidth]{eval2Family} 	
 \end{figure}
+
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{eval2Beer} 
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{eval2LUBM} 
+\end{figure}
+
+\subsection{Conclusion from experiments}
 
 
 \pagebreak
