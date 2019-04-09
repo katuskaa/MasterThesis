@@ -753,7 +753,7 @@ The QuickXPlain algorithm is designed for computation of explanations. In its cu
 	\end{algorithmic}
 \end{algorithm}
 
-At first the algorithm is checking consistency of $\mathcal{B}$ and $\mathcal{C}$. There is no conflict if they are consistent so algorithm returns "no conflict". Otherwise the next check in the algorithm is if $\mathcal{C}$ is empty. If it is empty there can not be any conflict. Then algorithm calls method $\mathit{GETCONFLICT}$ with parameters $\mathcal{B}$, $\mathcal{B}$ and $\mathcal{C}$. The $\mathit{GETCONFLICT}$ method is checking if the second parameter $D$ is not empty and if $\mathcal{B}$ is not consistent. Otherwise if $\mathcal{C}$ has size 1 then the result is $\mathbb{C}$ because $\mathcal{C}$ can not be divided into two sets anymore. It is already a conflict. If algorithm continues then $\mathcal{C}$ is randomly divided into two sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. Then the method $\mathit{GETCONFLICT}$ is recursively called, first with parameters $\mathcal{B} \cup \mathcal{C}_{1}$, $\mathcal{C}_{1}$ and $\mathcal{C_{2}}$, second with $\mathcal{B} \cup D_{2}$, $D_{2}$ and $\mathcal{C}_{1}$. After returning from recursion the results $D_{1}$ and $D_{2}$ are joined and returned as result.
+At first the QuickXPlain algorithm is checking consistency of $\mathcal{B}$ and $\mathcal{C}$. There is no conflict if they are consistent so algorithm returns "no conflict". Otherwise the next check in the algorithm is if $\mathcal{C}$ is empty. If it is empty there can not be any conflict. Then algorithm calls method $\mathit{GETCONFLICT}$ with parameters $\mathcal{B}$, $\mathcal{B}$ and $\mathcal{C}$. The $\mathit{GETCONFLICT}$ method is checking if the second parameter $D$ is not empty and if $\mathcal{B}$ is not consistent. Otherwise if $\mathcal{C}$ has size 1 then the result is $\mathbb{C}$ because $\mathcal{C}$ can not be divided into two sets anymore. It is already a conflict. If algorithm continues then $\mathcal{C}$ is randomly divided into two sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. Then the method $\mathit{GETCONFLICT}$ is recursively called, first with parameters $\mathcal{B} \cup \mathcal{C}_{1}$, $\mathcal{C}_{1}$ and $\mathcal{C_{2}}$, second with $\mathcal{B} \cup D_{2}$, $D_{2}$ and $\mathcal{C}_{1}$. After returning from recursion the results $D_{1}$ and $D_{2}$ are joined and returned as result.
 
 Difference between QuickXPlain and MergeXPlain algorithm (Algorithm \ref{alg:mxp}) is that MergeXPlain can return multiple conflicts at a time. MergeXPlain is repeatedly calling QuickXPlain for computation of an conflict.
 
@@ -786,18 +786,49 @@ Difference between QuickXPlain and MergeXPlain algorithm (Algorithm \ref{alg:mxp
 		\State $\Gamma \gets \Gamma_{1} \cup \Gamma_{2}$
 		\While {$\neg \mathit{isConsistent}(\mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime} \cup \mathcal{B})$}
 		\State $X \gets $ \Call{GetConflict}{$\mathcal{B} \cup \mathcal{C}_{2}^{\prime}, \mathcal{C}_{2}^{\prime}, \mathcal{C}_{1}^{\prime}$}
-		\State $\gamma \gets X$ $\cup$ \Call{GetConflict}{$\mathcal{B} \cup X, X, \mathcal{C}_{2}^{\prime}$}
+		\State $CS \gets X$ $\cup$ \Call{GetConflict}{$\mathcal{B} \cup X, X, \mathcal{C}_{2}^{\prime}$}
 		\State $\mathcal{C}_{1}^{\prime} \gets \mathcal{C}_{1}^{\prime} \backslash \{a\}$ where $a \in X$
-		\State $\Gamma \gets \Gamma \cup \{\gamma\}$
+		\State $\Gamma \gets \Gamma \cup \{CS\}$
 		\EndWhile
 		\State \Return $\langle \mathcal{C}_{1}^{\prime} \cup \mathcal{C}_{2}^{\prime}, \Gamma \rangle$
 		\EndFunction			
 	\end{algorithmic}
 \end{algorithm}
 
-TODO popisat mergexplain, zakomponovat pseudokod do mhs (vymysliet novy)
+At the beginning of the MergeXPlain algorithm, the algorithm is checking consistency of $\mathcal{B}$. If $\mathcal{B}$ is already inconsistent it has no point to continue and algorithm returns no solution. If $\mathcal{B}$ and $\mathcal{C}$ are consistent together, no conflict can be found and algorithm returns empty set. Otherwise algorithm calls a method $\mathit{FINDCONFLICTS}$ with parameters $\mathcal{B}$ and $\mathcal{C}$. This method checks consistency of $\mathcal{B}$ and $\mathcal{C}$ joined together. If they are consistent method returns a pair of $\mathcal{C}$ and empty set. If $\mathcal{C}$ has size one, method returns a pair of empty set and $\{ \mathcal{C} \}$. This condition is here because if $\mathcal{C}$ has size one it can not be divided into two disjoint non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. If $\mathcal{C}$ has size zero then the first condition is fulfilled because it is consistent with the set $\mathcal{B}$. But if the set $\mathcal{C}$ has size bigger than one then algorithm continues and splits the set $\mathcal{C}$ into two disjoint non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. 
+
+The method recursively calls itself, first with the set $\mathcal{C}_{1}$ as the second parameter and secondly with the set $\mathcal{C}_{2}$ as the second parameter. This is repeated until the method is emerged from both recursions and found explanations are joined together into variable $\Gamma$. The pair which is returned by function $\mathit{FINDCONFLICTS}$ returns remaining elements of $\mathcal{C}$ as the first argument and set of explanations as the second argument. The method did not check the whole search space. It can happened that some part of explanation is in the set $\mathcal{C}_{1}$ and other part is in the set $\mathcal{C}_{2}$. To find at least some explanations there is a while loop that should find more explanations. 
+
+The following while loop is running until the set $\mathcal{C}^{\prime}_{1}$ is either empty or consistent with the union of the sets $\mathcal{B}$ and $\mathcal{C}^{\prime}_{2}$. In the while loop from the set $\mathcal{C}^{\prime}_{1}$ are removed elements that is why this condition can be fulfilled. In the while loop the method calls the above mentioned method $\mathit{GETCONFLICT}$ which returned one conflict if exists. This conflict is stored into variable $X$. Then the $\mathit{GETCONFLICT}$ method is called again but with $X$ as parameter and the result is stored into variable $CS$. It is also joined with the previous result $X$. Then comes the most important part of this loop. From the set $\mathcal{C}^{\prime}_{1}$ is removed $\alpha$ where $\alpha$ belongs to the set $X$. This can be interpreted differently. It could mean that always only one element is removed from the set $\mathcal{C}^{\prime}_{1}$. Or it could mean that more elements are removed from this set. In the line below $\Gamma$ represents all found explanations in this run of the method. After jumping from while loop the methods returns a pair or remaining literals ($\mathcal{C}^{\prime}_{1} \cup \mathcal{C}^{\prime}_{2}$) and found explanations.
+
+!!!!!!!!!!!!!!TODO zakomponovat pseudokod do mhs (vymysliet novy)
+
+MergeXPlain algorithm is sound but is is not complete because it can not always find all explanations. This problems happens when they are explanations that are overlapping ecach other. Let's show the contradiction on following example.
 
 \begin{example}{\textbf{MergeXPlain example}}
+	\\
+	Let $\mathcal{K} = \{ A \sqcap B \sqsubseteq D, A \sqcap C \sqsubseteq D\}$ and let $O = D(a)$. 
+	
+	Let us ignore negated ABox expressions and start with $Abd = \{ A(a), B(a),
+	C(a)\}$. There are two minimal explanations of $\mathcal{P} = (\mathcal{K},O)$: $\{A(a),B(a)\}$, and	$\{A(a),C(a)\}$. Calling MXP($\mathcal{K} \cup \{\neg O\}, Abd$), it passes the
+	initial tests and calls \Call{FINDCONFLICTS}{$\mathcal{K} \cup \{\neg O\}, Abd$}.
+
+	\textsc{FINDCONFLICTS} needs to decide how to split $\mathcal{C} = Abd$ into $\mathcal{C}_{1}$
+	and $\mathcal{C}_{2}$. Let us assume the split was $\mathcal{C}_{1} = \{A(a)\}$ and $\mathcal{C}_{2} =
+	\{B(a),C(a)\}$. Since both $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$ are now conflict-free w.r.t.\
+	$\mathcal{K} \cup \{\neg O\}$, the two consecutive recursive calls return
+	$\langle \mathcal{C}^{\prime}_{1},\emptyset \rangle$ and $\langle \mathcal{C}^{\prime}_{2},\emptyset \rangle$ where
+	$\mathcal{C}^{\prime}_{1}=\{A(a)\}$ and $\mathcal{C}^{\prime}_{2}=\{B(a),C(a)\}$.
+	
+	In the while loop, \Call{GETCONFLICT}{$\mathcal{K} \cup \{\neg O\}\cup
+		\{B(a),C(a)\},$ $\{B(a),C(a)\},$ $\{A(a)\}$} returns $X = \{A(a)\}$ while
+	\Call{GETCONFLICT}{$\mathcal{K} \cup \{\neg O\}\cup
+		\{A(a)\},$ $\{A(a)\},$ $\{B(a),C(a)\}$} returns $B(a)$, and hence the first
+	confclit $\gamma = \{A(b),B(a)\}$ is found and added into $\Gamma$.
+	
+	However, consecutively $A(a)$ is removed from $C'_1$ leaving it empty,
+	and thus the other conflict is not found and $\Gamma = \{\{A(b),B(a)\}\}$ is
+	returned.	
 \end{example}
 
 \section{Our approach}
@@ -893,13 +924,11 @@ was chosen. Both LUBM and Beer were chosen because of their larger size compared
 of size one.
 
 \begin{table}[h!]
-	\scriptsize
 	\centering
 	\caption{Parameters of the ontologies}
 	\label{tab:ont}
 	\rowcolors{0}{gray!35}{}
 	\begin{tabular}{lcccc}
-		\scriptsize
 		\textbf{Ontology} & \textbf{Concepts} & \textbf{Roles} & \textbf{Individuals} & \textbf{Axioms} \\
 		Family ontology & $10$ & $1$ & $0$ & $28$\\
 		Beer ontology & $58$ & $9$ & $0$ & $165$\\
