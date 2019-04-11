@@ -645,7 +645,7 @@ Reiter's algorithm is used to compute minimal hitting sets. Input is a set of se
 Let's show an example with $F$ as the input set and $HS$ as the result \label{fig:MinimalHS}.
 
 \begin{example}{\textbf{(Minimal Hitting Set)}}
-	\[  F = \{ \{a,b\}, \{b,c\}, \{a,c\}, \{b,d\}, \{b\} \} \]
+	\[ F = \{ \{a,b\}, \{b,c\}, \{a,c\}, \{b,d\}, \{b\} \} \]
 	\[ HS = \{ \{a,b\}, \{b,c\} \} \]
 \end{example}
 
@@ -800,9 +800,6 @@ At the beginning of the MergeXPlain algorithm, the algorithm is checking consist
 The method recursively calls itself, first with the set $\mathcal{C}_{1}$ as the second parameter and secondly with the set $\mathcal{C}_{2}$ as the second parameter. This is repeated until the method is emerged from both recursions and found explanations are joined together into variable $\Gamma$. The pair which is returned by function $\mathit{FINDCONFLICTS}$ returns remaining elements of $\mathcal{C}$ as the first argument and set of explanations as the second argument. The method did not check the whole search space. It can happened that some part of explanation is in the set $\mathcal{C}_{1}$ and other part is in the set $\mathcal{C}_{2}$. To find at least some explanations there is a while loop that should find more explanations. 
 
 The following while loop is running until the set $\mathcal{C}^{\prime}_{1}$ is either empty or consistent with the union of the sets $\mathcal{B}$ and $\mathcal{C}^{\prime}_{2}$. In the while loop from the set $\mathcal{C}^{\prime}_{1}$ are removed elements that is why this condition can be fulfilled. In the while loop the method calls the above mentioned method $\mathit{GETCONFLICT}$ which returned one conflict if exists. This conflict is stored into variable $X$. Then the $\mathit{GETCONFLICT}$ method is called again but with $X$ as parameter and the result is stored into variable $CS$. It is also joined with the previous result $X$. Then comes the most important part of this loop. From the set $\mathcal{C}^{\prime}_{1}$ is removed $\alpha$ where $\alpha$ belongs to the set $X$. This can be interpreted differently. It could mean that always only one element is removed from the set $\mathcal{C}^{\prime}_{1}$. Or it could mean that more elements are removed from this set. In the line below $\Gamma$ represents all found explanations in this run of the method. After jumping from while loop the methods returns a pair or remaining literals ($\mathcal{C}^{\prime}_{1} \cup \mathcal{C}^{\prime}_{2}$) and found explanations.
-
-!!!!!!!!!!!!!!TODO zakomponovat pseudokod do mhs (vymysliet novy)
-
 MergeXPlain algorithm is sound but is is not complete because it can not always find all explanations. This problems happens when they are explanations that are overlapping ecach other. Let's show the contradiction on following example.
 
 \begin{example}{\textbf{MergeXPlain example}}
@@ -832,16 +829,18 @@ MergeXPlain algorithm is sound but is is not complete because it can not always 
 \end{example}
 
 \section{Our approach}
-In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one is Minimal Hitting Set (MHS) and the second one is MergeXPlain (MXP). Our both approaches are using reasoners for consistency checking. 
+In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one is using Minimal Hitting Set (MHS) and the second one is MergeXPlain (MXP). The first one is based one Reiter's algorithm Minimal Hitting Set from \citep{reiterHS} but it is modified to include ABox abduction according to previous work from \citep{pukancovaPreliminaryReport}. The second one is based on MergeXPlain from \citep{MXP}.
 
 \subsection{Our approach based on Minimal Hitting Set}
+Reiter's algorithm describes minmal hitting sets but we have to include also abductive reasoning as is described in algorithm ~\ref{alg:mhs}. So our input data are knowledge base $\mathcal{K}$ and observation $\mathcal{O}$. Result from this algorithm are minimal explanations.
 
-TODO tento algoritmus je prisposobeny na nasu situaciu - abdukcia
+The MHS algorithm starts with creating a negation model $\neg \mathcal{M}$ which is calculated from $\mathcal{K}$ joined with the negation of $\mathcal{O}$. If there is no such model $\neg \mathcal{M}$ respectively $\neg \mathcal{M}$ is equal to null no explanations can be found. Otherwise HS-tree is created with root $r$. The node of root $r$ is the found model $\neg \mathcal{M}$. Then the algorithm goes through each element of $\neg \mathcal{M}$ and creates a new child from root $r$. The new child is labeled on the edge by the current element. The algorithm generates HS-tree by breadth first search. So the next step is to iterate over each child in the next depth and to create its successors. But before generating its successors the algorithm must first check if the branch can be pruned or it is already an explanation. If it is already an explanation and its minimal it will be added to the result. To the result we add the path from root to the current node $n$ which we can name as $H(n)$. If it is not minimal but it is an explanation we can prune it because it has no point to continue in this branch. If the branch contains a clash we can prune it too. If the branch is not pruned and it is not a minimal explanation then we have to calculate a negation model $\neg \mathcal{M}_{i}$ from $\mathcal{K}$ joined with $\neg \mathcal{O}$ joined with $H(n)$ similarly like in the first step when we generated model $\neg \mathcal{M}$. With this conditions we will get to the state that there is no such a branch that we can continue with and algorithm terminates. This algorithm has an exponential time complexity but it is sound and complete and it always terminates.
+
 \begin{algorithm}[H] 
 	\setstretch{1.40}
 	\footnotesize
-	\caption{MHS($\mathcal{K}$,$O$)} \label{alg:mhs}
-	\label{alg:SOA}
+	\caption{MHS($\mathcal{K}$,$O$)}
+	\label{alg:mhs}
 	\begin{algorithmic}[1]
 		\Require knowledge base $\mathcal{K}$, observation $O$
 		\Ensure set $\mathcal{S}_{\mathcal{E}}$ of all explanations of $\mathcal{P}=(\mathcal{K},O)$ of the class Abd
@@ -939,35 +938,47 @@ of size one.
 \subsection{Experiment 1}
 
 \begin{figure}[H]
-	\noindent
-	\begin{tabular}{@{}c@{\ }c@{\ }c@{}}
-		\includegraphics[width=0.33\textwidth, height=4cm]{eval1Family} 
-		&
-		\includegraphics[width=0.33\textwidth, height=4cm]{eval1Beer} 
-		&
-		\includegraphics[width=0.33\textwidth, height=4cm]{eval1LUBM} 
-		\\
-		(a) Family & (b) Beer & (c) LUBM \\
-	\end{tabular}
-	\caption{Result times in seconds for Exp.\,1:\quad
-		\protect\includegraphics[width=1.5ex]{cl-mhs}~MHS\quad
-		\protect\includegraphics[width=1.5ex]{cl-mxp}~MXP
-	}
-	\label{fig:eval1}
+	\centering
+	\includegraphics[width=9cm]{eval1Family} 	
+	\caption{Family ontology}
+	\label{fig:eval1Family}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=9cm]{eval1Beer} 
+	\caption{Beer ontology}
+	\label{fig:eval1Beer}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=9cm]{eval1LUBM} 
+	\caption{LUBM ontology}
+	\label{fig:eval1LUBM}
 \end{figure}
 
 \subsection{Experiment 2}
 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth]{eval2Family} 	
+	\centering
+	\includegraphics[width=9cm]{eval2Family} 	
+	\caption{Family ontology}
+	\label{fig:eval2Family}
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth]{eval2Beer} 
+	\centering
+	\includegraphics[width=9cm]{eval2Beer} 
+	\caption{Beer ontology}
+	\label{fig:eval2Beer}
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[width=\textwidth]{eval2LUBM} 
+	\centering
+	\includegraphics[width=9cm]{eval2LUBM} 
+	\caption{LUBM ontology}
+	\label{fig:eval2LUBM}
 \end{figure}
 
 \subsection{Conclusion from experiments}
