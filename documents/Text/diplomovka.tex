@@ -11,7 +11,7 @@
 \usepackage{float}
 \usepackage{ragged2e}
 \usepackage{lipsum}
-\usepackage{titlesec}
+
 \usepackage[pdftex]{graphicx}
 \graphicspath{{.png}{images/}}
 \renewcommand{\baselinestretch}{1.8}
@@ -27,10 +27,19 @@
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black}
 
+\usepackage{titlesec}
+
 \titlespacing*{\section}
-{0pt}{5.5ex plus 1ex minus .2ex}{4.3ex plus .2ex}
+{0pt}{6.5ex plus 1ex minus .2ex}{5.3ex plus .2ex}
 \titlespacing*{\subsection}
-{0pt}{5.5ex plus 1ex minus .2ex}{4.3ex plus .2ex}
+{0pt}{6.5ex plus 1ex minus .2ex}{5.3ex plus .2ex}
+
+\usepackage{etoolbox}
+
+\makeatletter
+\patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
+\patchcmd{\ttlh@hang}{\noindent}{}{}{}
+\makeatother
 
 \usepackage{soul}
 \newcommand{\ol}[1]{{\setul{-1.2em}{}\ul{#1}}}
@@ -84,40 +93,48 @@
 		Consultant: & RNDr. Martin Homola, PhD. \\
 	\end{tabular}
 \end{table*}
-\par\vspace{3.03cm}
+\par\vspace{5.07cm}
 {\scshape\bf Bratislava 2019 \hfill Katarína Fabianová \par}
 
 \pagebreak
 
+\includepdf[fitpaper=true, pages=-]{zadanieZaverecnejPrace.pdf}
+
 \justify
 
-%\pagebreak
-%\thispagestyle{empty}
-%\par\vspace*{15cm}
-%{\large\bf Dedication \par}
-%\par\vspace{0.8cm}
-%\large Čestne prehlasujem, že prácu som vypracovala samostatne
-%pod vedením školiteľa a uviedla som všetky použité
-%zdroje informácií a použitú literatúru. \par
-%\par\vspace{3cm}
-%\large {Bratislava \hfill \textoverline{Katarína Fabianová}} \par
+\pagebreak
+\thispagestyle{empty}
+\vspace*{15cm}
+{\large\bf Declaration of honour \par}
+\vspace{0.8cm}
+{\large{I hereby declare that I wrote this master thesis by myself only with the help of the referenced literature and with the help of my adviser and consultant.}} \par
+\vspace{3cm}
+{\large{Bratislava \hfill \textoverline{Katarína Fabianová}}}
 
 \pagebreak
 \thispagestyle{empty}
 \par\vspace*{15cm}
-{\large\bf Acknowledgements \newline \par}
+{\large\bf \noindent Acknowledgements \par}
+\vspace{0.8cm}
+{\large{I would like to thank to my adviser Mgr. Júlia Pukancová, PhD. and to my consultant RNDr. Martin Homola, PhD. for their amazing help, valuable advices and for their guidance that helped me write this thesis.}}
 
 \pagebreak
 \thispagestyle{empty}
-{\large\bf Abstract \newline \par} 
+{\large\bf  \noindent Abstract \newline} 
 
-\textbf{Key words:}
+Logical abduction is a form of logical reasoning where we don't know the possible cause but we know theory and effect. In this thesis we propose two ways of solving ABox Abduction problem. The first way uses an existing algorithm, the Minimal Hitting Set algorithm. This algorithm is sound and complete but it has an exponential time complexity. We propose the MergeXPlain algorithm as the second way. This algorithm already exists but it was not used to solve this problem and we want to adjust it to our problem and find out if this algorithm is the solution we look for. The advantage of this algorithm is its time complexity. We want to implement both approaches and compare their execution times and results. \newline
+
+\noindent \textbf{Key words:}
+Abduction, Description logics, Minimal Hitting Set, MergeXPlain
 
 \pagebreak
 \thispagestyle{empty}
-{\large\bf Abstrakt \newline \par} 
+{\large\bf  \noindent Abstrakt \newline} 
 
-\textbf{Kľúčové slová:}
+Logická abdukcia je typ logického odvodzovania, kde nepoznáme možnú príčinu, ale poznáme teóriu a dôsledok. V tejto práci navrhujeme dve riešenia pre problém ABox abdukcie. Prvý riešenie je použitie už existujúceho algoritmu, Minimal Hitting Set algoritmus. Tento algoritmus je zdravý a úplný, ale má exponencionálnu zložitosť. Preto navrhujeme druhé riešenie, ktorým je MergeXPlain algoritmus. Tento algoritmus tiež už existuje, ale ešte nebol použitý na náš problém a chceme ho upraviť pre riešenie nášho problému. Chceme zistiť, či tento algoritmus je riešenie, ktoré hľadáme. Výhodou tohto algoritmu je jeho časová zložitosť. Chceme implementovať oba spôsoby a porovnať ich výsledne časy behu a ich výsledky. \newline
+
+\noindent \textbf{Kľúčové slová:}
+Abdukcia, Deskripčné logiky, Minimal Hittting Set, MergeXPlain
 
 \pagebreak
 \thispagestyle{empty}
@@ -132,30 +149,54 @@
 \setcounter{page}{1}
 \section*{Introduction}
 \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
+Description logics are a family of knowledge representation and we use their language in our problem. Our problem is ABox abduction where our input is ontology and observation. They both use the language of description logics.
 
+Logical abduction is a form of logical reasoning depending of knowing input theory and effect. Abduction knows theory and effect and is looking for the cause. In our work we want to optimize ABox abduction task. ABox abduction task is using ABox assertion as an observation which is effect in general abduction. We need to have a given theory which in ABox abduction is called an ontology. Ontology is our knowledge base where our input data are described in a form of description logics.
+
+We want to optimize ABox abduction problem. Until now there was only Reiter's Minimal Hitting Set algorithm and its variations and optimizations. We want to compare our implementation of this algorithm with another algorithm that we propose. The other algorithm is the MergeXPlain algorithm from Shchekotykhin. This algorithm already exists but it was not used to compute minimal explanations for ABox abduction problem. We want to adjust this algorithm to match the solution of our problem. We want to compare the results from both implementations and discover if the MergeXPlain algorithm is suitable as solution for this problem. We assume that if the MergeXPlain is able to solve this problem we could significantly eliminate execution time which takes to solve this problem with Minimal Hitting Set algorithm. The Minimal Hitting Set algorithm is sound and complete, so it will find all minimal explanations but it has an exponentional time complexity which makes this algorithm unusable for bigger inputs. On the other hand the MergeXPlain algorithm should be much more quicker but we do not know if the MergeXPlain algorithm is sound and complete yet. 
+
+At first we will introduce description logics and abduction. Then we will present the theory of the Minimal Hitting Set algorithm and the MergeXPlain algorithm. After theory we will describe our approach with theses two algorithms and then we evaluate results from experiments.
 
 \pagebreak
-\section{Description logics}
-Description logics (DLs) are a family of knowledge representation formalism. Each description logic has different expressivity. Every expressivity is expressed with a unique set of constructors. We are going to work with $\mathcal{ALC}$, $\mathcal{EL}$ and $\mathcal{EL}${+}{+} DL. Each description logic has its own syntax and semantics. In this chapter we will introduce syntax and semantics \citep{Rudolph2011} for each DL that we will be working with.
+\section{Description Logics}
+Description logics (DLs) are a family of knowledge representation formalism. Each description logic has different expressivity. Every expressivity is expressed with a unique set of constructors. We will work with $\mathcal{ALC}$, $\mathcal{EL}$ and $\mathcal{EL}${+}{+} DL. Each description logic has its own syntax and semantics. In this chapter we will introduce syntax and semantics \citep{Rudolph2011} for each DL that we will be working with.
 
 \subsection{$\mathcal{ALC}$ DL}
 $\mathcal{ALC}$ DL is a DL which is more expressive than $\mathcal{EL}$ and $\mathcal{EL}{+}{+}$ DL. $\mathcal{ALC}$ is less expressive than many other DLs. $\mathcal{ALC}$ stands for Attributive (Concept) Language with Complements. It means that not only complement of atomic concept is allowed but also a complement of complex concept is allowed.
 
 \subsubsection{$\mathcal{ALC}$ Syntax}
-$\mathcal{ALC}$ description logic consists of three mutually disjoint sets. These sets (definition~\ref{def:DLVocabulary}) represent whole vocabulary that is used by $\mathcal{ALC}$ DL.
+$\mathcal{ALC}$ description logic consists of three mutually disjoint sets. These sets (Definition~\ref{def:DLVocabulary}) represent whole vocabulary that is used by $\mathcal{ALC}$ DL.
 
 \begin{definition}{\textbf{DL vocabulary}}
 	\label{def:DLVocabulary}
 	
-	\[ \textbf{Set of individuals:} \text{ } N_{I} = \{a,b,c...\} \]
-	\[ \textbf{Set of concepts:} \text{ } N_{C} = \{A,B,C...\} \]
-	\[ \textbf{Set of roles:} \text{ } N_{R} = \{R_{1},R_{2},R_{3},...\} \]
+	DL vocabulary contains all symbols we use in concepts and knowledge base. It consists of three mutually disjoint sets: $N_{I}$, $N_{C}$ and $N_{R}$. 
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \textbf{Set of individuals:} \text{ } N_{I} = \{a,b,c...\} $ \\
+			\addlinespace[0.4cm]
+			$ \textbf{Set of concepts:} \text{ } N_{C} = \{A,B,C...\} $ \\
+			\addlinespace[0.4cm]
+			$ \textbf{Set of roles:} \text{ } N_{R} = \{R_{1},R_{2},R_{3},...\} $			
+		\end{tabular}
+	\end{table}		
+		
 \end{definition}
 
 \begin{example}{\textbf{DL vocabulary}}
-	\[ N_{I} = \{ jack, john, jane \} \]
-	\[ N_{C} = \{ Person, Mother, Father \} \]
-	\[ N_{R} = \{ hasChild, likes, owns \} \]
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ N_{I} = \{ jack, john, jane \} $ \\
+			\addlinespace[0.4cm]
+			$ N_{C} = \{ Person, Mother, Father \} $ \\
+			\addlinespace[0.4cm]
+			$ N_{R} = \{ hasChild, likes, owns \} $
+		\end{tabular}
+	\end{table}
 \end{example}
 
 $\mathcal{ALC}$ DL deals with individuals and concepts. An individual is a concrete instance of a concept. Concept is a class that defines some entity. Concept can be atomic or complex. Atomic concept is not constructed with any constructor. On the contrary complex concept is created from constructors and other concepts.
@@ -164,31 +205,54 @@ $\mathcal{ALC}$ DL deals with individuals and concepts. An individual is a concr
 	\label{def:complexConcept}
 	
 	Concepts are recursively constructed as the smallest set of expressions of the forms:
-	\[ C,D ::= A | \neg C | C \sqcap D | C \sqcup D | \exists R.C | \forall R.C \]
+
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ C,D ::= A | \neg C | C \sqcap D | C \sqcup D | \exists R.C | \forall R.C $
+		\end{tabular}
+	\end{table}
+
 	where $A \in N_{C}$, $R \in N_{R}$, and C, D are concepts.
 \end{definition}
 
-Practical usage of definition ~\ref{def:complexConcept} is shown in example~\ref{example:complexConcept}.
+Practical usage of Definition ~\ref{def:complexConcept} is shown in Example~\ref{example:complexConcept}.
 
 \begin{example}{\textbf{Complex concept}}
 	\label{example:complexConcept}
-\[ \neg Mother \]
-\[ Mother \sqcup Father \]
-\[ \exists hasChild.Person \]
-\[ \forall likes.Food \]
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \neg Mother $ \\
+			\addlinespace[0.4cm]
+			$ Mother \sqcup Father $ \\
+			\addlinespace[0.4cm]			
+			$ \exists hasChild.Person $ \\
+			\addlinespace[0.4cm]			
+			$ \forall likes.Food $ \\
+		\end{tabular}
+	\end{table}
 \end{example}
 
 Complex concept uses following constructors: $\neg$, $\sqcup$, $\sqcap$, $\exists$ and $\forall$. Constructor $\neg$ is negation, constructor $\sqcup$ is or and constructor $\sqcap$ is and. Constructors $\exists$ is existential restriction and $\forall$ is called value restriction.
 
-There are two concepts that are always in ontology. $\top$ (top) stays for everything. Each concept belongs under $\top$ which means that each concept is on left side of subsumption if on right side is only $\top$. Second concept is $\bot$ (bottom) and it stays for nothing which means that each concept is on the right side of subsumption if there is only $\bot$ on the left side. Formally these two concepts can be written as we see in definition~\ref{def:topBottom}.
+There are two concepts that are always in ontology. $\top$ (top) stays for everything. Each concept belongs under $\top$ which means that each concept is on left side of subsumption if on right side is only $\top$. Second concept is $\bot$ (bottom) and it stays for nothing which means that each concept is on the right side of subsumption if there is only $\bot$ on the left side. Formally these two concepts can be written as we see in Definition~\ref{def:topBottom}.
 
 \begin{definition}{\textbf{Top and Bottom}}
 	\label{def:topBottom}
-	\[ \top \equiv A \sqcup \neg A \] 
-	\[ \bot \equiv A \sqcap \neg A \]
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \top \equiv A \sqcup \neg A $ \\
+			\addlinespace[0.4cm]
+			$ \bot \equiv A \sqcap \neg A $
+		\end{tabular}
+	\end{table}
 \end{definition}
 
-$\mathcal{ALC}$ description logic uses axioms in order to model some situation. Ontology \citep{staabHandbookOntology} is used to formally describe these axioms. The purpose of ontology is to describe relationships between entities in a formal language. Every ontology has its own knowledge base. Knowledge base is a set of TBox axioms and ABox axioms. Ontology is described by knowledge base. Knowledge base is defined in definition~\ref{def:knowledgeBase}.
+$\mathcal{ALC}$ description logic uses axioms in order to model some situation. Ontology \citep{staabHandbookOntology} is used to formally describe these axioms. The purpose of ontology is to describe relationships between entities in a formal language. Every ontology has its own knowledge base. Knowledge base is a set of TBox axioms and ABox axioms. Ontology is described by knowledge base. Knowledge base is defined in Definition~\ref{def:knowledgeBase}.
 
 \begin{definition}{\textbf{Knowledge base}}
 	\label{def:knowledgeBase}
@@ -196,7 +260,7 @@ $\mathcal{ALC}$ description logic uses axioms in order to model some situation. 
 	Knowledge base ($\mathcal{KB}$) is an ordered pair of \textit{TBox} $\mathcal{T}$ and \textit{ABox} $\mathcal{A}$.
 \end{definition}
 
-An example for knowledge base is shown in example ~\ref{example:knowledgeBase}.
+An example for knowledge base is shown in Example ~\ref{example:knowledgeBase}.
 
 \begin{example}{\textbf{Knowledge base}}
 	\label{example:knowledgeBase}
@@ -213,13 +277,20 @@ An example for knowledge base is shown in example ~\ref{example:knowledgeBase}.
 	\]
 \end{example}
 
-There are two types of axioms, the first is TBox (definition~\ref{def:tbox}) and the second one is ABox (definition~\ref{def:abox}). In TBox the subsumption symbol ($\sqsubseteq$) is used. Let's explain this symbol on an example $Mother \sqsubseteq Parent$. $Mother$ is always a $Parent$ but $Parent$ does not always have to be a $Mother$. TBox represents axioms that model ontology. Each axiom explains the relationship between entities in this axiom.
+There are two types of axioms, the first is TBox (Definition~\ref{def:tbox}) and the second one is ABox (Definition~\ref{def:abox}). In TBox the subsumption symbol ($\sqsubseteq$) is used. Let's explain this symbol on an example $Mother \sqsubseteq Parent$. $Mother$ is always a $Parent$ but $Parent$ does not always have to be a $Mother$. TBox represents axioms that model ontology. Each axiom explains the relationship between entities in this axiom.
 
 \begin{definition}{\textbf{TBox}}
 	\label{def:tbox}
 	
 	A TBox $\mathcal{T}$ is a finite set of GCI axioms $\phi$ of the form:
-	\[ \phi ::= C \sqsubseteq D \]	
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \phi ::= C \sqsubseteq D $
+		\end{tabular}
+	\end{table}
+			
 	where C, D are any concepts.
 \end{definition}
 
@@ -236,12 +307,16 @@ There are two types of axioms, the first is TBox (definition~\ref{def:tbox}) and
 
 ABox on the other side does not model ontology but creates a database of facts. It contains set of assertion axioms that can be called facts. Fact is a direct assertion of an individual to a concept.
 
-\newpage
 \begin{definition}{\textbf{ABox}}
 	\label{def:abox}
 	
     An ABox $\mathcal{A}$ is a finite set of assertion axioms $\phi$ of the form:
-	\[ \phi ::= a:C | a,b:R \]
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \phi ::= a:C | a,b:R $
+		\end{tabular}
+	\end{table}
 	where $a,b \in N_{I}$, $R \in N_{R}$ and C is any concept.
 \end{definition}
 
@@ -257,7 +332,7 @@ ABox on the other side does not model ontology but creates a database of facts. 
 	\]
 \end{example}
 
-To have a better understanding of $\mathcal{ALC}$ DL we can translate sentences into $\mathcal{ALC}$ description logic (example~\ref{example:sentences}).
+To have a better understanding of $\mathcal{ALC}$ DL we can translate sentences into $\mathcal{ALC}$ description logic (Example~\ref{example:sentences}).
 
 \begin{example}{\textbf{ABox}}
 	\label{example:sentences}
@@ -265,17 +340,16 @@ To have a better understanding of $\mathcal{ALC}$ DL we can translate sentences 
 	\begin{table}[H]
 		\centering
 		\begin{tabular}{c c}
-			Everybody who is sick, is not happy & $Sick \sqsubseteq \neg Happy$ \\ \addlinespace[0.5cm]
-			Cat and dogs are animals. & $Cat \sqcup Dog \sqsubseteq Animal$ \\ \addlinespace[0.5cm]
-			Every person owns a house. & $Person \sqsubseteq \exists owns.House$ \\	\addlinespace[0.5cm]
+			Everybody who is sick, is not happy & $Sick \sqsubseteq \neg Happy$ \\ \addlinespace[0.4cm]
+			Cat and dogs are animals. & $Cat \sqcup Dog \sqsubseteq Animal$ \\ \addlinespace[0.4cm]
+			Every person owns a house. & $Person \sqsubseteq \exists owns.House$ \\	\addlinespace[0.4cm]
 		\end{tabular}		
 	\end{table}
 \end{example}
 
 \subsubsection{$\mathcal{ALC}$ Semantics}
-An interpretation is a pair of a domain and an interpretation function. The domain is a set of values that represents concepts in the interpretation (definition~\ref{def:interpretation}). The result of interpretation function is different for individuals, concepts and roles. If we use the interpretation function on an individual the result is an element from the domain. If we use it on the concepts the result is a set of elements from the domain. If we use it on the roles the result is a set of pairs of elements from the domain.
+An interpretation is a pair of a domain and an interpretation function. The domain is a set of values that represents concepts in the interpretation (Definition~\ref{def:interpretation}). The result of interpretation function is different for individuals, concepts and roles. If we use the interpretation function on an individual the result is an element from the domain. If we use it on the concepts the result is a set of elements from the domain. If we use it on the roles the result is a set of pairs of elements from the domain.
 
-\newpage
 \begin{definition}{\textbf{Interpretation}}
 	\label{def:interpretation}
 
@@ -283,18 +357,36 @@ An interpretation is a pair of a domain and an interpretation function. The doma
 	Domain can not be empty.
 		
 	The interpretation function is following:
-	\[ a^{\mathcal{I}} \in \Delta^{\mathcal{I}} \text{ } \forall a \in N_{I} \]
-	\[ A^{\mathcal{I}} \subseteq \Delta^{\mathcal{I}} \text{ } \forall A \in N_{C} \]
-	\[ R^{\mathcal{I}} \subseteq \Delta^{\mathcal{I}} \times \Delta^{\mathcal{I}} \text{ } \forall R \in N_{R} \]
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c c}
+			$ a^{\mathcal{I}} \in \Delta^{\mathcal{I}} \text{ } \forall a \in N_{I} $ \\ \addlinespace[0.4cm]
+			 $A^{\mathcal{I}} \subseteq \Delta^{\mathcal{I}} \text{ } \forall A \in N_{C} $ \\
+			\addlinespace[0.4cm]
+			$ R^{\mathcal{I}} \subseteq \Delta^{\mathcal{I}} \times \Delta^{\mathcal{I}} \text{ } \forall R \in N_{R} $ \\
+		\end{tabular}		
+	\end{table}
+
+\newpage	
 	The interpretation of complex concepts is recursively defined:
-	\[ \neg C^{\mathcal{I}} = \Delta^{\mathcal{I}} \backslash C^{\mathcal{I}} \]
-	\[ C \sqcap D^{\mathcal{I}} = C^{\mathcal{I}} \cap D^{\mathcal{I}} \]
-	\[ C \sqcup D^{\mathcal{I}} = C^{\mathcal{I}} \cup D^{\mathcal{I}} \]
-	\[ \exists R.C^{\mathcal{I}} = \{ x \in \Delta^{\mathcal{I}} | \exists y \in \Delta^{\mathcal{I}} : \langle x,y \rangle \in R^{\mathcal{I}} \land y \in C^{\mathcal{I}} \} \]
-	\[ \forall R.C^{\mathcal{I}} = \{ x \in \Delta^{\mathcal{I}} | \forall y \in \Delta^{\mathcal{I}} : \langle x,y \rangle \in R^{\mathcal{I}} \rightarrow y \in C^{\mathcal{I}} \} \]
+
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c c}
+			$ \neg C^{\mathcal{I}} = \Delta^{\mathcal{I}} \backslash C^{\mathcal{I}} $ \\ \addlinespace[0.4cm]
+			$ C \sqcap D^{\mathcal{I}} = C^{\mathcal{I}} \cap D^{\mathcal{I}} $ \\
+			\addlinespace[0.4cm]
+			$ C \sqcup D^{\mathcal{I}} = C^{\mathcal{I}} \cup D^{\mathcal{I}} $ \\
+			\addlinespace[0.4cm]
+			$ \exists R.C^{\mathcal{I}} = \{ x \in \Delta^{\mathcal{I}} | \exists y \in \Delta^{\mathcal{I}} : \langle x,y \rangle \in R^{\mathcal{I}} \land y \in C^{\mathcal{I}} \} $ \\
+			\addlinespace[0.4cm]
+			$ \forall R.C^{\mathcal{I}} = \{ x \in \Delta^{\mathcal{I}} | \forall y \in \Delta^{\mathcal{I}} : \langle x,y \rangle \in R^{\mathcal{I}} \rightarrow y \in C^{\mathcal{I}} \} $								
+		\end{tabular}		
+	\end{table}
+		
 \end{definition}
 
-\newpage
 \begin{example}{\textbf{Interpretation}}
 	\[ 
 	\mathcal{KB} = \left\{
@@ -306,28 +398,48 @@ An interpretation is a pair of a domain and an interpretation function. The doma
 	\right \}
 	\]
 	
-	\[ \mathcal{I} = (\Delta ^{\mathcal{I}}, \cdot^{\mathcal{I}}) \]
-	\[ \Delta ^{\mathcal{I}} = \{ P,S,A,AP \} \]
-	\[ Professor^{\mathcal{I}} = \{P\} \]
-	\[ Scientist^{\mathcal{I}} = \{S\} \]
-	\[ Academician^{\mathcal{I}} = \{A\} \]
-	\[ AssocProfessor^{\mathcal{I}} = \{AP\} \]
-	\[ jack^{\mathcal{I}} = A \]
-	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \mathcal{I} = (\Delta ^{\mathcal{I}}, \cdot^{\mathcal{I}}) $ \\
+			\addlinespace[0.4cm]
+			$ \Delta ^{\mathcal{I}} = \{ P,S,A,AP \} $ \\
+			\addlinespace[0.4cm]
+			$ Professor^{\mathcal{I}} = \{P\} $ \\
+			\addlinespace[0.4cm]
+			$ Scientist^{\mathcal{I}} = \{S\} $ \\
+			\addlinespace[0.4cm]
+			$ Academician^{\mathcal{I}} = \{A\} $ \\
+			\addlinespace[0.4cm]
+			$ AssocProfessor^{\mathcal{I}} = \{AP\} $ \\
+			\addlinespace[0.4cm]
+			$ jack^{\mathcal{I}} = A $
+		\end{tabular}
+	\end{table}
+
 \end{example}
 
-The interpretation satisfies (definition~\ref{def:satisfaction}) an axiom according to its type. We know three types of axioms. The first is an axiom from TBox, the second one is an assertion axiom to a concept and the third one is an assertion to a role.
+The interpretation satisfies (Definition~\ref{def:satisfaction}) an axiom according to its type. We know three types of axioms. The first is an axiom from TBox, the second one is an assertion axiom to a concept and the third one is an assertion to a role.
 
 \begin{definition}{\textbf{Satisfaction $\models$}}
 	\label{def:satisfaction}
 
 	Given an axiom $\phi$, an interpretation $\mathcal{I} = (\Delta^{\mathcal{I}}, \cdot ^{\mathcal{I}})$ satisfies $\phi (\mathcal{I} \models \phi)$ depending on its type:
-	\[ \mathcal{I} \models C \sqsubseteq D \text{ iff } C^{\mathcal{I}} \subseteq D^{\mathcal{I}} \]
-	\[ \mathcal{I} \models a:C \text{ iff } a^{\mathcal{I}} \in C^{\mathcal{I}} \]
-	\[ \mathcal{I} \models a,b:R \text{ iff } \langle a^{\mathcal{I}}, \in b^{\mathcal{I}} \rangle \in R^{\mathcal{I}} \]	
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \mathcal{I} \models C \sqsubseteq D \text{ iff } C^{\mathcal{I}} \subseteq D^{\mathcal{I}} $ \\
+			\addlinespace[0.4cm]
+			$ \mathcal{I} \models a:C \text{ iff } a^{\mathcal{I}} \in C^{\mathcal{I}} $ \\
+			\addlinespace[0.4cm]
+			$ \mathcal{I} \models a,b:R \text{ iff } \langle a^{\mathcal{I}}, \in b^{\mathcal{I}} \rangle \in R^{\mathcal{I}} $
+		\end{tabular}
+	\end{table}
+
 \end{definition}
 
-Finding a model (an interpretation satisfying $\mathcal{KB}$, definition~\ref{def:model}) is crucial for consistency checking. If we find at least one model the knowledge base $\mathcal{KB}$ is consistent. We can have more models for one knowledge base. In example~\ref{example:model} there are two showed models but there can be more models. 
+Finding a model (an interpretation satisfying $\mathcal{KB}$, Definition~\ref{def:model}) is crucial for consistency checking. If we find at least one model the knowledge base $\mathcal{KB}$ is consistent. We can have more models for one knowledge base. In Example~\ref{example:model} there are two showed models but there can be more models. 
 
 \begin{definition}{\textbf{Model}}
 	\label{def:model}
@@ -347,13 +459,28 @@ Finding a model (an interpretation satisfying $\mathcal{KB}$, definition~\ref{de
 	\right \}
 	\]
 
-	\[ \mathcal{I}_{1} = \{  \Delta^{\mathcal{I}} = \{ P,S,A,AP \}, \]	
-	\[ Professor^{\mathcal{I}} = \{P\}, Scientist^{\mathcal{I}} = \{S\}, Academician^{\mathcal{I}} = \{A\}, AssocProfessor^{\mathcal{I}} = \{AP\} \]
-	\[ jack^{\mathcal{I}} = A \} \]	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \mathcal{I}_{1} = \{  \Delta^{\mathcal{I}} = \{ P,S,A,AP \}, $ \\
+			\addlinespace[0.4cm]
+			$ Professor^{\mathcal{I}} = \{P\}, Scientist^{\mathcal{I}} = \{S\}, Academician^{\mathcal{I}} = \{A\}, AssocProfessor^{\mathcal{I}} = \{AP\} $ \\
+			\addlinespace[0.4cm]
+			$ jack^{\mathcal{I}} = A \} $
+		\end{tabular}
+	\end{table}
+		
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ \mathcal{I}_{2} = \{  \Delta^{\mathcal{I}} = \{ A \}, $ \\
+			\addlinespace[0.4cm]
+			$ Professor^{\mathcal{I}} = \{A\}, Scientist^{\mathcal{I}} = \{A\}, Academician^{\mathcal{I}} = \{A\}, AssocProfessor^{\mathcal{I}} = \{A\} $ \\
+			\addlinespace[0.4cm]
+			$ jack^{\mathcal{I}} = A \} $
+		\end{tabular}
+	\end{table}
 
-	\[ \mathcal{I}_{2} = \{  \Delta^{\mathcal{I}} = \{ A \}, \]	
-	\[ Professor^{\mathcal{I}} = \{A\}, Scientist^{\mathcal{I}} = \{A\}, Academician^{\mathcal{I}} = \{A\}, AssocProfessor^{\mathcal{I}} = \{A\} \]
-	\[ jack^{\mathcal{I}} = A \} \]		
 \end{example}
 
 \begin{definition}{\textbf{Consistency}}
@@ -380,24 +507,32 @@ We are familiar with more decision problems, satisfiability, subsumption $(\sqsu
 
 If $\mathcal{KB} = \emptyset$ then we say that decision problems (satisfiability, subsumption, equivalence and disjointness) of concepts are defined in general by definition and we use notation such as we omit $\mathcal{KB} \models$ from the notation.
 
-\subsection{DL Tableau algorithm}
-Following definitions \citep{baaderHandbook} describe rules and terms that are used by this algorithm. DL Tableau algorithm proves satisfiability of a concept or checks consistency of a given knowledge base. By proving satisfiability the input for the algorithm is concept C and TBox $\mathcal{T}$. By checking consistency the input for the algorithm is a knowledge base $\mathcal{KB}$. In both versions of this algorithm holds that each concept must be in NNF (negation normal form, definition ~\ref{def:nnf}). Negation normal form is such a form that each negation is pushed in front of atomic concept inside a complex concept. 
+\subsection{DL Tableau Algorithm}
+Following definitions \citep{baaderHandbook} describe rules and terms that are used by this algorithm. DL Tableau algorithm proves satisfiability of a concept or checks consistency of a given knowledge base. By proving satisfiability the input for the algorithm is concept C and TBox $\mathcal{T}$. By checking consistency the input for the algorithm is a knowledge base $\mathcal{KB}$. In both versions of this algorithm holds that each concept must be in NNF (negation normal form, Definition ~\ref{def:nnf}). Negation normal form is such a form that each negation is pushed in front of atomic concept inside a complex concept. 
 
 \begin{definition}{\textbf{NNF}}
 	\label{def:nnf}
 	
-	A concept C is in NNF (negation normal form) iff the complement constructor $\neg$ 
-	only occurs in front of atomic concept symbols inside C.
+	A concept C is in NNF (negation normal form) if and only if the complement constructor $\neg$ only occurs in front of atomic concept symbols inside C.
 \end{definition}
 
 \begin{example}{\textbf{NNF}}
-	\[ nnf(\neg (C \sqcap D)) = \neg C \sqcup \neg D \]
-	\[ nnf(\neg (C \sqcup D)) = \neg C \sqcap \neg D \]
-	\[ nnf(\neg \exists R.C) = \forall R. \neg C \]
-	\[ nnf(\neg \forall R.C) = \exists R. \neg C \]
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ nnf(\neg (C \sqcap D)) = \neg C \sqcup \neg D $ \\
+			\addlinespace[0.4cm]
+			$ nnf(\neg (C \sqcup D)) = \neg C \sqcap \neg D $ \\
+			\addlinespace[0.4cm]
+			$ nnf(\neg \exists R.C) = \forall R. \neg C $ \\
+			\addlinespace[0.4cm]
+			$ nnf(\neg \forall R.C) = \exists R. \neg C $
+		\end{tabular}
+	\end{table}
+	
 \end{example}
 
-DL Tableau algorithm creates a CTree (Completion tree, definition~\ref{def:ctree}). CTree proves whether model exists or not.
+DL Tableau algorithm creates a CTree (Completion tree, Definition~\ref{def:ctree}). CTree proves whether model exists or not.
 
 \begin{definition}{\textbf{Completion tree}}
 	\label{def:ctree}
@@ -409,7 +544,7 @@ DL Tableau algorithm creates a CTree (Completion tree, definition~\ref{def:ctree
 \end{definition}
 
 At first the algorithm creates node and initializes it with the input concept.
-Then the algorithm applies tableau rules for given DL. If the algorithm applies each rule until any rule can be applied and it finds no clash then result is that concept C is satisfiable w.r.t. $\mathcal{T}$. Children of a node are called successors or R-successors (definition~\ref{def:successor}).
+Then the algorithm applies tableau rules for given DL. If the algorithm applies each rule until any rule can be applied and it finds no clash then result is that concept C is satisfiable w.r.t. $\mathcal{T}$. Children of a node are called successors or R-successors (Definition~\ref{def:successor}).
 
 \begin{definition}{\textbf{Successor, R-successor}}
 	\label{def:successor}
@@ -421,7 +556,7 @@ Then the algorithm applies tableau rules for given DL. If the algorithm applies 
 	\end{itemize}
 \end{definition}
 
-A clash containing Ctree is such a tree that one branch of this tree contains a concept and simultaneously its negation too. Clash is defined in definition~\ref{def:clash}.
+A clash containing Ctree is such a tree that one branch of this tree contains a concept and simultaneously its negation too. Clash is defined in Definition~\ref{def:clash}.
 
 \begin{definition}{\textbf{Clash}}
 	\label{def:clash}
@@ -438,7 +573,7 @@ A clash containing Ctree is such a tree that one branch of this tree contains a 
 A CTree T = $(V,E, \mathcal{L})$ is clash-free iff none of the nodes in V contains a clash.
 \end{definition}
 
-There can be a situation that some concept can lead to infinite looping and algorithm would never stop. This situation is called blocking (definition~\ref{def:blocking}). An example for that is: $Person \sqsubseteq \exists hasParent.Person$. That is why the algorithm uses Blocking rule.
+There can be a situation that some concept can lead to infinite looping and algorithm would never stop. This situation is called blocking (Definition~\ref{def:blocking}). An example for that is: $Person \sqsubseteq \exists hasParent.Person$. That is why the algorithm uses Blocking rule.
 
 \begin{definition}{\textbf{Blocking}}
 	\label{def:blocking}
@@ -446,7 +581,7 @@ There can be a situation that some concept can lead to infinite looping and algo
 	Given a CTree $T = (V, E, \mathcal{L})$ a node $x \in V$ is blocked if it has an ancestor $y$ such that: either $\mathcal{L}(x) \subseteq \mathcal{L}(y)$ or $y$ is blocked.
 \end{definition}
 
-DL Tableau algorithm proves concept satisfiability in regard of TBox (definition~\ref{def:conceptSatisfiability}). Input for DL Tableau algorithm is concept C and TBox $\mathcal{T}$. Output is a boolean value which is true if concept C is satisfiable w.r.t. $\mathcal{T}$, false otherwise.
+DL Tableau algorithm proves concept satisfiability in regard of TBox (Definition~\ref{def:conceptSatisfiability}). Input for DL Tableau algorithm is concept C and TBox $\mathcal{T}$. Output is a boolean value which is true if concept C is satisfiable w.r.t. $\mathcal{T}$, false otherwise.
 
 \begin{definition}{\textbf{Algorithm -- Concept satisfiability}}	
 	\label{def:conceptSatisfiability}
@@ -475,7 +610,7 @@ DL Tableau algorithm proves concept satisfiability in regard of TBox (definition
 	\end{itemize}
 \end{definition}	
 
-Knowledge base is a pair of a TBox and an Abox and yet only a TBox was mentioned in connection with the DL Tableau algorithm. If we also have a given ABox the algorithm must be modified. The algorithm checks no longer concept satisfiability w.r.t. $\mathcal{T}$ but checks consistency of a given $\mathcal{KB}$. The same condition holds for the result as in proving concept satisfiability. If there is a found clash the knowledge base is not consistent otherwise the knowledge base is consistent (definition~\ref{def:consistency}). Difference between the first version of this algorithm is that here are used named nodes. Name of the node is an instance of a concept that comes from ABox. 
+Knowledge base is a pair of a TBox and an Abox and yet only a TBox was mentioned in connection with the DL Tableau algorithm. If we also have a given ABox the algorithm must be modified. The algorithm checks no longer concept satisfiability w.r.t. $\mathcal{T}$ but checks consistency of a given $\mathcal{KB}$. The same condition holds for the result as in proving concept satisfiability. If there is a found clash the knowledge base is not consistent otherwise the knowledge base is consistent (Definition~\ref{def:consistency}). Difference between the first version of this algorithm is that here are used named nodes. Name of the node is an instance of a concept that comes from ABox. 
 
 \begin{definition}{\textbf{Algorithm -- Consistency checking}}
 	\label{def:consistency}
@@ -484,7 +619,7 @@ Knowledge base is a pair of a TBox and an Abox and yet only a TBox was mentioned
 \indent \textbf{Output:} answers whether $\mathcal{KB}$ is consistent or not \newline
 \indent \textbf{Steps:}
 \begin{enumerate}
-	\item Initialize a CTree as follows:
+	\item Initialize a CTree T as follows:
 		\begin{itemize}
 			\item $V := \{ a \text{ } | \text{ individual a occurs in } \mathcal{A} \}$;
 			\item $E := \{ \langle a,b \rangle \text{ } | \text{ } a,b : R \in \mathcal{A} \text{ for some role R} \}$;
@@ -497,7 +632,7 @@ Knowledge base is a pair of a TBox and an Abox and yet only a TBox was mentioned
 
 \end{definition}
 
-Let's introduce an example~\ref{example:dlTableau} where we know a knowledge base $\mathcal{KB}$. DL Tableau algorithm checks if knowledge base is consistent or not.
+Let's introduce an Example~\ref{example:dlTableau} where we know a knowledge base $\mathcal{KB}$. DL Tableau algorithm checks if knowledge base is consistent or not.
 
 \begin{example}{(\textbf{DL Tableau algorithm})}
 	\label{example:dlTableau}
@@ -531,17 +666,18 @@ Let's introduce an example~\ref{example:dlTableau} where we know a knowledge bas
 	\end{tikzpicture}
 \end{center}
 
-The algorithm starts with the ABox assertion axioms. It selects the axiom $jack : Student$. At first it creates a node $jack$ with its label $\mathcal{L}(jack)$. From the assertion axiom $jack : Student$ algorithm knows that jack is a Student and adds the concept $Student$ to the label $\mathcal{L}(jack)$. Then the algorithm is choosing another axiom from the knowledge base. There are no more assertion axioms, so it starts with the axioms from TBox. It takes $Student \sqsubseteq \exists attends.MathCourse$. It must convert it into the negation normal form which is $\neg Student \sqcup \exists attends.MathCourse$. The algorithm applies $\sqcup-rule$. According to this rule it must choose $\exists attends.MathCourse$, otherwise there would be a clash. Now it has to apply $\exists - rule$ so a new node $l_{1}$ will be created with its label $\mathcal{L}(m_{1})$. Concept $MathCourse$ will be added into this label. Let's go back to the $jack$ node. The algorithm has to finish adding all axioms of TBox form. It will add the second axiom from the knowledge base in negation normal form as $\neg MathCourse \sqcup Course$. Now it does not matter which one algorithm chooses if $Course$ or $\neg MathCourse$ because any of these two does not cause a clash. Now the algorithm goes back to the $m_{1}$ node and continues to add axioms from the knowledge base similarly as in the node $jack$. It starts with axiom $\neg Student \sqcup \exists attends.MathCourse$, it will choose the first one $\neg Student$. Then continues with axiom $\neg MathCourse \sqcup Course$. It can not choose $\neg MathCourse$ because there would be immediately a clash. So it chooses $Course$.
+The algorithm starts with the ABox assertion axioms. It selects the axiom $jack : Student$. At first it creates a node $jack$ with its label $\mathcal{L}(jack)$. From the assertion axiom $jack : Student$ algorithm knows that jack is a Student and adds the concept $Student$ to the label $\mathcal{L}(jack)$. Then the algorithm chooses another axiom from the knowledge base. There are no more assertion axioms, so it starts with the axioms from TBox. It takes $Student \sqsubseteq \exists attends.MathCourse$. It must convert it into the negation normal form which is $\neg Student \sqcup \exists attends.MathCourse$. The algorithm applies $\sqcup-rule$. According to this rule it must choose $\exists attends.MathCourse$, otherwise there would be a clash. Now it has to apply $\exists - rule$ so a new node $l_{1}$ will be created with its label $\mathcal{L}(m_{1})$. Concept $MathCourse$ will be added into this label. Let's go back to the $jack$ node. The algorithm has to finish adding all axioms of TBox form. It will add the second axiom from the knowledge base in negation normal form as $\neg MathCourse \sqcup Course$. Now it does not matter which one algorithm chooses if $Course$ or $\neg MathCourse$ because any of these two does not cause a clash. Now the algorithm goes back to the $m_{1}$ node and continues to add axioms from the knowledge base similarly as in the node $jack$. It starts with axiom $\neg Student \sqcup \exists attends.MathCourse$, it will choose the first one $\neg Student$. Then continues with axiom $\neg MathCourse \sqcup Course$. It can not choose $\neg MathCourse$ because there would be immediately a clash. So it chooses $Course$.
 
 The created tree contains two nodes ($jack$ and $m_{1}$) and one edge between them. The edge represents that $jack$ attends some MathCourse $m_{1}$. There is not any instance of a concept $MathCourse$ so the node $m_{1}$ does not represent a concrete instance of the concept $MathCourse$ but represents some instance. There is no clash in both nodes so the answer of the DL Tableau algorithm is that the given knowledge base $\mathcal{KB}$ is consistent.
 
+\pagebreak
 \section{Abduction}
 Generally in logic we are familiar with three ways of thinking. Deduction, induction and abduction. The most known and natural for humans is probably deduction. All three ways are dealing with the following parts: theory, data and effect. In the description logic we can translate the theory as a knowledge base, data as the explanations and the effect as an observation.
 
 By deduction a knowledge base and the explanations is known, the observation is missing and the goal is to deduce the missing observation. By induction is known an observation and an explanation but the knowledge base is unknown. By abduction is known a knowledge base and an observation but the explanation is a subject of searching. All definitions are from article by \cite{pukancovaAboxAbduction}.
 
-\subsection{ABox abduction}
-In the description logics abduction (definition~\ref{def:abduction}) is used when we are not familiar with the explanation $\mathcal{E}$ but we know a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations. A minimal explanation is such an explanation that it does not exist any other explanation that would be a subset of that minimal explanation.
+\subsection{ABox Abduction}
+In the description logics abduction (Definition~\ref{def:abduction}) is used when we are not familiar with the explanation $\mathcal{E}$ but we know a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$. It is important to know that we are looking for minimal explanations. A minimal explanation is such an explanation that it does not exist any other explanation that would be a subset of that minimal explanation.
 
 \begin{definition}{\textbf{(Abduction)}} 
 	\label{def:abduction}
@@ -549,14 +685,15 @@ In the description logics abduction (definition~\ref{def:abduction}) is used whe
 	Given a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$, an abductive explanation is such an explanation $\mathcal{E}$ that satisfies $\mathcal{KB} \cup \mathcal{E} \models \mathcal{O}$.
 \end{definition}
 
+\newpage
 \begin{definition}{\textbf{(Correct explanation)}}
 	\begin{table}[H]
 		\centering
 		\begin{tabular}{c}
 			$\mathcal{E} \text{ is consistent if } \mathcal{E} \cup \mathcal{KB} \not \models \mathcal{\bot};$ \\
-			\addlinespace[0.5cm]
+			\addlinespace[0.4cm]
 			$\mathcal{E} \text{ is relevant if } \mathcal{E} \not \models \mathcal{O};$ \\
-			\addlinespace[0.5cm]
+			\addlinespace[0.4cm]
 			$\mathcal{E} \text{ is explanatory if } \mathcal{KB} \not \models \mathcal{O}$ \\
 		\end{tabular}
 	\end{table}
@@ -567,9 +704,8 @@ In the description logics abduction (definition~\ref{def:abduction}) is used whe
 	Minimal explanation is such an explanation that it does not exist any other explanation that would be a subset of this explanation.
 \end{definition}
 
-For better understanding of what ABox abduction is let's introduce a few examples. The first example~\ref{example:abductionEmotion} is easy, the searched explanation is obvious but it will demonstrate the problem. The second example~\ref{example:abductionAcademy} is not so obvious that is why we have to use an algorithm to compute the solution. For computing the solution we use the \textbf{Minimal Hitting Set algorithm}.
+For better understanding of what ABox abduction is let's introduce a few examples. The first Example~\ref{example:abductionEmotion} is easy, the searched explanation is obvious but it will demonstrate the problem. The second Example~\ref{example:abductionAcademy} is not so obvious that is why we have to use an algorithm to compute the solution. For computing the solution we use the \textbf{Minimal Hitting Set algorithm}.
 
-\newpage
 \begin{example}{(\textbf{ABox Abduction - Emotion})}
 	\label{example:abductionEmotion}
 	\[ 
@@ -588,7 +724,7 @@ For better understanding of what ABox abduction is let's introduce a few example
 	\]								
 \end{example}
 
-In example~\ref{example:abductionEmotion} we are searching the explanations. In this easy assignment it is obvious that what we are looking for is that Mary is sick. If Mary is not happy she must be sick. Formally written solution to this abduction problem is the following:
+In Example~\ref{example:abductionEmotion} we search for the explanations. In this easy assignment it is obvious that what we look for is that Mary is sick. If Mary is not happy she must be sick. Formally written solution to this abduction problem is the following:
 \[ 
 \mathcal{E} = \left\{
 \begin{tabular}{c c}
@@ -614,10 +750,9 @@ $mary : Sick$
 	\end{tabular}
 	\right \}
 	\]								
-	
 \end{example}
 
-In example~\ref{example:abductionAcademy} we search minimal explanations when we know that $jack$ is an Academician. If $jack$ is an Academician he must be a Professor or a Scientist. If he is a Professor he must be also an AssocProfessor. This is an oversimplified explanation how we can retrieve correct explanations. For the better introduction into this algorithm we will explain it step by step. We know the observation so we know that jack is an Academician, that is a fact. In our first axiom in TBox it is written that if somebody is an Academician he is also a Professor or a Scientist. He can be both but at least one of them but that we are not able to determine. That is why both explanations are correct. The second axiom claims that if somebody is a Professor he must be also an AssocProfessor. In this part we are not explaining the whole algorithm yet because it will be explained in our next chapter Minimal Hitting Set algorithm but we need to have at least an idea of how it works. So as we already know the correct explanations are following:
+In Example~\ref{example:abductionAcademy} we search minimal explanations when we know that $jack$ is an Academician. If $jack$ is an Academician he must be a Professor or a Scientist. If he is a Professor he must be also an AssocProfessor. This is an oversimplified explanation how we can retrieve correct explanations. For the better introduction into this algorithm we will explain it step by step. We know the observation so we know that jack is an Academician, that is a fact. In our first axiom in TBox it is written that if somebody is an Academician he is also a Professor or a Scientist. He can be both but at least one of them but that we are not able to determine. That is why both explanations are correct. The second axiom claims that if somebody is a Professor he must be also an AssocProfessor. In this part we do not explain the whole algorithm yet because it will be explained in our next chapter Minimal Hitting Set algorithm but we need to have at least an idea of how it works. So as we already know the correct explanations are following:
 
 \[ 
 \mathcal{E}_{1} = \left\{
@@ -641,8 +776,8 @@ In example~\ref{example:abductionAcademy} we search minimal explanations when we
 \right \}
 \]
 
-\subsection{Minimal Hitting Set algorithm}
-In this part we will explain the algorithm: Minimal hitting set algorithm. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using. The first term is a hitting set. Let's have collection of sets $C$. Hitting set (definition~\ref{def:hittingSet}) is such a set that has non-empty intersection with each set of collection $C$.
+\subsection{Minimal Hitting Set Algorithm}
+In this part we will explain the algorithm: Minimal hitting set algorithm. This algorithm is invented by Raymond \cite{reiterHS}. At first we will declare terms that we will be using. The first term is a hitting set. Let's have collection of sets $C$. Hitting set (Definition~\ref{def:hittingSet}) is such a set that has non-empty intersection with each set of collection $C$.
 
 \begin{definition}{\textbf{Hitting set}}
 	\label{def:hittingSet}
@@ -650,9 +785,8 @@ In this part we will explain the algorithm: Minimal hitting set algorithm. This 
 	A hitting set for a collection of sets $C$ is a set $H \subseteq \cup_{S \in C}$ such that $H \cap S$ is not an empty set for each $S \in C$.
 \end{definition}
 
-HS-tree (definition~\ref{def:hsTree}) is such a tree that contains nodes with three possible values. The first value is check mark, the second is cross mark and the third is a set. Each edge has its own label that determines a path from the parent to node. Labeled edges determines path from the root to node $n$. HS-tree must be the smallest tree for the collection of sets $C$.
+HS-tree (Definition~\ref{def:hsTree}) is such a tree that contains nodes with three possible values. The first value is check mark, the second is cross mark and the third is a set. Each edge has its own label that determines a path from the parent to node. Labeled edges determines path from the root to node $n$. HS-tree must be the smallest tree for the collection of sets $C$.
 
-\newpage
 \begin{definition}{\textbf{HS-tree}}
 	\label{def:hsTree}
 	
@@ -665,7 +799,7 @@ HS-tree (definition~\ref{def:hsTree}) is such a tree that contains nodes with th
 	\end{itemize}
 \end{definition}
 
-The minimal hitting set algorithm (definition~\ref{def:mhs}) generates a HS-tree. It is a breadth-first search algorithm which means that algorithm creates all nodes in one breadth level and then it goes to the next level if possible. The following definition describes rules of how the algorithm behaves.
+The Minimal Hitting Set algorithm (Definition~\ref{def:mhs}) generates a HS-tree. It is a breadth-first search algorithm which means that algorithm creates all nodes in one breadth level and then it goes to the next level if possible. The following definition describes rules of how the algorithm behaves.
 
 \begin{definition}{\textbf{Minimal Hitting Set algorithm}}{\indent}
 	\label{def:mhs}
@@ -691,12 +825,18 @@ The minimal hitting set algorithm (definition~\ref{def:mhs}) generates a HS-tree
 
 Reiter's algorithm is used to compute minimal hitting sets. Input is a set of sets. The goal of Reiter's algorithm is to compute minimal hitting sets from this input. It means that the resulting hitting sets will have a non-empty intersection with each set from the input.
 
-Let's show an example~\ref{example:mhs} with $F$ as the input set and $HS$ as the result.
+Let's show an Example~\ref{example:mhs} with $F$ as the input set and $HS$ as the result.
 
 \begin{example}{\textbf{(Minimal Hitting Set)}}
 	\label{example:mhs}
-	\[ F = \{ \{a,b\}, \{b,c\}, \{a,c\}, \{b,d\}, \{b\} \} \]
-	\[ HS = \{ \{a,b\}, \{b,c\} \} \]
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c}
+			$ F = \{ \{a,b\}, \{b,c\}, \{a,c\}, \{b,d\}, \{b\} \} $ \\
+			\addlinespace[0.4cm]
+			$ HS = \{ \{a,b\}, \{b,c\} \} $
+		\end{tabular}
+	\end{table}
 \end{example}
 
 As we can observe in this example the first result set has a non-empty intersection with each set of $F$ and the second result set also has an intersection with each set of $F$. So we can determine that these resulting sets are definitely minimal hitting sets. They are both minimal because there is no other set that is smaller and at the same time has non-empty intersection with each set of $F$.
@@ -740,7 +880,7 @@ For better and easier understanding of this algorithm we can visualize it and ex
 
 An aim is to create a tree where nodes can have three types of a value. A node can be a set from $F$, check mark or cross mark. Each edge is labeled by one element of some set from $F$. At first we have to create a root. The root node is the first set $\{a,b\}$ from $F$. It will have exactly two children because the size of the node label is two.
 
-Now we have to decide what will be the child's node. Let's check the left child. A labeled path from root to the left node is $\{a\}$. If $\{a\}$ has an intersection with each set from $F$ we can add check mark as the node. But that is not our case so we add such a set that has no intersection with the set $\{ a \}$, as the node. That set is $\{b,c\}$. Let's continue with the right child of the root. A labeled path from this node to the root is $\{b\}$. That does not have non-empty intersection with each set of $F$ so we add set $\{ a,c \}$ as node. We continue breadth-first with $\{b,c\}$ node. Left child has the path labeled by $\{a,b\}$ which has an intersection with each set of $F$ and it fulfills the condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we are looking only for the minimal hitting sets. If a checked node already exists and it is a proper subset of this possible hitting set we have to add cross mark as the node because it is not a minimal hitting set, otherwise we add check mark as the node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
+Now we have to decide what will be the child's node. Let's check the left child. A labeled path from root to the left node is $\{a\}$. If $\{a\}$ has an intersection with each set from $F$ we can add check mark as the node. But that is not our case so we add such a set that has no intersection with the set $\{ a \}$, as the node. That set is $\{b,c\}$. Let's continue with the right child of the root. A labeled path from this node to the root is $\{b\}$. That does not have non-empty intersection with each set of $F$ so we add set $\{ a,c \}$ as node. We continue breadth-first with $\{b,c\}$ node. Left child has the path labeled by $\{a,b\}$ which has an intersection with each set of $F$ and it fulfills the condition to be a possible minimal hitting set. Now we have to check if this possible minimal hitting set is really minimal. It is definitely a hitting set but we look only for the minimal hitting sets. If a checked node already exists and it is a proper subset of this possible hitting set we have to add cross mark as the node because it is not a minimal hitting set, otherwise we add check mark as the node. Similarly we continue in this algorithm and we get two minimal hitting sets: $\{a,b\}$ and $\{b,c\}$.
 
 \subsection{Optimizations}
 Optimizations by \cite{greinerReitersCorrection} and \cite{wotawaReitersVariant} were added to Reiter's original algorithm a few years later. 
@@ -749,10 +889,10 @@ Greiner claims that Reiter's way of creating a tree handles some situations inco
 
 The next optimization by Wotawa disclaims the proposed way by Greiner. He has returned to using a tree. He tries to save time and make the algorithm quicker. His idea is to create deterministic tree where nodes are sorted from left to right where left means the smallest size of an edge label and right means the biggest size of an edge label in one breadth level. In our case this optimization is also useless because in our tree the size of the edge label is always equal.
 
-\subsection{MergeXPlain algorithm}
-The main goal of MergeXPlain algorithm is to find minimal conflicts. That is a complex task that can be done by this algorithm. This algorithm is proposed by \citep{MXP}. The main algorithm is MergeXPlain (algorithm~\ref{alg:mxp}) that finds minimal conflicts. MXP uses an algorithm that is called QuickXPlain (algorithm ~\ref{alg:qxp}). The QuickXPlain algorithm uses divide and conquere strategy and it returns one minimal conflict if such conflict exists. 
+\subsection{MergeXPlain Algorithm}
+The main goal of MergeXPlain algorithm is to find minimal conflicts. That is a complex task that can be done by this algorithm. This algorithm is proposed by \cite{MXP}. The main algorithm is MergeXPlain (Algorithm~\ref{alg:mxp}) that finds minimal conflicts. MXP uses an algorithm that is called QuickXPlain (Algorithm ~\ref{alg:qxp}). The QuickXPlain algorithm uses divide and conquere strategy and it returns one minimal conflict if such conflict exists. 
 
-To characterize a conflict we have to first characterize what is a diagnosable system (definition~\ref{def:diagnosableSystem}) and diagnosis (definition~\ref{def:diagnosis}) from \citep{reiterHS}.
+To characterize a conflict we have to first characterize what is a diagnosable system (Definition~\ref{def:diagnosableSystem}) and diagnosis (Definition~\ref{def:diagnosis}) from \cite{reiterHS}.
 
 \begin{definition}{\textbf{Diagnosable System}} \\
 	\label{def:diagnosableSystem}
@@ -766,17 +906,18 @@ A diagnosis problem is when observations ($OBS$) are inconsistent with the diagn
 	\noindent Given a diagnosis problem (SD, COMPS, OBS), a diagnosis is a minimal set $\Delta \subseteq COMPS$ such that $SD \cup OBS \cup \{ AB(c) | c \in \Delta \} \cup \{ \neg \{AB(c) | c \in COMPS \backslash \Delta \}$ is consistent.
 \end{definition}
 
-A minimal conflict seems to be the same as minimal diagnosis. Finding all minimal conflicts corresponds to finding all minimal hitting sets (\cite{reiterHS}). Conflict CS is minimal if exists no proper subset of CS such as this subset is a conflict. Conflict is defined in definition~\ref{def:conflict}.
+A minimal conflict seems to be the same as minimal diagnosis. Finding all minimal conflicts corresponds to finding all minimal hitting sets \citep{reiterHS}. Conflict CS is minimal if exists no proper subset of CS such as this subset is a conflict. Conflict is defined in Definition~\ref{def:conflict}.
 
-\newpage
 \begin{definition}{\textbf{Conflict}} \\
 	\label{def:conflict}
 	\noindent A conflict CS for (SD, COMPS, OBS) is a set $\{c_{1}, ..., c_{k}\} \subseteq COMPS$ such that $SD \cup OBS \cup \{ \neg AB(c_{i}) | c_{i} \in CS \} $ is incosistent.
 \end{definition}
 
-\subsection{QXP algorithm}
+\subsubsection{QXP Algorithm}
 
-The QuickXPlain (QXP) algorithm is designed for computation of explanations. In its current state it has the ability to return one conflict which means one possible explanation. It is a recursive algorithm showed in algorithm~\ref{alg:qxp}.
+The QuickXPlain (QXP) algorithm is designed for computation of explanations. In its current state it has the ability to return one conflict which means one possible explanation. It is a recursive algorithm showed in Algorithm~\ref{alg:qxp}.
+
+At first the QuickXPlain algorithm checks for consistency of $\mathcal{B}$ and $\mathcal{C}$. There is no conflict if they are consistent so algorithm returns "no conflict". Otherwise the next check in the algorithm is if $\mathcal{C}$ is empty. If it is empty there can not be any conflict. Then algorithm calls method $\mathit{GETCONFLICT}$ with parameters $\mathcal{B}$, $\mathcal{B}$ and $\mathcal{C}$. The $\mathit{GETCONFLICT}$ method checks if the second parameter $D$ is not empty and if $\mathcal{B}$ is not consistent. Otherwise if $\mathcal{C}$ has size 1 then the result is $\mathbb{C}$ because $\mathcal{C}$ can not be divided into two sets anymore. It is already a conflict. If algorithm continues then $\mathcal{C}$ is randomly divided into two sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. Then the method $\mathit{GETCONFLICT}$ is recursively called, first with parameters $\mathcal{B} \cup \mathcal{C}_{1}$, $\mathcal{C}_{1}$ and $\mathcal{C_{2}}$, second with $\mathcal{B} \cup D_{2}$, $D_{2}$ and $\mathcal{C}_{1}$. After return from recursion the results $D_{1}$ and $D_{2}$ are joined and returned as result.
 
 \begin{algorithm}[H]
 	\setstretch{1.7}
@@ -809,11 +950,8 @@ The QuickXPlain (QXP) algorithm is designed for computation of explanations. In 
 	\end{algorithmic}
 \end{algorithm}
 
-At first the QuickXPlain algorithm is checking consistency of $\mathcal{B}$ and $\mathcal{C}$. There is no conflict if they are consistent so algorithm returns "no conflict". Otherwise the next check in the algorithm is if $\mathcal{C}$ is empty. If it is empty there can not be any conflict. Then algorithm calls method $\mathit{GETCONFLICT}$ with parameters $\mathcal{B}$, $\mathcal{B}$ and $\mathcal{C}$. The $\mathit{GETCONFLICT}$ method is checking if the second parameter $D$ is not empty and if $\mathcal{B}$ is not consistent. Otherwise if $\mathcal{C}$ has size 1 then the result is $\mathbb{C}$ because $\mathcal{C}$ can not be divided into two sets anymore. It is already a conflict. If algorithm continues then $\mathcal{C}$ is randomly divided into two sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. Then the method $\mathit{GETCONFLICT}$ is recursively called, first with parameters $\mathcal{B} \cup \mathcal{C}_{1}$, $\mathcal{C}_{1}$ and $\mathcal{C_{2}}$, second with $\mathcal{B} \cup D_{2}$, $D_{2}$ and $\mathcal{C}_{1}$. After returning from recursion the results $D_{1}$ and $D_{2}$ are joined and returned as result.
-
-
-\subsection{MXP algorithm}
-The MergeXPlain (MXP) algorithm is using QXP algorithm. The MXP is repeatedly calling QXP for computation of an conflict. Difference between QuickXPlain and MergeXPlain algorithm (algorithm \ref{alg:mxp}) is that the MergeXPlain can return multiple conflicts at a time and the QuickXPlain only one in such a case that at least one conflict exists. 
+\subsubsection{MXP Algorithm}
+The MergeXPlain (MXP) algorithm uses QXP algorithm. The MXP calls QXP repeatedly for computation of an conflict. Difference between QuickXPlain and MergeXPlain algorithm (Algorithm \ref{alg:mxp}) is that the MergeXPlain algorithm can return multiple conflicts at a time and the QuickXPlain algorithm only one in such a case that at least one conflict exists. 
 
 \begin{algorithm}[H]
 	\setstretch{1.7}
@@ -853,57 +991,50 @@ The MergeXPlain (MXP) algorithm is using QXP algorithm. The MXP is repeatedly ca
 	\end{algorithmic}
 \end{algorithm}
 
-At the beginning of the MergeXPlain algorithm, the algorithm is checking consistency of $\mathcal{B}$. If $\mathcal{B}$ is already inconsistent it has no point to continue and algorithm returns no solution. If $\mathcal{B}$ and $\mathcal{C}$ are consistent together, no conflict can be found and algorithm returns empty set. Otherwise algorithm calls a method $\mathit{FINDCONFLICTS}$ with parameters $\mathcal{B}$ and $\mathcal{C}$. This method checks consistency of $\mathcal{B}$ and $\mathcal{C}$ joined together. If they are consistent method returns a pair of $\mathcal{C}$ and empty set. If $\mathcal{C}$ has size one, method returns a pair of empty set and $\{ \mathcal{C} \}$. This condition is here because if $\mathcal{C}$ has size one it can not be divided into two disjoint non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. If $\mathcal{C}$ has size zero then the first condition is fulfilled because it is consistent with the set $\mathcal{B}$. But if the set $\mathcal{C}$ has size bigger than one then algorithm continues and splits the set $\mathcal{C}$ into two disjoint non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. 
+At the beginning of the MergeXPlain algorithm, the algorithm checks for consistency of $\mathcal{B}$. If $\mathcal{B}$ is already inconsistent it has no point to continue and algorithm returns no solution. If $\mathcal{B}$ and $\mathcal{C}$ are consistent together, no conflict can be found and algorithm returns empty set. Otherwise algorithm calls a method $\mathit{FINDCONFLICTS}$ with parameters $\mathcal{B}$ and $\mathcal{C}$. This method checks consistency of $\mathcal{B}$ and $\mathcal{C}$ joined together. If they are consistent method returns a pair of $\mathcal{C}$ and empty set. If $\mathcal{C}$ has size one, method returns a pair of empty set and $\{ \mathcal{C} \}$. This condition is here because if $\mathcal{C}$ has size one it can not be divided into two disjoint non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. If $\mathcal{C}$ has size zero then the first condition is fulfilled because it is consistent with the set $\mathcal{B}$. But if the set $\mathcal{C}$ has size bigger than one then algorithm continues and splits the set $\mathcal{C}$ into two disjoint non-empty sets $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$. 
 
 The method recursively calls itself, first with the set $\mathcal{C}_{1}$ as the second parameter and secondly with the set $\mathcal{C}_{2}$ as the second parameter. This is repeated until the method is emerged from both recursions and found explanations are joined together into variable $\Gamma$. The pair which is returned by function $\mathit{FINDCONFLICTS}$ returns remaining elements of $\mathcal{C}$ as the first argument and set of explanations as the second argument. The method did not check the whole search space. It can happened that some part of explanation is in the set $\mathcal{C}_{1}$ and other part is in the set $\mathcal{C}_{2}$. To find at least some explanations there is a while loop that should find more explanations. 
 
-The following while loop is running until the set $\mathcal{C}^{\prime}_{1}$ is either empty or consistent with the union of the sets $\mathcal{B}$ and $\mathcal{C}^{\prime}_{2}$. In the while loop from the set $\mathcal{C}^{\prime}_{1}$ are removed elements that is why this condition can be fulfilled. In the while loop the method calls the above mentioned method $\mathit{GETCONFLICT}$ which returned one conflict if exists. This conflict is stored into variable $X$. Then the $\mathit{GETCONFLICT}$ method is called again but with $X$ as parameter and the result is stored into variable $CS$. It is also joined with the previous result $X$. Then comes the most important part of this loop. From the set $\mathcal{C}^{\prime}_{1}$ is removed $\alpha$ where $\alpha$ belongs to the set $X$. This can be interpreted differently. It could mean that always only one element is removed from the set $\mathcal{C}^{\prime}_{1}$. Or it could mean that more elements are removed from this set. In the line below $\Gamma$ represents all found explanations in this run of the method. After jumping from while loop the methods returns a pair or remaining literals ($\mathcal{C}^{\prime}_{1} \cup \mathcal{C}^{\prime}_{2}$) and found explanations.
+The following while loop is running until the set $\mathcal{C}^{\prime}_{1}$ is either empty or consistent with the union of the sets $\mathcal{B}$ and $\mathcal{C}^{\prime}_{2}$. In the while loop from the set $\mathcal{C}^{\prime}_{1}$ are removed elements that is why this condition can be fulfilled. In the while loop the method calls the above mentioned method $\mathit{GETCONFLICT}$ which returned one conflict if exists. This conflict is stored into variable $X$. Then the $\mathit{GETCONFLICT}$ method is called again but with $X$ as parameter and the result is stored into variable $CS$. It is also joined with the previous result $X$. Then comes the most important part of this loop. From the set $\mathcal{C}^{\prime}_{1}$ is removed $\alpha$ where $\alpha$ belongs to the set $X$. This can be interpreted differently. It could mean that always only one element is removed from the set $\mathcal{C}^{\prime}_{1}$. Or it could mean that more elements are removed from this set. In the line below $\Gamma$ represents all found explanations in this run of the method. After jumping from while loop the methods returns a pair of remaining literals ($\mathcal{C}^{\prime}_{1} \cup \mathcal{C}^{\prime}_{2}$) and found explanations.
 
-This algorithm was not used on solving ABox abduction problem yet. Until now this algorithm was designed to detect conflicts. This conflict detection uses divide and conquer strategy as is described in algorithms~\ref{alg:mxp} and~\ref{alg:qxp}.
+This algorithm was not used on solving ABox abduction problem yet. Until now this algorithm was designed to detect conflicts. This conflict detection uses divide and conquer strategy as is described in Algorithms~\ref{alg:mxp} and~\ref{alg:qxp}.
 
-\section{Our approach}
-In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one is using Minimal Hitting Set (MHS) and is based one Reiter's algorithm Minimal Hitting Set \citep{reiterHS}. But it is modified to include ABox abduction according to previous work from Pukancová and Homola \citep{pukancovaPreliminaryReport}. The second is MergeXPlain (MXP) and is based on MergeXPlain \citep{MXP}.
+\pagebreak
+\section{Our Approach}
+In this chapter we would like to introduce two ways of abductive reasoning which we have implemented. The first one uses Minimal Hitting Set (MHS) and is based one the Minimal Hitting Set algorithm from \cite{reiterHS}. But it is modified to include ABox abduction according to previous work from \cite{pukancovaPreliminaryReport}. Our approach based on the Minimal Hitting Set algorithm is described in the Section~\ref{subsection:MHSBasedApproach}. The second approach is the MergeXPlain (MXP) which is based on the MergeXPlain from \cite{MXP}. This approach is described in the Section~\ref{subsection:MXPBasedApproach}.
 
-\subsection{Our approach based on Minimal Hitting Set}
-Reiter's algorithm describes minmal hitting sets but we have to include also abductive reasoning as is described in algorithm ~\ref{alg:mhs}. So our input data are knowledge base $\mathcal{K}$ and observation $\mathcal{O}$. Result from this algorithm are minimal explanations.
+\subsection{MHS-Based Approach}
+\label{subsection:MHSBasedApproach}
+Reiter's algorithm considers minimal hitting sets but we have to take into account the conditions for abductive solutions defined in the Algorithm~\ref{alg:mhs}. So our input data are a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$. The result from this algorithm is the set of all the minimal explanations.
 
-The MHS algorithm starts with creating a negation model $\neg \mathcal{M}$ which is calculated from $\mathcal{K}$ joined with the negation of $\mathcal{O}$. If there is no such model $\neg \mathcal{M}$ respectively $\neg \mathcal{M}$ is equal to null no explanations can be found. Otherwise HS-tree is created with root $r$. The node of root $r$ is the found model $\neg \mathcal{M}$. Then the algorithm goes through each element of $\neg \mathcal{M}$ and creates a new child from root $r$. The new child is labeled on the edge by the current element. The algorithm generates HS-tree by breadth first search. So the next step is to iterate over each child in the next depth and to create its successors. But before generating its successors the algorithm must first check if the branch can be pruned or it is already an explanation. If it is already an explanation and its minimal it will be added to the result. To the result we add the path from root to the current node $n$ which we can name as $H(n)$. If it is not minimal but it is an explanation we can prune it because it has no point to continue in this branch. If the branch contains a clash we can prune it too. If the branch is not pruned and it is not a minimal explanation then we have to calculate a negation model $\neg \mathcal{M}_{i}$ from $\mathcal{K}$ joined with $\neg \mathcal{O}$ joined with $H(n)$ similarly like in the first step when we generated model $\neg \mathcal{M}$. With this conditions we will get to the state that there is no such a branch that we can continue with and algorithm terminates. This algorithm has an exponential time complexity but it is sound and complete and it always terminates.
+\subsubsection{MHS Algorithm}
+The MHS algorithm (defined in the Algorithm~\ref{alg:mhs}) requires following parameters: a knowledge base $\mathcal{KB}$ and an observation $\mathcal{O}$. At the beginning the algorithm starts with finding a negation model $\neg M$. The model $M$ is acquired from the union of the knowledge base $\mathcal{KB}$ and the negation of the observation $\neg \mathcal{O}$ (line~\ref{mhs:line1}). How to create a model, respectively a negation model is explained in the Section~\ref{subsubsection:modelCreation}. After retrieving the negation model $\neg M$ the algorithm checks if the negation model $\neg M$ is null or not (line~\ref{mhs:line2}). If we can find no negation model that means that we can not continue in the algorithm and we can not return any explanations. We can not continue in the algorithm because we need some non-empty negation model which would be a value for the root $r$.
 
 \begin{algorithm}[H] 
 	\setstretch{1.7}
 	\footnotesize
-	\caption{MHS($\mathcal{K}$,$O$)}
+	\caption{MHS($\mathcal{KB}$,$O$)}
 	\label{alg:mhs}
 	\begin{algorithmic}[1]
-		\Require knowledge base $\mathcal{K}$, observation $O$
-		\Ensure set $\mathcal{S}_{\mathcal{E}}$ of all explanations of $\mathcal{P}=(\mathcal{K},O)$ of the class Abd
-		\State $M \gets$ a model $M$ of $\mathcal{K} \cup \{\neg O\}$
-		\label{soal:ta_init}
-		\If { $M = \mathtt{null}$ }
+		\Require knowledge base $\mathcal{KB}$, observation $O$
+		\Ensure set $\mathcal{S}_{\mathcal{E}}$ of all explanations of $\mathcal{P}=(\mathcal{KB},O)$ of the class Abd
+		\State $M \gets$ a model $M$ of $\mathcal{KB} \cup \{\neg O\}$ \label{mhs:line1}
+		\If { $M = \mathtt{null}$ } \label{mhs:line2}
 		\State \Return \texttt{"nothing to explain"} %4
 		\label{soal:nte}
 		\EndIf %5
-		\label{soal:init:e}
-		\State create new HS-tree $T=(V,E,L)$ with root $r$ %7
-		\label{soal:root:b}
-		\State label $r$ by $L(r) \gets$ Abd($M$)
-		\label{soal:r-label}
-		\State for each $\sigma\in L(r)$ create a successor $n_\sigma$ of $r$
+		\State create new HS-tree $T=(V,E,L)$ with root $r$ \label{mhs:line5}
+		\State label $r$ by $L(r) \gets$ Abd($M$) \label{mhs:line6}
+		\State for each $\sigma\in L(r)$ create a successor $n_\sigma$ of $r$ \label{mhs:line7}
 		and label the resp.\ edge by $\sigma$ %9
-		\label{soal:root:e}
 		\State $\mathcal{S}_{\mathcal{E}} \gets$ $\{\}$ %10
-		\label{soal:SE:init}
-		\While {there is next node $n$ in $T$ w.r.t.\ BFS}  %12
-		\label{soal:loop:b}
-		\If { $n$ can be pruned } %13
-		\label{soal:prune:b}
+		\While {there is next node $n$ in $T$ w.r.t.\ BFS}  \label{mhs:line9}
+		\If { $n$ can be pruned } \label{mhs:line10}
 		\State prune $n$
-		\label{soal:prune:e}
-		\ElsIf{there is a model $M$ of $\mathcal{K} \cup \{\neg O\} \cup H(n)$}
-		\label{soal:ta}
+		\ElsIf{there is a model $M$ of $\mathcal{KB} \cup \{\neg O\} \cup H(n)$}
 		\State label $n$ by $L(n) \gets$  Abd($M$) 
 		\Else %17
-		\State $\mathcal{S}_\mathcal{E} \gets \mathcal{S}_\mathcal{E} \cup \{H(n)\}$ 
+		\State $\mathcal{S}_\mathcal{E} \gets \mathcal{S}_\mathcal{E} \cup \{H(n)\}$ \label{mhs:line15}
 		\EndIf
 		\State for each $\sigma\in L(n)$ create a successor $n_\sigma$ of $n$
 		and label the resp.\ edge by $\sigma$ %28
@@ -911,51 +1042,70 @@ The MHS algorithm starts with creating a negation model $\neg \mathcal{M}$ which
 		\EndWhile
 		\label{soal:loop:e}
 		\label{soal:output}
-		\State \Return $\mathcal{S}_\mathcal{E}$
+		\State \Return $\mathcal{S}_\mathcal{E}$ \label{mhs:line19}
 	\end{algorithmic}
 \end{algorithm}
 
-\subsection{Our approach based on MergeXPlain}
-We have used MergeXPlain as is described by Shchekotykhin \citep{MXP}. At first we needed to create input data to MXP from given knowledge base and observation. The MXP algorithm is taking parameters $\mathcal{B}$ as background theory and $\mathcal{C}$ as the set of possibly faulty constraints. We use knowledge base as parameter $\mathcal{B}$ and we create a set of possibly faulty constraints as parameter $\mathcal{C}$. This set $\mathcal{C}$ is created from knowledge base. At first we need to acquire all concepts from the knowledge base and all individuals from observation. Then we pair each individual witch each concept and its negation which results in a set of ABox assertions. We exclude one pair that is equal to observation. For better understanding let's show it on example~\ref{example:mxpTransform}.
+If we can continue in the algorithm we proceed with line~\ref{mhs:line5}. The algorithm creates a new HS-tree $T$ initialized with a root $r$. The node $r$ is labeled by the negation model $\neg M$. Then we continue with line~\ref{mhs:line6} and~\ref{mhs:line7} where we create successors for the root $r$. Each successor has labeled its edge from the root $r$ to the successor's node with one element of the negation model $\neg M$. Each successor's node is not labeled yet, it will be labeled in the next step. The next step is to label the successor's nodes by breadth first search which means that we will label each successor from left to right. This node labeling is done in the while loop which starts in line~\ref{mhs:line9} and is explained in the Section~\ref{subsubsection:nodeLabeling}.
+
+After we decide how the successor's nodes will be labeled we continue with line~\ref{mhs:line10}. We can prune node $n$ if there is no point to keep this path anymore. Pruning rules are defined in the Section~\ref{subsubsection:pruning}. If the node $n$ is labeled by a negation model $\neg M$ then we repeat above mentioned steps like by the root $r$. That means that we create its successors and labeled their edges and nodes. This node is added to the HS-tree $T$. Otherwise the path from the root $r$ to the node $n$ creates a minimal explanation and we will add this minimal explanation to the set of all minimal explanations $\mathcal{S}_{\mathcal{E}}$ (line~\ref{mhs:line15}). Until we still have some node in our HS-tree $T$ we repeat this process and acquire minimal explanations. If there is no node in the HS-tree $T$ the algorithm breaks from the while loop and returns the set of all the found minimal explanations $\mathcal{S}_{\mathcal{E}}$ in line~\ref{mhs:line19}.
+
+This algorithm has an exponential time complexity but it is sound and complete and it always terminates. It also means that this algorithm will find all minimal explanations eventually.
+
+\subsubsection{Model Creation}
+\label{subsubsection:modelCreation}
+The model creation requires following parameters: the knowledge base $\mathcal{KB}$, the negation of the observation $\neg \mathcal{O}$ and the path $H(n)$ which represents path from the root $r$ to node $n$. A new model is a set of ABox assertions. Each assertion has an ABox form $a:A$ or $a:\neg A$. The individual we take is from the observation $\mathcal{O}$. Each concept is from the knowledge base $\mathcal{KB}$. First we create a new set $S$ for the model $M$. Secondly we take the negation of the observation $\neg \mathcal{O}$ and add it to the set $S$. Then we add ABox assertions from the path $H(n)$. Then we have to add the remaining ABox assertions to the set $S$. The set $S$ has to contain all concepts from knowledge base $\mathcal{KB}$ in the ABox assertions. Which means that we have to iterate through all concepts and evaluate if each concept is already in some assertion of the $S$ or not. Let's show it with concept $C$ and an individual $a$. The concept $C$ is in some assertion of the set $S$ if $a:C \in S$ or $a:\neg C \in S$. If we evaluate that the concept $C$ is in any assertion of the set $S$ we have to add either $a:C$ or $a:\neg C$. We decide which assertion we use with the help of a reasoner. We ask the reasoner if after adding assertion $a:C$ is the set $S$ still consistent. If yes then we add assertion $a:C$ to the set $S$ otherwise we add assertion $a:\neg C$. We continue with this approach with all remaining concepts. We add one optimization and that is that we remove the negation of the observation $\neg \mathcal{O}$ after the set $S$ is completed. We do this because in the MHS algorithm we need to get a negation of the model $M$. The set $S$ is the model $M$. But we need to return a negation of the model $M$ which means that we negate each assertion of the set $S$. Then we create a set $\neg S$ that is shaped from the negated assertions from the set $S$. That is our negation model $\neg M$. And now back to the explanation why we removed the negation of the observation $\neg \mathcal{O}$ from the set $S$. It is because the set $\neg S$ would contain the actual observation $\mathcal{O}$ and that would not lead to relevant explanation.
+
+\subsubsection{Node Labeling}
+\label{subsubsection:nodeLabeling}
+In the MHS algorithm nodes can have three types of label. The first type is a new negation of the model that is acquired from the union of the knowledge base $\mathcal{KB}$, the negation of the observation $\neg \mathcal{O}$ and the parameter $H(n)$. The parameter $H(n)$ is a path from the root $r$ to node $n$. The second type of label is a check mark ($\checkmark$). That means that the path $H(n)$ is a possible explanation. It does not have to be a minimal explanation. The last type of label is a cross mark (\xmark) which represents such a path $H(n)$ that is inconsistent or not relevant.
+
+\subsubsection{Pruning}
+\label{subsubsection:pruning}
+The pruning rules are simple. We can not have a path $H(n)$ from the root $r$ to a node $n$ if there is a clash which leads to inconsistency. Or if there is already such a path $H(n')$ that $H(n') \subseteq H(n)$. The path $H(n)$ could be an explanation but it could not be a minimal explanations because it already exists an explanation that is a subset of this path $H(n)$. Such a path that fulfills at least one of this two conditions could not lead to a possible minimal explanations and that is why we have to prune this path.
+
+\subsection{MXP-Based Approach}
+\label{subsection:MXPBasedApproach}
+We have used MergeXPlain as is described by \cite{MXP}. At first we need to create input data for MXP from given knowledge base $\mathcal{KB}$ and observation $\mathcal{O}$. The MXP algorithm takes parameters $\mathcal{B}$ as background theory and $\mathcal{C}$ as the set of possibly faulty constraints. The parameter $\mathcal{B}$ is created by our input data which are the knowledge base $\mathcal{KB}$ and the negation of the observation $\mathcal{O}$. We create a set of possibly faulty constraints as parameter $\mathcal{C}$. This set $\mathcal{C}$ is created from the knowledge base $\mathcal{KB}$. At first we need to acquire all concepts from the knowledge base $\mathcal{KB}$ and all individuals from the observation $\mathcal{O}$. Then we pair each individual witch each concept and its negation which results in a set of ABox assertions. We exclude one pair that is equal to the observation $\mathcal{O}$. For better understanding let's show it on the Example~\ref{example:mxpTransform}.
 
 \begin{example}{\textbf{Transformation of input data in MXP}} \\
 	\label{example:mxpTransform}
 	\noindent Let's have knowledge base that contains following concepts: 
-	$\mathcal{N}_{C} = \{ A, B, C \}$ \\
+	$N_{C} = \{ A, B, C \}$ \\
 	And observation: $\mathcal{O} = \{ d:B \}$ \\
-	Then we have one individual from observation: $\mathcal{N}_{I} = \{ d \} $ \\
+	Then we have one individual from observation: $N_{I} = \{ d \} $ \\
+	So the parameter $\mathcal{B} = \{ A,B,C, d: \neg B  \} $ \\
 	So set $\mathcal{C} = \{ d:A, d:\neg A, d:\neg B, d:C, d:\neg C \}$
 \end{example}
 
-After transformation we can begin with the algorithm. The MXP algorithm checks consistency of given input which is knowledge base joined with other constraints. For consistency checking we use reasoner. Reasoner decides if the given input is consistent or not. We have implemented the algorithm exactly as is shown in algorithm~\ref{alg:mxp}. There is only one thing that is not exactly specified and that is a line 21 in the method $\mathit{FINDCONFLICTS}$. We need to reduce either the set $\mathcal{C}^{\prime}_{1}$ or the set $\mathcal{C}^{\prime}_{2}$. If we would not do that we would be infinitely looping in the while loop. So now we have to decide which one will be removed. Our approach is working so that always first element from the set $X$ is removed from the set $\mathcal{C}^{\prime}_{1}$. This can work in such a case that no conflict is overlapping with another. But if there are conflicts that are overlapping each other, this way will not find all conflicts, it will find only its subset. 
+After transformation we can begin with the algorithm. The MXP algorithm checks for consistency of given input which is knowledge base joined with other constraints. For consistency checking we use reasoner. Reasoner decides if the given input is consistent or not. We have implemented the algorithm exactly as is shown in Algorithm~\ref{alg:mxp}. There is only one thing that is not exactly specified and that is a line 21 in the method $\mathit{FINDCONFLICTS}$. We need to reduce either the set $\mathcal{C}^{\prime}_{1}$ or the set $\mathcal{C}^{\prime}_{2}$. If we would not do that we would be infinitely looping in the while loop. So now we have to decide which one will be removed. Our approach is working so that always first element from the set $X$ is removed from the set $\mathcal{C}^{\prime}_{1}$. This can work in such a case that no conflict is overlapping with another. But if there are conflicts that are overlapping each other, this way will not find all conflicts, it will find only its subset. 
 
-MergeXPlain algorithm is sound because it always terminates. But it is not complete because it can not always find all conflicts. This problems happens when they are explanations that are overlapping each other. Let's show the contradiction on following example~\ref{example:mxpContradiction}.
+MergeXPlain algorithm is sound because it always terminates. But it is not complete because it can not always find all conflicts. This problem happens when they are explanations that are overlapping each other. Let's show the contradiction on following Example~\ref{example:mxpContradiction}.
 
-\newpage
 \begin{example}{\textbf{MergeXPlain contradiction example}}
 	\label{example:mxpContradiction}
 	\\
-	Let $\mathcal{K} = \{ A \sqcap B \sqsubseteq D, A \sqcap C \sqsubseteq D\}$ and let $O = D(a)$. 
+	Let $\mathcal{K} = \{ A \sqcap B \sqsubseteq D, A \sqcap C \sqsubseteq D\}$ and let $O = \{ a:D \}$. 
 	
-	Let us ignore negated ABox expressions and start with $Abd = \{ A(a), B(a),
-	C(a)\}$. There are two minimal explanations of $\mathcal{P} = (\mathcal{K},O)$: $\{A(a),B(a)\}$, and	$\{A(a),C(a)\}$. Calling MXP($\mathcal{K} \cup \{\neg O\}, Abd$), it passes the
+	Let us ignore negated ABox expressions and start with $Abd = \{ a:A, a:B,
+	a:C \}$. There are two minimal explanations of $\mathcal{P} = (\mathcal{K},O)$: $\{ a:A, a:B \}$, and	$\{ a:A, a:C \}$. Calling MXP($\mathcal{K} \cup \{\neg O\}, Abd$), it passes the
 	initial tests and calls \Call{FINDCONFLICTS}{$\mathcal{K} \cup \{\neg O\}, Abd$}.
 	
 	\textsc{FINDCONFLICTS} needs to decide how to split $\mathcal{C} = Abd$ into $\mathcal{C}_{1}$
-	and $\mathcal{C}_{2}$. Let us assume the split was $\mathcal{C}_{1} = \{A(a)\}$ and $\mathcal{C}_{2} =
-	\{B(a),C(a)\}$. Since both $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$ are now conflict-free w.r.t.\
+	and $\mathcal{C}_{2}$. Let us assume the split was $\mathcal{C}_{1} = \{ a:A \}$ and $\mathcal{C}_{2} =
+	\{ a:B, a:C \}$. Since both $\mathcal{C}_{1}$ and $\mathcal{C}_{2}$ are now conflict-free w.r.t.\
 	$\mathcal{K} \cup \{\neg O\}$, the two consecutive recursive calls return
 	$\langle \mathcal{C}^{\prime}_{1},\emptyset \rangle$ and $\langle \mathcal{C}^{\prime}_{2},\emptyset \rangle$ where
-	$\mathcal{C}^{\prime}_{1}=\{A(a)\}$ and $\mathcal{C}^{\prime}_{2}=\{B(a),C(a)\}$.
+	$\mathcal{C}^{\prime}_{1}=\{A(a)\}$ and $\mathcal{C}^{\prime}_{2}=\{ a:B, a:C \}$.
 	
 	In the while loop, \Call{GETCONFLICT}{$\mathcal{K} \cup \{\neg O\}\cup
-		\{B(a),C(a)\},$ $\{B(a),C(a)\},$ $\{A(a)\}$} returns $X = \{A(a)\}$ while
+		\{a:B,a:C\},$ $\{a:B,a:C\},$ $\{a:A\}$} returns $X = \{a:A\}$ while
 	\Call{GETCONFLICT}{$\mathcal{K} \cup \{\neg O\}\cup
-		\{A(a)\},$ $\{A(a)\},$ $\{B(a),C(a)\}$} returns $B(a)$, and hence the first
-	confclit $\gamma = \{A(b),B(a)\}$ is found and added into $\Gamma$.
+		\{a:A\},$ $\{a:A\},$ $\{a:B,a:C\}$} returns $a:B$, and hence the first
+	confclit $\gamma = \{b:A,a:B\}$ is found and added into $\Gamma$.
 	
-	However, consecutively $A(a)$ is removed from $C'_1$ leaving it empty,
-	and thus the other conflict is not found and $\Gamma = \{\{A(b),B(a)\}\}$ is
+	However, consecutively $a:A$ is removed from $C'_1$ leaving it empty,
+	and thus the other conflict is not found and $\Gamma = \{\{b:A,a:B\}\}$ is
 	returned.	
 \end{example}
 
@@ -964,30 +1114,31 @@ The MXP algorithm returns a set of conflicts. But not all conflicts are minimal 
 \subsection{Implementation}
 Our work is implemented in Java 1.8. Both algorithms, MHS and MergeXPlain, are implemented in one project. Our work can be found on github: \url{https://github.com/katuskaa/MasterThesis}. 
 
-The project is using maven for dependency management. We needed to use library for OWL API and all three reasoners. We use it also for generating a jar file from our project. Our program does not have a graphical user interface. It can run in some IDE for Java for example (IntelliJ IDEA) or our program can create a jar file that can be launched in a terminal. In both ways our program expects some arguments. 
+The project is using maven for dependency management. We needed to use library for OWL API and all the three reasoners. We use it also for generating a jar file from our project. Our program does not have a graphical user interface. It can run in some IDE for Java for example (IntelliJ IDEA) or our program can create a jar file that can be launched in a terminal. In both ways our program expects some arguments. 
 
-The useful argument is help (-h or --help) which shows what arguments can be used and if they are optional or not. Necessary arguments (-f "relativePath/ontology.owl") are the path to file which contains ontology (*.owl format). Another mandatory argument is an observation (-o "a:A") that can be given in the Manchester syntax. Our algorithms work with single observation but that can be also complex, for example (-o "d:(A and B) or C"). Other arguments are optional. Following two arguments are changing reasoner and algorithm. To define which reasoner should be used, use an argument (-r "pellet"). If this argument is not used, default reasoner is used and that is HermiT. To define which algorithm is used, use an argument (-s "mergexplain"). Default for this algorithm is MHS method. The last two arguments are also optional and works only with MHS algorithm. To define how many depths of HS-tree should be generated, use an argument (-d n), where n specifies a depth of the HS-tree. To define a timeout for MHS method, use an argument (-t s), where s specifies a number of seconds. The timeout parameter defines how long should program maximally run. After achieving this timeout, algorithm is terminated and returns the minimal explanations found until timeout was reached.
+The useful argument is help (-h or --help) which shows what arguments can be used and if they are optional or not. This command also shows what values can be used with the arguments. Necessary arguments (-f "relativePath/ontology.owl") are the path to file which contains ontology (*.owl format). Another mandatory argument is an observation (-o "a:A") that can be given in the Manchester syntax. Our algorithms work with single observation but that can be also complex, for example (-o "d:(A and B) or C"). Other arguments are optional. Following two arguments change reasoner and algorithm. To define which reasoner should be used, use an argument (-r "pellet"). If this argument is not used, default reasoner is used and that is HermiT. To define which algorithm is used, use an argument (-s "mergexplain"). Default for this algorithm is MHS method. The last two arguments are also optional and works only with MHS algorithm. To define how many depths of HS-tree should be generated, use an argument (-d n), where n specifies a depth of the HS-tree. To define a timeout for MHS method, use an argument (-t s), where s specifies a number of seconds. The timeout parameter defines how long should program maximally run. After achieving this timeout, algorithm is terminated and returns the minimal explanations found until timeout was reached.
 
-In both approaches we need to use reasoner. In our implementation we use three reasoners from which you can always choose one that will be used in computation. These reasoner that we use are, HermiT, JFact and Pellet. We use them only for consistency checking which means that in both algorithms (MHS, MXP) we need to ask the reasoner if our ontology joined with constraints is consistent in current state. The ontology is changing in the flow of algorithm, so we ask many times if ontology is consistent or other words if the ontology is clash free. With these reasoners we communicate through OWL API which is a common api for all reasoners. Each reasoner has its own implementation of this api.
+In both approaches we need to use reasoner. In our implementation we use three reasoners from which you can always choose one that will be used in the computation. These reasoner that we use are, HermiT, JFact and Pellet. We use them only for consistency checking which means that in both algorithms (MHS, MXP) we need to ask the reasoner if our ontology joined with constraints is consistent in current state. The ontology is changing in the flow of algorithm, so we ask many times if ontology is consistent or other words if the ontology is clash free. With these reasoners we communicate through OWL API which is a common api for all reasoners. Each reasoner has its own implementation of this api.
 
 Our program has common part that use both approaches or better to say that this part is evaluated before the approach is called. Let's call it preprocessing of the input data. First we have to map our arguments to a configuration structure where we remember which reasoner and which method should be used. We can remember depth and timeout if given too. Second we have to parse the observation into our common structure. Then we have to load the given ontology into selected reasoner through OWL API. We only change the instance of a reasoner, then we use the same implementation for all reasoners thanks to the OWL API.
 
-After preprocessing selected approach is called. We use one interface that has a method \textit{solve}. Both out approaches implement this interface and after selecting the method, correct instance is created and then we only call the method \textit{solve} that is implemented in both approaches.
+After preprocessing selected approach is called. We use one interface that has a method \textit{solve}. Both our approaches implement this interface and after selecting the method, correct instance is created and then we only call the method \textit{solve} that is implemented in both approaches.
 
 We implemented time measurement for the timeout. This timer does not count time from start to end or to timeout. It counts that time that the computer spends on doing this task (our program).
 
+\pagebreak
 \section{Evaluation}
 
 A preliminary experimental evaluation was conducted with implementations of
 MHS and MXP, both paired with three  DL reasoners -- Pellet, HermiT, and
-JFact. Both algorithms are implemented in Java and communicate with the
+JFact. Both algorithms are implemented in Java and they communicate with the
 reasoners through OWL API.
 
 The source code of both implementations is available online.
 \footnote{\url{https://github.com/katuskaa/MasterThesis}}
 
 The evaluation is split into two experiments. Experiment 1 is focused on
-computing explanations of size one. In this case MHS can be
+computing explanations of size one. In this case the MHS algorithm can be
 made more effective by bounding the HS-tree depth, and on the other hand
 MXP is complete in this case. Experiment 2 was conducted without any
 constraints on the size of explanations, but a timeout needed to be set. Both
@@ -998,7 +1149,7 @@ value from ten runs with ten different observations.
 \subsection{Dataset and Methodology}
 
 Three ontologies were chosen. The Family ontology
-\footnote{\url{http://dai.fmph.uniba.sk/~pukancova/aaa/ont/family2.owl}}, is our own ontology of family relations. It is smaller, but it is particularly useful in this use case as it generates a number of explanations of size higher than one. The second ontology, LUBM (Lehigh University Benchmark \cite{LUBM}), is a standard benchmark. The Beer ontology\footnote{\url{https://www.cs.umd.edu/projects/plus/SHOE/onts/beer1.0.html}} was chosen. Both LUBM and Beer were chosen because of their larger size compared to the Family ontology, but on the other hand as in the case of many real world ontologies their axiomatic structure is less complex which implies that most if not all explanations are of size one. In the table~\ref{tab:ont} the structure of these three ontologies is described.
+\footnote{\url{http://dai.fmph.uniba.sk/~pukancova/aaa/ont/family2.owl}}, is our own ontology of family relations. It is smaller, but it is particularly useful in this use case as it generates a number of explanations of size higher than one. The second ontology, LUBM (Lehigh University Benchmark \cite{LUBM}), is a standard benchmark. The Beer ontology\footnote{\url{https://www.cs.umd.edu/projects/plus/SHOE/onts/beer1.0.html}} was chosen. Both LUBM and Beer were chosen because of their larger size compared to the Family ontology, but on the other hand as in the case of many real world ontologies their axiomatic structure is less complex which implies that most if not all explanations are of size one. In the Table~\ref{tab:ont} the structure of these three ontologies is described.
 
 \begin{table}[h!]
 	\centering
@@ -1018,58 +1169,92 @@ Three ontologies were chosen. The Family ontology
 	\end{tabular}
 \end{table}
 
+All experiments were done on a virtual machine with 8 cores (16 threads) of
+the processor Intel\textsuperscript \textregistered Xeon\textsuperscript
+\textregistered CPU E5-2695 v4, 32 GB RAM, 2.10GHz, running Ubuntu 18.04.1,
+while the maximum Java heap size was set to 4GB. Execution times were measured
+in Java using \texttt{ThreadMXBean} from the \texttt{java.lang.management}
+package. We used \emph{user} time, that is the actual time without system
+overhead.
+
 \subsection{Experiment 1}
+
+The Experiment 1 compares execution times between the MHS and the MXP algorithm. The MHS algorithm was launched with the depth parameter and the depth was set to 1. The MXP algorithm was launched without any additional parameters.
+
+The first tested ontology was Family ontology. The resulting plot we can see in the  Figure~\ref{fig:eval1Family}. In all three cases the MHS algorithm was quicker because it was stopped after reaching depth 1 of generated HS-tree. The MXP algorithm was a little bit slower. In this graph time is measured in seconds so it is not a big difference between MHS and MXP algorithm. Especially in the case of JFact. The JFact reasoner finished with similar results in both approaches and with the MXP approach was the quickest reasoner. The HermiT reasoner was the slowest reasoner in all three cases and the Pellet reasoner wins with the MHS approach.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=9cm]{eval1Family} 	
+	\includegraphics[width=11cm]{eval1Family}
 	\caption{Family ontology - Experiment 1}
 	\label{fig:eval1Family}
 \end{figure}
 
+The second tested ontology was the Beer ontology. The result from the experiment on this ontology we can see in the Figure~\ref{fig:eval1Beer}. The Beer ontology is significantly bigger than the Family ontology. We can see that the JFact reasoner was definitely quicker with the MXP approach. On the other hand the Pellet reasoner was quicker with the MHS algorithm. The HermiT reasoner is also quicker with the MHS algorithm and it seems to have better performance for larger ontologies. The HermiT reasoner achieved worse results with the Family ontology comparing to the other reasoners and the Family ontology is smaller than the Beer ontology.
+
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=9cm]{eval1Beer} 
+	\includegraphics[width=11cm]{eval1Beer} 
 	\caption{Beer ontology - Experiment 1}
 	\label{fig:eval1Beer}
 \end{figure}
 
+The last ontology that has been tested is the LUBM ontology. That is our largest ontology. The result from the experiment on this ontology is in the Figure~\ref{fig:eval1LUBM}. As we can see the JFact reasoner is again extremely slow with the MHS algorithm comparing to MXP algorithm. The Pellet reasoner acts similarly as it did in two previous cases, the MHS algorithm is quicker than the MXP algorithm. The HermiT reasoner is with both approaches in the middle, the MHS algorithm was quicker with the Pellet reasoner, the MXP algorithm was quicker with the JFact reasoner.
+
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=9cm]{eval1LUBM} 
+	\includegraphics[width=11cm]{eval1LUBM} 
 	\caption{LUBM ontology - Experiment 1}
 	\label{fig:eval1LUBM}
 \end{figure}
 
 \subsection{Experiment 2}
+The Experiment 2 compares execution times between the MHS and the MXP algorithm. The MHS algorithm was launched with the timeout parameter and the timeout was set to 43200 seconds which is 12 hours. The MXP algorithm finished without any timeout. In this experiment we want to compare execution times and number of found explanations expressed in percents. We assume that the MHS algorithm will find all possible explanations and we take its count as maximum or in other words as 100\% of all minimal explanations. Then we calculate how much percent of minimal explantions the MXP algorithm was able to find. In this experiment all resulting plots show the percentage of found minimal explanations at the top of the bar in the histogram. Under each plot the legend is displayed. Each legend describes if the used algorithm is the MHS or the MXP algorithm and in the case of the MHS algorithm the legend shows the depth of the HS-tree. Each depth is calculated as an average of all runs from all observations.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=9cm]{eval2Family} 	
+	\includegraphics[width=10cm]{eval2Family} 	
 	\caption{Family ontology - Experiment 2}
 	\label{fig:eval2Family}
 \end{figure}
 
+The Family ontology is the first ontology that has been tested in our experiment. The resulting plot we can see in the Figure~\ref{fig:eval2Family}. This ontology is small so both algorithms finished their goal without timeout. In all three cases the MXP approach found exactly the same number of minimal explanations because the percentage is the same. This ontology is interesting for its structure. There is a multiple hierarchy in concepts and that is why a simple observation can have minimal explanations with cardinality bigger than one. The MXP algorithm is not able to find all minimal explanations which cardinality is bigger than one. So the resulting percentage is not 100\%. 
+
+This experiment is measured in seconds but in the plot in the Figure~\ref{fig:eval2Family} is seen that the MXP algorithm is with any of tested reasoners quicker than the MHS algorithm. The MHS algorithm has found all minimal explanations but it was definitely slower. The HermiT reasoner is the slowest and the Pellet reasoner is the quickest. Interesting is that we can not say that if one reasoner is the quickest with the MHS approach it will be also the quickest with the MXP approach. Great example is the JFact reasoner with the Family ontology. The JFact reasoner is the quickest reasoner with the MXP approach but is the second best reasoner with the MHS approach.
+
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=9cm]{eval2Beer} 
+	\includegraphics[width=10cm]{eval2Beer} 
 	\caption{Beer ontology - Experiment 2}
 	\label{fig:eval2Beer}
 \end{figure}
 
+The Beer ontology is used as the second ontology in Experiment 2. We can see its result on Figure~\ref{fig:eval2Beer}. The MXP approach takes only seconds and it is not even seen in the plot in the Figure~\ref{fig:eval2Beer}. This plot is measured in hours because the MHS algorithm took a long time. But the MXP algorithm was running only a few seconds. For the MHS approach a 12 hours timeout has to be set. And we can see that HermiT and JFact have managed to run this 12 hours but Pellet did not. The reason why Pellet took shorter time is not that it was that quick. It is because the Pellet reasoner threw an exception (OutOfMemoryException). That is not problem with our algorithm, that is a problem with the reasoner. The Pellet reasoner does it unfortunately with bigger ontologies. We assume that minimal explanations that have been found before timeout are our 100\% of all minimal explanations. And we compare this result with the MXP approach and its result. The Beer ontology is bigger than the Family ontology and it has different structure. The Beer ontology is flat, the maximum depth of a concept hierarchy is two. So that means that the explanations of simple observation can not have bigger size than one. The MXP algorithm has to find all minimal explanations in such a case. We have confirmed that the MXP algorithm has found all minimal explanations that were found by the MHS approach. We can observe that each reasoner finished in different depth before timeout. The HermiT reasoner managed to get into the third depth of the HS-tree, the JFact reasoner was only in the second and the Pellet reasoner seems to be the quickest because it was in the second depth before the other reasoners. Unfortunately the Pellet reasoner threw an OutOfMemoryException and could not finish.
+
+The third ontology is the LUBM ontology in our experiment. Its result we can see in the Figure~\ref{fig:eval2LUBM}. The LUBM ontology is bigger than the Beer ontology but its structure is similar to the Beer ontology. Also the resulting plot is similar to the plot with the Beer ontology. Again the MXP approach took only seconds so that is why it is not even seen in the plot. The plot is measured in hours. The Pellet reasoner threw an OutOfMemoryException so it finished earlier. The HermiT and Pellet reasoner were terminated because of the timeout. Both reasoners did not finish naturally but we assume that they have found 100\% of all explanations. The MXP approach found also 100\% comparing to the MHS algorithm. But the LUBM ontology has similar structure as the Beer ontology. Its structure is flat so we can not find minimal explanations with cardinality bigger than one.
+
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=9cm]{eval2LUBM} 
+	\includegraphics[width=10cm]{eval2LUBM} 
 	\caption{LUBM ontology - Experiment 2}
 	\label{fig:eval2LUBM}
 \end{figure}
 
-\subsection{Conclusion from experiments}
+\subsection{Conclusion from Experiments}
+The Experiment 1 finished in all cases without timeout and without any exceptions. In general we can say that the MXP algorithm found all minimal explanations with cardinality equals to one. We know that the MHS algorithm is sound and complete so we assume that all found minimal explanations are really all and no other minimal explanation exists. That is why we say that the MXP algorithm has found all minimal explanations comparing to the MHS algorithm. By comparing result from the MXP and the MHS approach we can see that in this case is more useful to use the MHS algorithm because it is quicker, except JFact reasoner. But that could be because of the implementation of this reasoner. Interesting about JFact is that with the MHS approach is the slowest reasoner. But with the MXP approach it is not the slowest reasoner. So we can not say that the JFact reasoner is not suitable for our solution.
 
+In the Experiment 2 a timeout needed to be set. The timeout was set to 12 hours and for bigger ontologies like the Beer and the LUBM ontology that was still not enough. They did not manage to finish and they were terminated because of the timeout. The Family ontology is a small ontology so there was not necessary to use a timeout. This ontology finished in seconds in our experiment. This experiment was about to find all possible minimal explanations, not just minimal explanations with size one. The goal of this experiment is to compare how much percents of all possible minimal explanations could be found by the MXP algorithm. The experiment did not find 100\% of minimal explanations only with the Family ontology. That is because its structure is more hierarchical comparing to the other two ontologies. The experiment found all minimal explanations with these two ontologies. The execution times with both approaches are very different. With the Family ontology we can see that there is no such big difference, it is just a few seconds because the ontology is small. But with the Beer and the LUBM ontology we can see that the MHS algorithm took hours and it still was not enough and the MXP algorithm took only seconds and it found all minimal explanations.
+
+Both experiments proved that the MXP algorithm is quick and able to find all minimal explanations of size one. It is more suitable for ontologies with flat hierarchy. But that depends on the situation. If we prefer to find only minimal explanations with the cardinality equals to one, then we can definitely use the MXP approach. Or if we have ontologies like the Beer or the LUBM ontology that are big but flat then we can also use the MXP algorithm to find minimal explanations. But with this situation we can also use the MHS approach with defined depth parameter.
 
 \pagebreak
 \section*{Conclusion}
 \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
+We wanted to find out if the MergeXPlain algorithm is the solution for the ABox abduction problem. From evaluation part we know that the MXP algorithm will find all minimal explanations of size one. But we can not guarantee that the MXP will find all minimal explanations. So the answer for our question is not so simple. We can not say that the MHS algorithm takes too long and can be replaced with the MXP algorithm. We can say that for some situations where we have ontologies with flat hierarchy we can use the MXP algorithm or we can use the MHS algorithm with depth parameter set to one.
+
+The goal of our thesis was to implement two approaches and compare their execution times and results. We managed to implement both approaches to work correctly. In the process of implementation we have found out that the MXP algorithm is not able to find all minimal explanations. This happens if there are some minimal explanations which are overlapping each other. Then the MXP algorithm will not find them all, it will find only a subset of them. That is happening because the MXP algorithm is not able to search the whole space of possible explanations. But if we have minimal explanations that do not overlap each other, the MXP algorithm should find them. The evaluation showed that the MXP algorithm can be used if we look only for minimal explanations with size one. The Experiment 1 showed that if we look only for minimal explanations with cardinality equals to one we want to use the MHS algorithm because it is a little bit quicker. The Experiment 2 showed in the case with the Family ontology that even if the MXP won't find all explanations, it found 83\% which is not so bad. 
+
+In our future work we think about combining these two approaches. The slow part of the MHS algorithm is to compute the negation model for given node. This step could be replaced with the MXP algorithm and that could improve the execution times.
 
 \pagebreak
 \addcontentsline{toc}{section}{\protect\numberline{}References}
